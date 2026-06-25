@@ -1,0 +1,355 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:layout="sap.ui.layout">
+
+    
+         PANEL 1 : Filters + KPI Summary Cards
+    
+    <Panel id="panelPlanningSummary" class="sapUiTinyMargin"> 
+
+        <!-- Filter Row -->
+        <HBox id="hboxFilterRow" alignItems="Center" justifyContent="SpaceBetween"
+              class="filterContainer sapUiSmallMargin">
+            <Text id="textPlanningSummary" text="Planning Summary" class="filterText"/>
+            <Label id="labelDateRange" text="DateRange :"/>
+            <DateRangeSelection id="dateRangeSelection" placeholder="MM/DD/YYYY - MM/DD/YYYY"/>
+            <Label id="labelMode" text="Mode :"/>
+            <SegmentedButton id="segmentedButtonMode" selectedKey="All">
+                <items>
+                    <SegmentedButtonItem id="segmentedButtonItemTrain" key="Train" icon="sap-icon://cargo-train"/>
+                    <SegmentedButtonItem id="segmentedButtonItemTruck" key="Truck" icon="sap-icon://shipping-status"/>
+                </items>
+            </SegmentedButton>
+            <Label id="labelCommodity" text="Commodity :"/>
+            <MultiComboBox id="comboCommodity" placeholder="Select Commodity" width="100%">
+                <items>
+                    <core:Item id="itemCommodityGas87" key="GAS87" text="GAS87"/>
+                    <core:Item id="itemCommodityGas88" key="GAS88" text="GAS88"/>
+                </items>
+            </MultiComboBox>
+            <Label id="labelMarketZone" text="Market Zone :"/>
+            <MultiComboBox id="comboMarketZone" placeholder="All Zones" width="100%">
+                <items>
+                    <core:Item id="itemMarketZoneGas87" key="GAS87" text="GAS87"/>
+                    <core:Item id="itemMarketZoneGas88" key="GAS88" text="GAS88"/>
+                </items>
+            </MultiComboBox>
+        </HBox>
+
+        <!-- KPI Cards -->
+        <HBox id="hboxKpiCards" wrap="Wrap">
+            <VBox id="vboxTotalEntitlements" class="kpiCard green-border sapUiSmallMarginEnd">
+                <Text id="textTotalEntitlementsLabel" text="Total Entitlements" class="kpiLabel"/>
+                <Title id="titleTotalEntitlementsValue" text="2,40,000" class="kpiValue"/>
+                <Text id="textTotalEntitlementsSubtext" text="6 positions" class="kpiSubtext"/>
+                
+                <core:Icon id="iconTotalEntitlements" size="25px" src="sap-icon://trend-up"  color="#2b7d2b"/>
+            </VBox>
+            <VBox id="vboxTotalObligations" class="kpiCard red-border sapUiSmallMarginEnd">
+                <Text id="textTotalObligationsLabel" text="Total Obligations" class="kpiLabel"/>
+                <Title id="titleTotalObligationsValue" text="2,02,000" class="kpiValue"/>
+                <Text id="textTotalObligationsSubtext" text="6 positions" class="kpiSubtext"/>
+                <core:Icon id="iconTotalObligations" size="25px" src="sap-icon://trend-down"  color="#fb0404"/>
+            </VBox>
+            <VBox id="vboxTotalPlanned" class="kpiCard blue-border sapUiSmallMarginEnd">
+                <Text id="textTotalPlannedLabel" text="Total Planned" class="kpiLabel"/>
+                <Title id="titleTotalPlannedValue" text="2,02,000" class="kpiValue"/>
+                <Text id="textTotalPlannedSubtext" text="6 positions" class="kpiSubtext"/>
+                <core:Icon id="iconTotalPlanned" size="25px" src="sap-icon://select-appointments"  color="#048ef7"/>
+            </VBox>
+            <VBox id="vboxNetPosition" class="kpiCard green-border sapUiSmallMarginEnd">
+                <Text id="textNetPositionLabel" text="Net Position" class="kpiLabel"/>
+                <Title id="titleNetPositionValue" text="2,02,000" class="kpiValue"/>
+                <Text id="textNetPositionSubtext" text="6 positions" class="kpiSubtext"/>
+               
+            </VBox>
+        </HBox>
+
+    </Panel>
+
+   
+         PANEL 2 : Planning Summary by UOM (Summary Table)
+
+    <Panel id="_IDGenPanel2"  headerText="Planning Summary by UOM" class="sapUiTinyMargin">
+        <Table id="positionTable" inset="false" class="TableContainer sapUiSmallMargin" width="100%">
+            <columns>
+                <Column id="_IDGenColumn"><Text id="_IDGenText29" text="Commodity"/></Column>
+                <Column id="_IDGenColumnu"><Text id="_IDGenText29u" text="Base Unit"/></Column>
+                <Column id="_IDGenColumn1"><Text id="_IDGenText30" text="Total Entitlements (Long)"/></Column>
+                <Column id="_IDGenColumn2"><Text id="_IDGenText31" text="Total Obligations (Short)"/></Column>
+                <Column id="_IDGenColumn3"><Text id="_IDGenText32" text="Total Matched"/></Column>
+                <Column id="_IDGenColumn4"><Text id="_IDGenText33" text="Net Position"/></Column>
+                <Column id="_IDGenColumn21"><Text id="_IDGenText34" text="Status"/></Column>
+            </columns>
+            <items>
+                <ColumnListItem id="_IDGenColumnListItem">
+                    <cells>
+                        <ObjectStatus id="_IDGenObjectStatusE" text="87 e10 Gaoline" state="Success" icon="sap-icon://product"/>
+                        <Text id="_IDGenText35" text="March 2026"/>
+                        <Text id="_IDGenText36" text="2,40,000 lbs"/>
+                        <Text id="_IDGenText37" text="2,02,000 lbs"/>
+                        <Text id="_IDGenText38" text="2,02,000 lbs"/>
+                        <Text id="_IDGenText39" text="+38,000 lbs"/>
+                        <ObjectStatus id="_IDGenObjectStatus" text="Long" state="Success"/>
+                    </cells>
+                </ColumnListItem>
+            </items>
+        </Table>
+    </Panel>
+
+    
+         PANEL 3 : Planning Details (4-quadrant split view)
+   
+    <Panel id="_IDGenPanel3" class="sapUiTinyMargin"  >
+
+        <!-- Toolbar -->
+        <OverflowToolbar id="_IDGenOverflowToolbar1p">
+            <Title id="_IDGenTitle4lp" text="Planning Details"/>
+            <SegmentedButton id="_IDGenSegmentedButton1">
+                <items>
+                    <SegmentedButtonItem id="_IDGenSegmentedButtonItemlp1" key="Date" text="Date"/>
+                    <SegmentedButtonItem id="_IDGenSegmentedButtonItemlp2" key="Week" text="Week"/>
+                </items>
+            </SegmentedButton>
+            <ToolbarSpacer id="_IDGenToolbarSpacerlp"/>
+            <Button id="_IDGenButtonlp1" text="Create Deal" icon="sap-icon://add" type="Emphasized"/>
+            <Button id="_IDGenButtonlp2" text="Refresh" icon="sap-icon://refresh" type="Ghost"/>
+        </OverflowToolbar>
+
+        <!-- ROW 1 : Entitlements | Obligations -->
+         <layout:Splitter id="IDGV1" orientation="Vertical" height="400px">
+        <layout:Splitter id="_IDGenSplitter2" orientation="Horizontal"  >
+
+            <!-- Entitlements section -->
+            <VBox id="vboxEntitlements" class="splitterSection" >
+                <layoutData>
+                    <layout:SplitterLayoutData id="sldEntitlements" size="50%"/>
+                </layoutData>
+                <Toolbar id="tbEntitlements" class="splitterSectionHeader">
+                    <Title id="titleEntitlements" text="Entitlements" level="H4"/>
+                </Toolbar>
+                <ScrollContainer id="scEntitlements" horizontal="true" vertical="false" width="100%">
+                    <Table id="tableEntitlements">
+                        <columns>
+                            <Column id="colEnt_DealId"         width="7rem"><header><Text id="_IDGenText2" text="Deal ID"/></header></Column>
+                            <Column id="colEnt_Commodity"      width="7rem"><header><Text id="_IDGenText3" text="Commodity"/></header></Column>
+                            <Column id="colEnt_CounterParty"   width="7rem"><header><Text id="_IDGenText4" text="CounterParty"/></header></Column>
+                            <Column id="colEnt_CPName"         width="7rem"><header><Text id="_IDGenText5" text="CounterParty Name"/></header></Column>
+                            <Column id="colEnt_DealType"       width="7rem"><header><Text id="_IDGenText6" text="Deal Type"/></header></Column>
+                            <Column id="colEnt_Status"         width="7rem"><header><Text id="_IDGenText7" text="Status"/></header></Column>
+                            <Column id="colEnt_TradeDate"      width="7rem"><header><Text id="_IDGenText28" text="Trade Date"/></header></Column>
+                            <Column id="colEnt_ValidFrom"      width="7rem"><header><Text id="_IDGenText63" text="Valid From"/></header></Column>
+                            <Column id="colEnt_ValidTo"        width="7rem"><header><Text id="_IDGenText64" text="Valid To"/></header></Column>
+                            <Column id="colEnt_SchedDate"      width="7rem"><header><Text id="_IDGenText65" text="Schedule Date"/></header></Column>
+                            <Column id="colEnt_SchedQty"       width="7rem"><header><Text id="_IDGenText66" text="Schedule Quantity"/></header></Column>
+                            <Column id="colEnt_CalledQty"      width="7rem"><header><Text id="_IDGenText67" text="Called-off Quantity"/></header></Column>
+                            <Column id="colEnt_Origin"         width="7rem"><header><Text id="_IDGenText68" text="Origin"/></header></Column>
+                            <Column id="colEnt_OriginId"       width="7rem"><header><Text id="_IDGenText69" text="Origin ID"/></header></Column>
+                            <Column id="colEnt_Dest"           width="7rem"><header><Text id="_IDGenText70" text="Destination"/></header></Column>
+                            <Column id="colEnt_DestId"         width="7rem"><header><Text id="_IDGenText71" text="Destination ID"/></header></Column>
+                            <Column id="colEnt_MarketZone"     width="7rem"><header><Text id="_IDGenText72" text="MarketZone"/></header></Column>
+                            <Column id="colEnt_MarketZoneId"   width="7rem"><header><Text id="_IDGenText73" text="MarketZone ID"/></header></Column>
+                            <Column id="colEnt_MOT"            width="7rem"><header><Text id="_IDGenText74" text="MOT"/></header></Column>
+                            <Column id="colEnt_Pricing"        width="7rem"><header><Text id="_IDGenText75" text="Pricing"/></header></Column>
+                        </columns>
+                    </Table>
+                </ScrollContainer>
+            </VBox>
+
+            <!-- Obligations section -->
+            <VBox id="vboxObligations" class="splitterSection">
+                <layoutData>
+                    <layout:SplitterLayoutData id="sldObligations" size="50%"/>
+                </layoutData>
+                <Toolbar id="tbObligations" class="splitterSectionHeader">
+                    <Title id="titleObligations" text="Obligations" level="H4"/>
+                </Toolbar>
+                <ScrollContainer id="scObligations" horizontal="true" vertical="false" width="100%">
+                    <Table id="tableObligations">
+                        <columns>
+                            <Column id="colObl_DealId"         width="7rem"><header><Text id="_IDGenText76" text="Deal ID"/></header></Column>
+                            <Column id="colObl_CounterParty"   width="7rem"><header><Text id="_IDGenText77" text="CounterParty"/></header></Column>
+                            <Column id="colObl_CPName"         width="7rem"><header><Text id="_IDGenText78" text="CounterParty Name"/></header></Column>
+                            <Column id="colObl_DealType"       width="7rem"><header><Text id="_IDGenText79" text="Deal Type"/></header></Column>
+                            <Column id="colObl_Commodity"      width="7rem"><header><Text id="_IDGenText80" text="Commodity"/></header></Column>
+                            <Column id="colObl_Status"         width="7rem"><header><Text id="_IDGenText81" text="Status"/></header></Column>
+                            <Column id="colObl_TradeDate"      width="7rem"><header><Text id="_IDGenText82" text="Trade Date"/></header></Column>
+                            <Column id="colObl_ValidFrom"      width="7rem"><header><Text id="_IDGenText83" text="Valid From"/></header></Column>
+                            <Column id="colObl_ValidTo"        width="7rem"><header><Text id="_IDGenText84" text="Valid To"/></header></Column>
+                            <Column id="colObl_SchedDate"      width="7rem"><header><Text id="_IDGenText85" text="Schedule Date"/></header></Column>
+                            <Column id="colObl_SchedQty"       width="7rem"><header><Text id="_IDGenText86" text="Schedule Quantity"/></header></Column>
+                            <Column id="colObl_CalledQty"      width="7rem"><header><Text id="_IDGenText87" text="Called-off Quantity"/></header></Column>
+                            <Column id="colObl_Origin"         width="7rem"><header><Text id="_IDGenText88" text="Origin"/></header></Column>
+                            <Column id="colObl_OriginId"       width="7rem"><header><Text id="_IDGenText89" text="Origin ID"/></header></Column>
+                            <Column id="colObl_Dest"           width="7rem"><header><Text id="_IDGenText90" text="Destination"/></header></Column>
+                            <Column id="colObl_DestId"         width="7rem"><header><Text id="_IDGenText91" text="Destination ID"/></header></Column>
+                            <Column id="colObl_MarketZone"     width="7rem"><header><Text id="_IDGenText92" text="MarketZone"/></header></Column>
+                            <Column id="colObl_MarketZoneId"   width="7rem"><header><Text id="_IDGenText93" text="MarketZone ID"/></header></Column>
+                            <Column id="colObl_MOT"            width="7rem"><header><Text id="_IDGenText94" text="MOT"/></header></Column>
+                            <Column id="colObl_Pricing"        width="7rem"><header><Text id="_IDGenText95" text="Pricing"/></header></Column>
+                        </columns>
+                    </Table>
+                </ScrollContainer>
+            </VBox>
+
+        </layout:Splitter>
+
+        <!-- ROW 2 : Inventory | Selected Items -->
+        <layout:Splitter id="_IDGenSplitter3" orientation="Horizontal" >
+
+            <!-- Inventory section -->
+            <VBox id="vboxInventory" class="splitterSection">
+                <layoutData>
+                    <layout:SplitterLayoutData id="sldInventory" size="50%"/>
+                </layoutData>
+                <Toolbar id="tbInventory" class="splitterSectionHeader">
+                    <Title id="titleInventory" text="Inventory" level="H4"/>
+                </Toolbar>
+                <ScrollContainer id="scInventory" horizontal="true" vertical="false" width="100%">
+                    <Table id="tableInventory">
+                        <columns>
+                            <Column id="colInv_DealId"         width="7rem"><header><Text id="_IDGenText96" text="Deal ID"/></header></Column>
+                            <Column id="colInv_CounterParty"   width="7rem"><header><Text id="_IDGenText97" text="CounterParty"/></header></Column>
+                            <Column id="colInv_CPName"         width="7rem"><header><Text id="_IDGenText98" text="CounterParty Name"/></header></Column>
+                            <Column id="colInv_DealType"       width="7rem"><header><Text id="_IDGenText99" text="Deal Type"/></header></Column>
+                            <Column id="colInv_Commodity"      width="7rem"><header><Text id="_IDGenText100" text="Commodity"/></header></Column>
+                            <Column id="colInv_Status"         width="7rem"><header><Text id="_IDGenText101" text="Status"/></header></Column>
+                            <Column id="colInv_TradeDate"      width="7rem"><header><Text id="_IDGenText102" text="Trade Date"/></header></Column>
+                            <Column id="colInv_ValidFrom"      width="7rem"><header><Text id="_IDGenText103" text="Valid From"/></header></Column>
+                            <Column id="colInv_ValidTo"        width="7rem"><header><Text id="_IDGenText104" text="Valid To"/></header></Column>
+                            <Column id="colInv_SchedDate"      width="7rem"><header><Text id="_IDGenText105" text="Schedule Date"/></header></Column>
+                            <Column id="colInv_SchedQty"       width="7rem"><header><Text id="_IDGenText106" text="Schedule Quantity"/></header></Column>
+                            <Column id="colInv_CalledQty"      width="7rem"><header><Text id="_IDGenText107" text="Called-off Quantity"/></header></Column>
+                            <Column id="colInv_Origin"         width="7rem"><header><Text id="_IDGenText108" text="Origin"/></header></Column>
+                            <Column id="colInv_OriginId"       width="7rem"><header><Text id="_IDGenText109" text="Origin ID"/></header></Column>
+                            <Column id="colInv_Dest"           width="7rem"><header><Text id="_IDGenText110" text="Destination"/></header></Column>
+                            <Column id="colInv_DestId"         width="7rem"><header><Text id="_IDGenText111" text="Destination ID"/></header></Column>
+                            <Column id="colInv_MarketZone"     width="7rem"><header><Text id="_IDGenText112" text="MarketZone"/></header></Column>
+                            <Column id="colInv_MarketZoneId"   width="7rem"><header><Text id="_IDGenText113" text="MarketZone ID"/></header></Column>
+                            <Column id="colInv_MOT"            width="7rem"><header><Text id="_IDGenText114" text="MOT"/></header></Column>
+                            <Column id="colInv_Pricing"        width="7rem"><header><Text id="_IDGenText115" text="Pricing"/></header></Column>
+                        </columns>
+                    </Table>
+                </ScrollContainer>
+            </VBox>
+
+            <!-- Selected Items section -->
+            <VBox id="vboxSelected" class="splitterSection">
+                <layoutData>
+                    <layout:SplitterLayoutData id="sldSelected" size="50%"/>
+                </layoutData>
+                <Toolbar id="tbSelected" class="splitterSectionHeader">
+                    <Title id="titleSelected" text="Selected Items" level="H4"/>
+                </Toolbar>
+                <ScrollContainer id="scSelected" horizontal="true" vertical="false" width="100%">
+                    <Table id="tableSelected">
+                        <columns>
+                            <Column id="colSel_DealId"         width="7rem"><header><Text id="_IDGenText116" text="Deal ID"/></header></Column>
+                            <Column id="colSel_CounterParty"   width="7rem"><header><Text id="_IDGenText117" text="CounterParty"/></header></Column>
+                            <Column id="colSel_CPName"         width="7rem"><header><Text id="_IDGenText118" text="CounterParty Name"/></header></Column>
+                            <Column id="colSel_DealType"       width="7rem"><header><Text id="_IDGenText119" text="Deal Type"/></header></Column>
+                            <Column id="colSel_Commodity"      width="7rem"><header><Text id="_IDGenText120" text="Commodity"/></header></Column>
+                            <Column id="colSel_Status"         width="7rem"><header><Text id="_IDGenText121" text="Status"/></header></Column>
+                            <Column id="colSel_TradeDate"      width="7rem"><header><Text id="_IDGenText122" text="Trade Date"/></header></Column>
+                            <Column id="colSel_ValidFrom"      width="7rem"><header><Text id="_IDGenText123" text="Valid From"/></header></Column>
+                            <Column id="colSel_ValidTo"        width="7rem"><header><Text id="_IDGenText124" text="Valid To"/></header></Column>
+                            <Column id="colSel_SchedDate"      width="7rem"><header><Text id="_IDGenText125" text="Schedule Date"/></header></Column>
+                            <Column id="colSel_SchedQty"       width="7rem"><header><Text id="_IDGenText126" text="Schedule Quantity"/></header></Column>
+                            <Column id="colSel_CalledQty"      width="7rem"><header><Text id="_IDGenText127" text="Called-off Quantity"/></header></Column>
+                            <Column id="colSel_Origin"         width="7rem"><header><Text id="_IDGenText128" text="Origin"/></header></Column>
+                            <Column id="colSel_OriginId"       width="7rem"><header><Text id="_IDGenText129" text="Origin ID"/></header></Column>
+                            <Column id="colSel_Dest"           width="7rem"><header><Text id="_IDGenText130" text="Destination"/></header></Column>
+                            <Column id="colSel_DestId"         width="7rem"><header><Text id="_IDGenText131" text="Destination ID"/></header></Column>
+                            <Column id="colSel_MarketZone"     width="7rem"><header><Text id="_IDGenText132" text="MarketZone"/></header></Column>
+                            <Column id="colSel_MarketZoneId"   width="7rem"><header><Text id="_IDGenText133" text="MarketZone ID"/></header></Column>
+                            <Column id="colSel_MOT"            width="7rem"><header><Text id="_IDGenText134" text="MOT"/></header></Column>
+                            <Column id="colSel_Pricing"        width="7rem"><header><Text id="_IDGenText135" text="Pricing"/></header></Column>
+                        </columns>
+                    </Table>
+                </ScrollContainer>
+            </VBox>
+
+        </layout:Splitter>
+     </layout:Splitter>
+    </Panel>
+    <Panel id="_IDGenPanel4" class="sapUiTinyMargin">
+       <Toolbar id="_IDGenToolbar1" >
+        <Title id="_IDGenTitle9" text="Monthly Planning Summary"></Title>
+        <DateRangeSelection id="_IDGenDateRangeSelection" width="15rem" placeholder="MM/DD/YYYY - MM/DD/YYYY"></DateRangeSelection>
+        <ToolbarSpacer id="_IDGenToolbarSpacer2" ></ToolbarSpacer>
+        <Button  id="BtnRefresh"  text="Refresh" icon="sap-icon://refresh" type="Ghost"></Button>
+       </Toolbar> 
+        <Table id="_IDGenTable1" >
+            <columns>
+                 <Column id="_IDGenMatchedColumn1PS" width="7rem"><header><Text id="_IDGenMatchedText1ps" text="Entitlements()" /></header></Column>
+                    <Column id="_IDGenMatchedColumn2ps" width="10rem"><header><Text id="_IDGenMatchedText2ps" text="Obligations()" /></header></Column>
+                    <Column id="_IDGenMatchedColumn3ps" width="10rem"><header><Text id="_IDGenMatchedText3ps" text="Matched" /></header></Column>
+                    <Column id="_IDGenMatchedColumn4PS" width="7rem"><header><Text id="_IDGenMatchedText4ps" text="Net Positions" /></header></Column>
+                    <Column id="_IDGenMatchedColumn5PS" width="10rem"><header><Text id="_IDGenMatchedText5ps" text="status " /></header></Column>
+                    
+            </columns><items>
+                <ColumnListItem id="_IDColumnListItem">
+                    <cells>
+                       
+                        
+                        <Text id="_IDText36" text="2,40,000 lbs"/>
+                        <Text id="_IDText37" text="2,02,000 lbs"/>
+                        <Text id="_IDText38" text="2,02,000 lbs"/>
+                        <Text id="_IDText39" text="+38,000 lbs"/>
+                        <ObjectStatus id="_IDObjectStatus" text="Long" state="Success"/>
+                    </cells>
+                </ColumnListItem>
+            </items>
+        </Table>
+    </Panel>
+
+<Panel id="_IDGenPanel5" class="sapUiTinyMargin">
+    <headerToolbar>
+    <Toolbar id="_IDGenToolbar" >  
+    <Title id="_IDGenTitle3" text="Matched Positions"></Title>
+    <ToolbarSpacer id="_IDGenToolbarSpacer1" ></ToolbarSpacer>
+    <Button id="btnMp" text="Create Nominations" icon="sap-icon://add" type="Emphasized"></Button>
+    </Toolbar>
+    </headerToolbar>
+    <Table id="tableMatchedPositions">
+    <columns>
+    <Column id="_IDGenMatchedColumn1M" width="7rem"><header><Text id="_IDGenMatchedText1M" text="Match Source" /></header></Column>
+    <Column id="_IDGenMatchedColumn2M" width="10rem"><header><Text id="_IDGenMatchedText2M" text="Supplier" /></header></Column>
+    <Column id="_IDGenMatchedColumn3M" width="10rem"><header><Text id="_IDGenMatchedText3M" text="Customer" /></header></Column>
+    <Column id="_IDGenMatchedColumn4M" width="7rem"><header><Text id="_IDGenMatchedText4M" text="Origin" /></header></Column>
+    <Column id="_IDGenMatchedColumn5M" width="10rem"><header><Text id="_IDGenMatchedText5M" text="Origin Name" /></header></Column>
+    <Column id="_IDGenMatchedColumn6M" width="7rem"><header><Text id="_IDGenMatchedText6M" text="Destination" /></header></Column>
+    <Column id="_IDGenMatchedColumn7M" width="10rem"><header><Text id="_IDGenMatchedText7M" text="Dest. Name" /></header></Column>
+    
+    <Column id="_IDGenMatchedColumn8M" width="8rem"><header><Text id="_IDGenMatchedText8M" text="Purch. Sched. Date" /></header></Column>
+    <Column id="_IDGenMatchedColumn9M" width="5rem"><header><Text id="_IDGenMatchedText9M" text="Purch. Month" /></header></Column>
+    <Column id="_IDGenMatchedColumn10M" width="6rem"><header><Text id="_IDGenMatchedText10M" text="P IncoTerms" /></header></Column>
+    <Column id="_IDGenMatchedColumn11M" width="8rem"><header><Text id="_IDGenMatchedText11M" text="Sales Sched. Date" /></header></Column>
+    <Column id="_IDGenMatchedColumn12M" width="5rem"><header><Text id="_IDGenMatchedText12M" text="Sales Month" /></header></Column>
+    <Column id="_IDGenMatchedColumn13M" width="6rem"><header><Text id="_IDGenMatchedText13M" text="S IncoTerms" /></header></Column>
+    
+    <Column id="_IDGenMatchedColumn14M" width="8rem"><header><Text id="_IDGenMatchedText14M" text="Sales Quantity" /></header></Column>
+    <Column id="_IDGenMatchedColumn15M" width="5rem"><header><Text id="_IDGenMatchedText15M" text="MOT" /></header></Column>
+    <Column id="_IDGenMatchedColumn16M" width="8rem"><header><Text id="_IDGenMatchedText16M" text="Mode of Trans." /></header></Column>
+    <Column id="_IDGenMatchedColumn17M" width="5rem"><header><Text id="_IDGenMatchedText17M" text="Week ID" /></header></Column>
+    <Column id="_IDGenMatchedColumn18M" width="8rem"><header><Text id="_IDGenMatchedText18M" text="Planned Qty" /></header></Column>
+    <Column id="_IDGenMatchedColumn19M" width="5rem"><header><Text id="_IDGenMatchedText19M" text="Plant" /></header></Column>
+    <Column id="_IDGenMatchedColumn20M" width="8rem"><header><Text id="_IDGenMatchedText20M" text="Storage Loc." /></header></Column>
+    <Column id="_IDGenMatchedColumn21EM" width="8rem"><header><Text id="_IDGenMatchedText21M" text="Plant Loc. ID" /></header></Column>
+    <Column id="_IDGenMatchedColumn22M" width="10rem"><header><Text id="_IDGenMatchedText22M" text="Plant Loc. Name" /></header></Column>
+    <Column id="_IDGenMatchedColumn23M" width="8rem"><header><Text id="_IDGenMatchedText23M" text="On-Hand Inv." /></header></Column>
+    <Column id="_IDGenMatchedColumn24M" width="8rem"><header><Text id="_IDGenMatchedText24M" text="Match Status" /></header></Column>
+    
+    <Column id="_IDGenMatchedColumn25M" width="8rem"><header><Text id="_IDGenMatchedText25M" text="Commodity" /></header></Column>
+    <Column id="_IDGenMatchedColumn26M" width="10rem"><header><Text id="_IDGenMatchedText26M" text="Purchase Deal" /></header></Column>
+    <Column id="_IDGenMatchedColumn27M" width="10rem"><header><Text id="_IDGenMatchedText27M" text="Purchase Doc." /></header></Column>
+    <Column id="_IDGenMatchedColumn28M" width="6rem"><header><Text id="_IDGenMatchedText28M" text="Purch. Doc Item" /></header></Column>
+    <Column id="_IDGenMatchedColumn29M" width="10rem"><header><Text id="_IDGenMatchedText29M" text="Purch. Trans. Type" /></header></Column>
+    <Column id="_IDGenMatchedColumn30M" width="8rem"><header><Text id="_IDGenMatchedText30M" text="Purchase Qty" /></header></Column>
+    <Column id="_IDGenMatchedColumn31M" width="10rem"><header><Text id="_IDGenMatchedText31M" text="Sales Deal" /></header></Column>
+    <Column id="_IDGenMatchedColumn32M" width="10rem"><header><Text id="_IDGenMatchedText32M" text="Sales Document" /></header></Column>
+</columns>
+    </Table>
+    </Panel>
+</core:FragmentDefinition>

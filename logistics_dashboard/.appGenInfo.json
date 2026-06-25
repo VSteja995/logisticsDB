@@ -1,0 +1,24 @@
+{
+  "generationParameters": {
+    "generationDate": "Mon Jun 22 2026 10:54:14 GMT+0530 (India Standard Time)",
+    "generatorPlatform": "Visual Studio Code",
+    "serviceType": "SAP System (ABAP On-Premise)",
+    "metadataFilename": "",
+    "serviceUrl": "http://gens.sapvista.com:50000/sap/opu/odata4/sap/zsrvimp_logistick_wrkbnch/srvd/sap/zsd_logistick_workbench/0001/",
+    "appName": "logistics_dashboard",
+    "appTitle": "logistics_dashboard",
+    "appDescription": "custom dashboard for logistics",
+    "appNamespace": "genslogiques",
+    "ui5Theme": "sap_horizon",
+    "ui5Version": "1.120.23",
+    "enableCodeAssist": false,
+    "enableEslint": false,
+    "enableTypeScript": false,
+    "showMockDataInfo": true,
+    "generatorVersion": "1.19.0",
+    "template": "Basic V4",
+    "generatorName": "SAP Fiori Application Generator",
+    "entityRelatedConfig": [],
+    "launchText": "To launch the generated application, run the following from the generated application root folder:\n\n```\n    npm start\n```"
+  }
+}

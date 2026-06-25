@@ -1,0 +1,74 @@
+html, body, .sapUiBody {
+    overflow-y: hidden !important;
+}
+
+/* If the scrollbar is caused by your main application view wrapper */
+.sapMPage, .sapMPageBgStandard {
+    overflow-y: auto !important;
+}
+.Icontabbar{
+    width: auto;
+}
+/* ----------------------------------------------css for DealsOverView Tab-------------------------------------------------- */
+
+.header{
+    background-color: #204d0277;
+}
+.cardTable{
+    border: 4px solid rgb(37, 139, 173);
+    border-radius: 8px;
+}
+.sapUiNoScroll {
+    overflow-y: hidden !important;
+}
+/* ----------------------------------------------css for planniglogistics Tab-------------------------------------------------- */
+.filterText{
+ font-weight:bold;
+}
+.filterContainer {
+    background-color: #f7f7f7; /* Light gray shade */
+    border: 1px solid #dcdcdc; /* Subtle border */
+    border-radius: 8px;        /* Rounded corners */
+    padding: 0.25rem;             /* Padding around the items */
+    display: flex;
+    align-items: center;
+}
+
+.TableContainer {
+    background-color: #f7f7f7; /* Light gray shade */
+    border: 1px solid #dcdcdc; /* Subtle border */
+    border-radius: 8px;        /* Rounded corners */
+    display: flex;
+    align-items: center;
+}
+/* ********* kpi cards *********** */
+/* Base card style */
+.kpiCard {
+    background-color: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    padding: 1rem;
+    min-width: 240px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* Specific Border Colors */
+.kpiCard.green-border { border : 0.5px solid #2b7d2b; background-color: #f1f8f1; }
+.kpiCard.red-border   { border : 0.5px solid #bb0000; background-color: #fff1f1; }
+.kpiCard.blue-border  { border : 0.5px solid #0070f2; background-color: #f1f7ff; }
+
+/* Text Styling */
+.kpiLabel { font-size: 0.875rem; color: #666; }
+.kpiValue { font-size: 1.5rem; font-weight: bold; margin: 0.5rem 0; }
+.kpiSubtext { font-size: 0.875rem; color: #333; }
+
+/* Icon Positioning (Top Right) */
+.kpiIcon {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+}
