@@ -19,11 +19,11 @@
             >
         
             <items>
-               <IconTabFilter id="_IDGenIconTabFilter2" text="Logistics Planning" key="position" icon="sap-icon://vertical-bar-chart-2">
-                       <core:Fragment id="_IDGenFragment2" fragmentName = "genslogiques.logisticsdashboard.fragments.PositionManagement" type = "XML" />
-                </IconTabFilter>
                 <IconTabFilter id="_IDGenIconTabFilter" text="Deals Overview" key="deals" icon="sap-icon://document">
                            <core:Fragment id="_IDGenFragment" fragmentName = "genslogiques.logisticsdashboard.fragments.DealsOverview" type = "XML" />
+                </IconTabFilter>
+               <IconTabFilter id="_IDGenIconTabFilter2" text="Logistics Planning" key="position" icon="sap-icon://vertical-bar-chart-2">
+                       <core:Fragment id="_IDGenFragment2" fragmentName = "genslogiques.logisticsdashboard.fragments.PositionManagement" type = "XML" />
                 </IconTabFilter>
                 <IconTabFilter id="_IDGenIconTabFilter3" text="Nominations" key="nominations" icon="sap-icon://activity-individual">
                        <core:Fragment id="_IDGenFragment3" fragmentName = "genslogiques.logisticsdashboard.fragments.Nominations" type = "XML" />
