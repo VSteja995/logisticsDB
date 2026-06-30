@@ -128,6 +128,15 @@
                 </layoutData>
                 <Toolbar id="tbEntitlements" class="splitterSectionHeader">
                     <Title id="titleEntitlements" text="Entitlements" level="H4"/>
+                    <ToolbarSpacer id="_IDGenToolbarSpacer3" ></ToolbarSpacer>
+                    <Button id="_IDGenButton22"  icon="sap-icon://copy" type="Transparent"/>
+                    <Button id="_IDGenButton23"  icon="sap-icon://action-settings" type="Transparent"/>
+                    <Button id="_IDGenButton24"  icon="sap-icon://table-view" type="Transparent"/>
+                    
+                    <Button id="_IDGenButton25"  icon="sap-icon://slim-arrow-down"
+                    type="Transparent"/>
+                    
+                    <Button id="_IDGenButton26" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent"/>
                 </Toolbar>
                 <ScrollContainer id="scEntitlements" horizontal="true" vertical="false" width="100%">
                     <Table id="tableEntitlements">
@@ -164,6 +173,13 @@
                 </layoutData>
                 <Toolbar id="tbObligations" class="splitterSectionHeader">
                     <Title id="titleObligations" text="Obligations" level="H4"/>
+                    <ToolbarSpacer id="_IDGenToolbarSpacer3O" ></ToolbarSpacer>
+                    <Button id="_IDGenButton22O"  icon="sap-icon://copy" type="Transparent"/>
+                    <Button id="_IDGenButton23O"  icon="sap-icon://action-settings" type="Transparent"/>
+                    <Button id="_IDGenButton24O"  icon="sap-icon://table-view" type="Transparent"/>
+                    
+                    <Button id="_IDGenButton25O"  icon="sap-icon://slim-arrow-down"
+                    type="Transparent"/>
                 </Toolbar>
                 <ScrollContainer id="scObligations" horizontal="true" vertical="false" width="100%">
                     <Table id="tableObligations">
@@ -205,6 +221,13 @@
                 </layoutData>
                 <Toolbar id="tbInventory" class="splitterSectionHeader">
                     <Title id="titleInventory" text="Inventory" level="H4"/>
+                    <ToolbarSpacer id="_IDGenToolbarSpacer3I" ></ToolbarSpacer>
+                    <Button id="_IDGenButton22I"  icon="sap-icon://copy" type="Transparent"/>
+                    <Button id="_IDGenButton23I"  icon="sap-icon://action-settings" type="Transparent"/>
+                    <Button id="_IDGenButton24I"  icon="sap-icon://table-view" type="Transparent"/>
+                    
+                    <Button id="_IDGenButton25I"  icon="sap-icon://slim-arrow-down"
+                    type="Transparent"/>
                 </Toolbar>
                 <ScrollContainer id="scInventory" horizontal="true" vertical="false" width="100%">
                     <Table id="tableInventory">
@@ -241,6 +264,12 @@
                 </layoutData>
                 <Toolbar id="tbSelected" class="splitterSectionHeader">
                     <Title id="titleSelected" text="Selected Items" level="H4"/>
+                    <ToolbarSpacer id="_IDGenToolbarSpacer3S" ></ToolbarSpacer>
+                    <Button id="_IDGenButton27" icon="sap-icon://collapse-group"  type="Transparent"/>
+ 
+                    <Button id="_IDGenButton28"  text="Confirm-Match" icon="sap-icon://accept" type="Accept"/> 
+                    <Button id="_IDGenButton29" text="Clear-All" icon="sap-icon://decline"  type="Transparent" />   
+                    <Button id="_IDGenButton30" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent" />
                 </Toolbar>
                 <ScrollContainer id="scSelected" horizontal="true" vertical="false" width="100%">
                     <Table id="tableSelected">
