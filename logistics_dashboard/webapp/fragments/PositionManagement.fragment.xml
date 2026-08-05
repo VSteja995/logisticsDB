@@ -1,67 +1,69 @@
 <core:FragmentDefinition
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
-    xmlns:layout="sap.ui.layout">
+    xmlns:layout="sap.ui.layout"
+    xmlns:smartTable="sap.ui.comp.smarttable">
 
-    
+    <!-- ═══════════════════════════════════════════════════════
          PANEL 1 : Filters + KPI Summary Cards
-    
-    <Panel id="panelPlanningSummary" class="sapUiTinyMargin"> 
+         ═══════════════════════════════════════════════════════ -->
+
+    <Panel id="sumPanel" class="sapUiTinyMargin" headerText="Planning Summary" expandable="true" expanded="true" >
 
         <!-- Filter Row -->
-        <HBox id="hboxFilterRow" alignItems="Center" justifyContent="SpaceBetween"
+        <HBox id="fBox" alignItems="Center" justifyContent="SpaceBetween"
               class="filterContainer sapUiSmallMargin">
-            <Text id="textPlanningSummary" text="Planning Summary" class="filterText"/>
-            <Label id="labelDateRange" text="DateRange :"/>
-            <DateRangeSelection id="dateRangeSelection" placeholder="MM/DD/YYYY - MM/DD/YYYY"/>
-            <Label id="labelMode" text="Mode :"/>
-            <SegmentedButton id="segmentedButtonMode" selectedKey="All">
+           
+            <Label id="dtLbl" text="DateRange :"/>
+            <DateRangeSelection id="dateDrs" placeholder="MM/DD/YYYY - MM/DD/YYYY" change=".onOEScheduleDateRangeChange"/>
+            <Label id="modeLbl" text="Mode :"/>
+            <SegmentedButton id="modeSeg" selectedKey="All" selectionChange=".onModeChange">
                 <items>
-                    <SegmentedButtonItem id="segmentedButtonItemTrain" key="Train" icon="sap-icon://cargo-train"/>
-                    <SegmentedButtonItem id="segmentedButtonItemTruck" key="Truck" icon="sap-icon://shipping-status"/>
+                    <SegmentedButtonItem id="trainSeg" key="Train" icon="sap-icon://cargo-train"/>
+                    <SegmentedButtonItem id="truckSeg" key="Truck" icon="sap-icon://shipping-status"/>
                 </items>
             </SegmentedButton>
-            <Label id="labelCommodity" text="Commodity :"/>
-            <MultiComboBox id="comboCommodity" placeholder="Select Commodity" width="100%">
+            <Label id="commLbl" text="Commodity :"/>
+            <MultiComboBox id="commBox" placeholder="Select Commodity" width="100%">
                 <items>
-                    <core:Item id="itemCommodityGas87" key="GAS87" text="GAS87"/>
-                    <core:Item id="itemCommodityGas88" key="GAS88" text="GAS88"/>
+                    <core:Item id="gas87Item" key="GAS87" text="GAS87"/>
+                    <core:Item id="gas88Item" key="GAS88" text="GAS88"/>
                 </items>
             </MultiComboBox>
-            <Label id="labelMarketZone" text="Market Zone :"/>
-            <MultiComboBox id="comboMarketZone" placeholder="All Zones" width="100%">
+            <Label id="zoneLbl" text="Market Zone :"/>
+            <MultiComboBox id="zoneBox" placeholder="All Zones" width="100%">
                 <items>
-                    <core:Item id="itemMarketZoneGas87" key="GAS87" text="GAS87"/>
-                    <core:Item id="itemMarketZoneGas88" key="GAS88" text="GAS88"/>
+                    <core:Item id="zone87Item" key="GAS87" text="GAS87"/>
+                    <core:Item id="zone88Item" key="GAS88" text="GAS88"/>
                 </items>
             </MultiComboBox>
         </HBox>
 
         <!-- KPI Cards -->
-        <HBox id="hboxKpiCards" wrap="Wrap">
-            <VBox id="vboxTotalEntitlements" class="kpiCard green-border sapUiSmallMarginEnd">
-                <Text id="textTotalEntitlementsLabel" text="Total Entitlements" class="kpiLabel"/>
-                <Title id="titleTotalEntitlementsValue" text="2,40,000" class="kpiValue"/>
-                <Text id="textTotalEntitlementsSubtext" text="6 positions" class="kpiSubtext"/>
+        <HBox id="kpiBox" wrap="Wrap">
+            <VBox id="entCard" class="kpiCard green-border sapUiSmallMarginEnd">
+                <Text id="entLbl" text="Total Entitlements" class="kpiLabel"/>
+                <Title id="entVal" text="2,40,000" class="kpiValue"/>
+                <Text id="entSub" text="6 positions" class="kpiSubtext"/>
                 
-                <core:Icon id="iconTotalEntitlements" size="25px" src="sap-icon://trend-up"  color="#2b7d2b"/>
+                <core:Icon id="entIcon" size="25px" src="sap-icon://trend-up"  color="#2b7d2b"/>
             </VBox>
-            <VBox id="vboxTotalObligations" class="kpiCard red-border sapUiSmallMarginEnd">
-                <Text id="textTotalObligationsLabel" text="Total Obligations" class="kpiLabel"/>
-                <Title id="titleTotalObligationsValue" text="2,02,000" class="kpiValue"/>
-                <Text id="textTotalObligationsSubtext" text="6 positions" class="kpiSubtext"/>
-                <core:Icon id="iconTotalObligations" size="25px" src="sap-icon://trend-down"  color="#fb0404"/>
+            <VBox id="oblCard" class="kpiCard red-border sapUiSmallMarginEnd">
+                <Text id="oblLbl" text="Total Obligations" class="kpiLabel"/>
+                <Title id="oblVal" text="2,02,000" class="kpiValue"/>
+                <Text id="oblSub" text="6 positions" class="kpiSubtext"/>
+                <core:Icon id="oblIcon" size="25px" src="sap-icon://trend-down"  color="#fb0404"/>
             </VBox>
-            <VBox id="vboxTotalPlanned" class="kpiCard blue-border sapUiSmallMarginEnd">
-                <Text id="textTotalPlannedLabel" text="Total Planned" class="kpiLabel"/>
-                <Title id="titleTotalPlannedValue" text="2,02,000" class="kpiValue"/>
-                <Text id="textTotalPlannedSubtext" text="6 positions" class="kpiSubtext"/>
-                <core:Icon id="iconTotalPlanned" size="25px" src="sap-icon://select-appointments"  color="#048ef7"/>
+            <VBox id="planCard" class="kpiCard blue-border sapUiSmallMarginEnd">
+                <Text id="planLbl" text="Total Planned" class="kpiLabel"/>
+                <Title id="planVal" text="2,02,000" class="kpiValue"/>
+                <Text id="planSub" text="6 positions" class="kpiSubtext"/>
+                <core:Icon id="planIcon" size="25px" src="sap-icon://select-appointments"  color="#048ef7"/>
             </VBox>
-            <VBox id="vboxNetPosition" class="kpiCard green-border sapUiSmallMarginEnd">
-                <Text id="textNetPositionLabel" text="Net Position" class="kpiLabel"/>
-                <Title id="titleNetPositionValue" text="2,02,000" class="kpiValue"/>
-                <Text id="textNetPositionSubtext" text="6 positions" class="kpiSubtext"/>
+            <VBox id="netCard" class="kpiCard green-border sapUiSmallMarginEnd">
+                <Text id="netLbl" text="Net Position" class="kpiLabel"/>
+                <Title id="netVal" text="2,02,000" class="kpiValue"/>
+                <Text id="netSub" text="6 positions" class="kpiSubtext"/>
                
             </VBox>
         </HBox>
@@ -71,27 +73,27 @@
    
          PANEL 2 : Planning Summary by UOM (Summary Table)
 
-    <Panel id="_IDGenPanel2"  headerText="Planning Summary by UOM" class="sapUiTinyMargin">
-        <Table id="positionTable" inset="false" class="TableContainer sapUiSmallMargin" width="100%">
+    <Panel id="uomPanel"  headerText="Planning Summary by UOM" class="sapUiTinyMargin" expandable="true" expanded="true" >
+        <Table id="uomTbl" fixedLayout="false" inset="false" class="TableContainer sapUiSmallMargin" width="100%">
             <columns>
-                <Column id="_IDGenColumn"><Text id="_IDGenText29" text="Commodity"/></Column>
-                <Column id="_IDGenColumnu"><Text id="_IDGenText29u" text="Base Unit"/></Column>
-                <Column id="_IDGenColumn1"><Text id="_IDGenText30" text="Total Entitlements (Long)"/></Column>
-                <Column id="_IDGenColumn2"><Text id="_IDGenText31" text="Total Obligations (Short)"/></Column>
-                <Column id="_IDGenColumn3"><Text id="_IDGenText32" text="Total Matched"/></Column>
-                <Column id="_IDGenColumn4"><Text id="_IDGenText33" text="Net Position"/></Column>
-                <Column id="_IDGenColumn21"><Text id="_IDGenText34" text="Status"/></Column>
+                <Column id="uomColCom"><Text id="uomComTxt" text="Commodity"/></Column>
+                <Column id="uomColUnit"><Text id="uomUnitTxt" text="Base Unit"/></Column>
+                <Column id="uomColEnt"><Text id="uomEntTxt" text="Total Entitlements (Long)"/></Column>
+                <Column id="uomColObl"><Text id="uomOblTxt" text="Total Obligations (Short)"/></Column>
+                <Column id="uomColMatch"><Text id="uomMatchTxt" text="Total Matched"/></Column>
+                <Column id="uomColNet"><Text id="uomNetTxt" text="Net Position"/></Column>
+                <Column id="uomColStatus"><Text id="uomStatusTxt" text="Status"/></Column>
             </columns>
             <items>
-                <ColumnListItem id="_IDGenColumnListItem">
+                <ColumnListItem id="uomRow">
                     <cells>
-                        <ObjectStatus id="_IDGenObjectStatusE" text="87 e10 Gaoline" state="Success" icon="sap-icon://product"/>
-                        <Text id="_IDGenText35" text="March 2026"/>
-                        <Text id="_IDGenText36" text="2,40,000 lbs"/>
-                        <Text id="_IDGenText37" text="2,02,000 lbs"/>
-                        <Text id="_IDGenText38" text="2,02,000 lbs"/>
-                        <Text id="_IDGenText39" text="+38,000 lbs"/>
-                        <ObjectStatus id="_IDGenObjectStatus" text="Long" state="Success"/>
+                        <ObjectStatus id="uomComSts" text="87 e10 Gaoline" state="Success" icon="sap-icon://product"/>
+                        <Text id="uomMonthTxt" text="March 2026"/>
+                        <Text id="uomEntVal" text="2,40,000 lbs"/>
+                        <Text id="uomOblVal" text="2,02,000 lbs"/>
+                        <Text id="uomMatchVal" text="2,02,000 lbs"/>
+                        <Text id="uomNetVal" text="+38,000 lbs"/>
+                        <ObjectStatus id="uomSts" text="Long" state="Success"/>
                     </cells>
                 </ColumnListItem>
             </items>
@@ -101,199 +103,287 @@
     
          PANEL 3 : Planning Details (4-quadrant split view)
    
-    <Panel id="_IDGenPanel3" class="sapUiTinyMargin"  >
+    <Panel id="planPanel" class="sapUiTinyMargin" headerText="Planning Detail" expandable="true" expanded="true"  >
 
         <!-- Toolbar -->
-        <OverflowToolbar id="_IDGenOverflowToolbar1p">
-            <Title id="_IDGenTitle4lp" text="Planning Details"/>
-            <SegmentedButton id="_IDGenSegmentedButton1">
-                <items>
-                    <SegmentedButtonItem id="_IDGenSegmentedButtonItemlp1" key="Date" text="Date"/>
-                    <SegmentedButtonItem id="_IDGenSegmentedButtonItemlp2" key="Week" text="Week"/>
-                </items>
-            </SegmentedButton>
-            <ToolbarSpacer id="_IDGenToolbarSpacerlp"/>
-            <Button id="_IDGenButtonlp1" text="Create Deal" icon="sap-icon://add" type="Emphasized"/>
-            <Button id="_IDGenButtonlp2" text="Refresh" icon="sap-icon://refresh" type="Ghost"/>
+        <headerToolbar>
+        <OverflowToolbar id="planBar">
+            <Title id="idpdt"  text="Planning Detail"></Title>
+         
+            <ToolbarSpacer id="planSpc"/>
+            
+            <Button id="refreshPlanBtn" text="Refresh" icon="sap-icon://refresh" type="Ghost"/>
         </OverflowToolbar>
+        </headerToolbar>
 
         <!-- ROW 1 : Entitlements | Obligations -->
-         <layout:Splitter id="IDGV1" orientation="Vertical" height="400px">
-        <layout:Splitter id="_IDGenSplitter2" orientation="Horizontal"  >
+         <layout:Splitter id="planSplit" orientation="Vertical" height="400px">
+        <layout:Splitter id="topSplit" orientation="Horizontal"  >
 
             <!-- Entitlements section -->
-            <VBox id="vboxEntitlements" class="splitterSection" >
+            <VBox id="entBox" class="splitterSection" >
                 <layoutData>
-                    <layout:SplitterLayoutData id="sldEntitlements" size="50%"/>
+                    <layout:SplitterLayoutData id="entLay" size="50%"/>
                 </layoutData>
-                <Toolbar id="tbEntitlements" class="splitterSectionHeader">
-                    <Title id="titleEntitlements" text="Entitlements" level="H4"/>
-                    <ToolbarSpacer id="_IDGenToolbarSpacer3" ></ToolbarSpacer>
-                    <Button id="_IDGenButton22"  icon="sap-icon://copy" type="Transparent"/>
-                    <Button id="_IDGenButton23"  icon="sap-icon://action-settings" type="Transparent"/>
-                    <Button id="_IDGenButton24"  icon="sap-icon://table-view" type="Transparent"/>
-                    
-                    <Button id="_IDGenButton25"  icon="sap-icon://slim-arrow-down"
-                    type="Transparent"/>
-                    
-                    <Button id="_IDGenButton26" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent"/>
+                <Toolbar id="entBar" class="splitterSectionHeader">
+                    <Title id="entTitle" text="Entitlements" level="H4"/>
+                    <ToolbarSpacer id="entSpc" ></ToolbarSpacer>
+                 <Button id="entFullBtnI12" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent"/>
                 </Toolbar>
-                <ScrollContainer id="scEntitlements" horizontal="true" vertical="false" width="100%">
-                    <Table id="tableEntitlements">
+               <ScrollContainer id="entScroll" horizontal="true" vertical="true" width="100%" height="100%">
+                    <smartTable:SmartTable
+                        id="entSmartTable"
+                        entitySet="EntDetailSet"
+                        tableType="Table"
+                        enableExport="false"
+                        useVariantManagement="false"
+                        useTablePersonalisation="false"
+                        beforeRebindTable="onBeforeRebindEntitlementsTable"
+                        showRowCount="true"
+                        enableAutoBinding="false"
+                        enableCopy="false"   
+                        editable="false"
+                        showFullScreenButton="false"
+                       >
+                    
+                    <Table id="entTbl" fixedLayout="false" items="{EntDetailData>/EntDetailSet}" mode="MultiSelect" >
                         <columns>
-                            <Column id="colEnt_DealId"         width="7rem"><header><Text id="_IDGenText2" text="Deal ID"/></header></Column>
-                            <Column id="colEnt_Commodity"      width="7rem"><header><Text id="_IDGenText3" text="Commodity"/></header></Column>
-                            <Column id="colEnt_CounterParty"   width="7rem"><header><Text id="_IDGenText4" text="CounterParty"/></header></Column>
-                            <Column id="colEnt_CPName"         width="7rem"><header><Text id="_IDGenText5" text="CounterParty Name"/></header></Column>
-                            <Column id="colEnt_DealType"       width="7rem"><header><Text id="_IDGenText6" text="Deal Type"/></header></Column>
-                            <Column id="colEnt_Status"         width="7rem"><header><Text id="_IDGenText7" text="Status"/></header></Column>
-                            <Column id="colEnt_TradeDate"      width="7rem"><header><Text id="_IDGenText28" text="Trade Date"/></header></Column>
-                            <Column id="colEnt_ValidFrom"      width="7rem"><header><Text id="_IDGenText63" text="Valid From"/></header></Column>
-                            <Column id="colEnt_ValidTo"        width="7rem"><header><Text id="_IDGenText64" text="Valid To"/></header></Column>
-                            <Column id="colEnt_SchedDate"      width="7rem"><header><Text id="_IDGenText65" text="Schedule Date"/></header></Column>
-                            <Column id="colEnt_SchedQty"       width="7rem"><header><Text id="_IDGenText66" text="Schedule Quantity"/></header></Column>
-                            <Column id="colEnt_CalledQty"      width="7rem"><header><Text id="_IDGenText67" text="Called-off Quantity"/></header></Column>
-                            <Column id="colEnt_Origin"         width="7rem"><header><Text id="_IDGenText68" text="Origin"/></header></Column>
-                            <Column id="colEnt_OriginId"       width="7rem"><header><Text id="_IDGenText69" text="Origin ID"/></header></Column>
-                            <Column id="colEnt_Dest"           width="7rem"><header><Text id="_IDGenText70" text="Destination"/></header></Column>
-                            <Column id="colEnt_DestId"         width="7rem"><header><Text id="_IDGenText71" text="Destination ID"/></header></Column>
-                            <Column id="colEnt_MarketZone"     width="7rem"><header><Text id="_IDGenText72" text="MarketZone"/></header></Column>
-                            <Column id="colEnt_MarketZoneId"   width="7rem"><header><Text id="_IDGenText73" text="MarketZone ID"/></header></Column>
-                            <Column id="colEnt_MOT"            width="7rem"><header><Text id="_IDGenText74" text="MOT"/></header></Column>
-                            <Column id="colEnt_Pricing"        width="7rem"><header><Text id="_IDGenText75" text="Pricing"/></header></Column>
+                            <Column id="_IDGenColumn1"><header><Text id="_IDGenText" text="Deal ID"/></header></Column>
+                            <Column id="_IDGenColumn2"><header><Text id="_IDGenText1" text="Commodity"/></header></Column>
+                            <Column id="_IDGenColumn3"><header><Text id="_IDGenText2" text="Purchase Document"/></header></Column>
+                            <Column id="_IDGenColumn4"><header><Text id="_IDGenText3" text="Purchase Item"/></header></Column>
+                            <Column id="_IDGenColumn5"><header><Text id="_IDGenText4" text="Purchase Quantity"/></header></Column>
+                            <Column id="_IDGenColumn6"><header><Text id="_IDGenText5" text="MatchQunatity"/></header></Column>
+                            <Column id="_IDGenColumn7"><header><Text id="_IDGenText6" text="Delivery Date"/></header></Column>
+                            <Column id="_IDGenColumn8"><header><Text id="_IDGenText7" text="Delivery Month"/></header></Column>
+                            <Column id="_IDGenColumn9"><header><Text id="_IDGenText8" text="Transaction Type"/></header></Column>
+                            <Column id="_IDGenColumn10"><header><Text id="_IDGenText9" text="Week Id"/></header></Column>
+                            <Column id="_IDGenColumn11"><header><Text id="_IDGenText10" text="Supplier"/></header></Column>
+                            <Column id="_IDGenColumn12"><header><Text id="_IDGenText11" text="Supplier Id"/></header></Column>
+                            <Column id="_IDGenColumn13"><header><Text id="_IDGenText12" text="Origin ID"/></header></Column>
+                            <Column id="_IDGenColumn14"><header><Text id="_IDGenText13" text="Origin "/></header></Column>
+                            <Column id="_IDGenColumn15"><header><Text id="_IDGenText14" text="Destination ID"/></header></Column>
+                            <Column id="_IDGenColumn16"><header><Text id="_IDGenText15" text="Destination "/></header></Column>
+                            <Column id="_IDGenColumn17"><header><Text id="_IDGenText16" text="MarketZone"/></header></Column>
+                            <Column id="_IDGenColumn18"><header><Text id="_IDGenText17" text="MarketZone ID"/></header></Column>
+                            <Column id="_IDGenColumn19"><header><Text id="_IDGenText18" text="MOT"/></header></Column>
+                            <Column id="_IDGenColumn20"><header><Text id="_IDGenText19" text="Mode of transportation"/></header></Column>
+                            <Column id="_IDGenColumn21"><header><Text id="_IDGenText20" text="Inco Terms"/></header></Column>
                         </columns>
+                        <items>
+                            <ColumnListItem id="123a" >
+                                <cells>
+                                    <Text id="_IDGenText111" text="{EntDetailData>DealNumber}"></Text>
+                                    <Text id="_IDGenText112" text="{EntDetailData>CommodityDesc}"></Text>
+                                    <Text id="_IDGenText113" text="{EntDetailData>DocumentNumber}"></Text>
+                                    <Text id="_IDGenText114" text="{EntDetailData>DocumentItem}"></Text>
+                                    <Text id="_IDGenText115" text="{EntDetailData>PurchaseQuantity}"></Text>
+                                    <Text id="_IDGenText116" text="{EntDetailData>MatchQuantity}"></Text>
+                                    <Text id="_IDGenText117" text="{
+                                    path: 'EntDetailData>DeliveryDate',
+                                    type: 'sap.ui.model.type.Date',
+                                    formatOptions: {
+                                          pattern: 'yyyy/MMM/dd'     
+                                    }
+                                    }" ></Text>
+                                    <Text id="_IDGenText118" text="{EntDetailData>ScheduleMonth}"></Text>
+                                    <Text id="_IDGenText119" text="{EntDetailData>TransactionType}"></Text>
+                                    <Text id="_IDGenText120" text="{EntDetailData>WeekID}"></Text>
+                                    <Text id="_IDGenText121" text="{EntDetailData>Supplier}"></Text>
+                                    <Text id="_IDGenText122" text="{EntDetailData>SupplierID}"></Text>
+                                    <Text id="_IDGenText123" text="{EntDetailData>Origin}"></Text>
+                                    <Text id="_IDGenText124" text="{EntDetailData>OriginName}"></Text>
+                                    <Text id="_IDGenText125" text="{EntDetailData>Destination}"></Text>
+                                    <Text id="_IDGenText126" text="{EntDetailData>DestinationName}"></Text>
+                                    <Text id="_IDGenText127" text="{EntDetailData>Marketzone}"></Text>
+                                    <Text id="_IDGenText128" text="{EntDetailData>MarketzoneName}"></Text>
+                                    <Text id="_IDGenText129" text="{EntDetailData>ModeOfTransport}"></Text>
+                                    <Text id="_IDGenText130" text="{EntDetailData>ModeOfTransportText}"></Text>
+                                    <Text id="_IDGenText131" text="{EntDetailData>IncoTerms}"></Text>
+                                    <Text id="_IDGenText132" text="{EntDetailData>Commodity}"></Text>
+                                    
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+
                     </Table>
-                </ScrollContainer>
+                   
+                    </smartTable:SmartTable>
+                     </ScrollContainer>
+                
             </VBox>
 
             <!-- Obligations section -->
-            <VBox id="vboxObligations" class="splitterSection">
+            <VBox id="oblBox" class="splitterSection">
                 <layoutData>
-                    <layout:SplitterLayoutData id="sldObligations" size="50%"/>
+                    <layout:SplitterLayoutData id="oblLay" size="50%"/>
                 </layoutData>
-                <Toolbar id="tbObligations" class="splitterSectionHeader">
-                    <Title id="titleObligations" text="Obligations" level="H4"/>
-                    <ToolbarSpacer id="_IDGenToolbarSpacer3O" ></ToolbarSpacer>
-                    <Button id="_IDGenButton22O"  icon="sap-icon://copy" type="Transparent"/>
-                    <Button id="_IDGenButton23O"  icon="sap-icon://action-settings" type="Transparent"/>
-                    <Button id="_IDGenButton24O"  icon="sap-icon://table-view" type="Transparent"/>
-                    
-                    <Button id="_IDGenButton25O"  icon="sap-icon://slim-arrow-down"
-                    type="Transparent"/>
+                <Toolbar id="oblBar" class="splitterSectionHeader">
+                    <Title id="oblTitle" text="Obligations" level="H4"/>
+                    <ToolbarSpacer id="oblSpc" ></ToolbarSpacer>
+                     <Button id="entFullBtnI34" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent"/>
                 </Toolbar>
-                <ScrollContainer id="scObligations" horizontal="true" vertical="false" width="100%">
-                    <Table id="tableObligations">
+                    <smartTable:SmartTable
+                        id="oblSmartTable"
+                        entitySet="OblDetailSet"
+                        tableType="ResponsiveTable"
+                        enableExport="false"
+                        useVariantManagement="false"
+                        useTablePersonalisation="false"
+                        beforeRebindTable="onBeforeRebindEntitlementsTable"
+                        showRowCount="true"
+                        enableAutoBinding="false"
+                        enableCopy="false"
+                        editable="false"
+                        showFullScreenButton="false" >
+
+                        <ScrollContainer id="oblScroll" horizontal="true" vertical="true" width="100%" height="100%" >
+                    <Table id="oblTbl" fixedLayout="false" items="{OblDetailData>/OblDetailSet}" mode="MultiSelect" >
                         <columns>
-                            <Column id="colObl_DealId"         width="7rem"><header><Text id="_IDGenText76" text="Deal ID"/></header></Column>
-                            <Column id="colObl_CounterParty"   width="7rem"><header><Text id="_IDGenText77" text="CounterParty"/></header></Column>
-                            <Column id="colObl_CPName"         width="7rem"><header><Text id="_IDGenText78" text="CounterParty Name"/></header></Column>
-                            <Column id="colObl_DealType"       width="7rem"><header><Text id="_IDGenText79" text="Deal Type"/></header></Column>
-                            <Column id="colObl_Commodity"      width="7rem"><header><Text id="_IDGenText80" text="Commodity"/></header></Column>
-                            <Column id="colObl_Status"         width="7rem"><header><Text id="_IDGenText81" text="Status"/></header></Column>
-                            <Column id="colObl_TradeDate"      width="7rem"><header><Text id="_IDGenText82" text="Trade Date"/></header></Column>
-                            <Column id="colObl_ValidFrom"      width="7rem"><header><Text id="_IDGenText83" text="Valid From"/></header></Column>
-                            <Column id="colObl_ValidTo"        width="7rem"><header><Text id="_IDGenText84" text="Valid To"/></header></Column>
-                            <Column id="colObl_SchedDate"      width="7rem"><header><Text id="_IDGenText85" text="Schedule Date"/></header></Column>
-                            <Column id="colObl_SchedQty"       width="7rem"><header><Text id="_IDGenText86" text="Schedule Quantity"/></header></Column>
-                            <Column id="colObl_CalledQty"      width="7rem"><header><Text id="_IDGenText87" text="Called-off Quantity"/></header></Column>
-                            <Column id="colObl_Origin"         width="7rem"><header><Text id="_IDGenText88" text="Origin"/></header></Column>
-                            <Column id="colObl_OriginId"       width="7rem"><header><Text id="_IDGenText89" text="Origin ID"/></header></Column>
-                            <Column id="colObl_Dest"           width="7rem"><header><Text id="_IDGenText90" text="Destination"/></header></Column>
-                            <Column id="colObl_DestId"         width="7rem"><header><Text id="_IDGenText91" text="Destination ID"/></header></Column>
-                            <Column id="colObl_MarketZone"     width="7rem"><header><Text id="_IDGenText92" text="MarketZone"/></header></Column>
-                            <Column id="colObl_MarketZoneId"   width="7rem"><header><Text id="_IDGenText93" text="MarketZone ID"/></header></Column>
-                            <Column id="colObl_MOT"            width="7rem"><header><Text id="_IDGenText94" text="MOT"/></header></Column>
-                            <Column id="colObl_Pricing"        width="7rem"><header><Text id="_IDGenText95" text="Pricing"/></header></Column>
+                            <Column id="_IDGenColumn22"><header><Text id="_IDGenText21" text="Deal ID"/></header></Column>
+                            <Column id="_IDGenColumn23"><header><Text id="_IDGenText22" text="Commodity"/></header></Column>
+                            <Column id="_IDGenColumn24"><header><Text id="_IDGenText23" text="Sales Document"/></header></Column>
+                            <Column id="_IDGenColumn25"><header><Text id="_IDGenText24" text="Sales Item"/></header></Column>
+                            <Column id="_IDGenColumn26"><header><Text id="_IDGenText25" text="Sales Quantity"/></header></Column>
+                            <Column id="_IDGenColumn27"><header><Text id="_IDGenText26" text="Match Qunatity"/></header></Column>
+                            <Column id="_IDGenColumn28"><header><Text id="_IDGenText27" text="Due Date"/></header></Column>
+                            <Column id="_IDGenColumn29"><header><Text id="_IDGenText28" text="Due month"/></header></Column>
+                            <Column id="_IDGenColumn30"><header><Text id="_IDGenText29" text="Transaction Type"/></header></Column>
+                            <Column id="_IDGenColumn31"><header><Text id="_IDGenText30" text="Week ID"/></header></Column>
+                            <Column id="_IDGenColumn32"><header><Text id="_IDGenText31" text="Customer "/></header></Column>
+                            <Column id="_IDGenColumn33"><header><Text id="_IDGenText32" text="Customer Id"/></header></Column>
+                            <Column id="_IDGenColumn34"><header><Text id="_IDGenText33" text="Origin ID"/></header></Column>
+                            <Column id="_IDGenColumn35"><header><Text id="_IDGenText34" text="Origin"/></header></Column>
+                            <Column id="_IDGenColumn36"><header><Text id="_IDGenText35" text="Destination ID"/></header></Column>
+                            <Column id="_IDGenColumn37"><header><Text id="_IDGenText36" text="Destination"/></header></Column>
+                            <Column id="_IDGenColumn38"><header><Text id="_IDGenText37" text="MarketZone Id"/></header></Column>
+                            <Column id="_IDGenColumn39"><header><Text id="_IDGenText38" text="MarketZone"/></header></Column>
+                            <Column id="_IDGenColumn40"><header><Text id="_IDGenText39" text="MOT"/></header></Column>
+                            <Column id="_IDGenColumn41"><header><Text id="_IDGenText40" text="Mode of transportation"/></header></Column>
+                            <Column id="_IDGenColumn42"><header><Text id="_IDGenText41" text="Inco Terms"/></header></Column>
+
                         </columns>
+                        <items>
+                            <ColumnListItem id="123b" >
+                                <cells>
+                               
+                                     <Text id="_IDGenText133" text="{OblDetailData>DealNumber}"></Text>
+                                     <Text id="_IDGenText134" text="{OblDetailData>CommodityDesc}"></Text>
+                                     <Text id="_IDGenText135" text="{OblDetailData>DocumentNumber}"></Text>
+                                     <Text id="_IDGenText136" text="{OblDetailData>DocumentItem}"></Text>
+                                     <Text id="_IDGenText137" text="{OblDetailData>SalesQuantity}"></Text>
+                                     <Text id="_IDGenText138" text="{OblDetailData>MatchQuantity}"></Text>
+                                     <Text id="_IDGenText139" text="{OblDetailData>DueDate}"></Text>
+                                     <Text id="_IDGenText140" text="{OblDetailData>ScheduleMonth}"></Text>
+                                     <Text id="_IDGenText141" text="{OblDetailData>TransactionType}"></Text>
+                                     <Text id="_IDGenText142" text="{OblDetailData>Origin}"></Text>
+                                  
+                                    
+                                </cells>
+                            </ColumnListItem>
+                        </items>
                     </Table>
-                </ScrollContainer>
+                    </ScrollContainer>
+                    </smartTable:SmartTable>
+                
             </VBox>
 
         </layout:Splitter>
 
         <!-- ROW 2 : Inventory | Selected Items -->
-        <layout:Splitter id="_IDGenSplitter3" orientation="Horizontal" >
+        <layout:Splitter id="botSplit" orientation="Horizontal" >
 
             <!-- Inventory section -->
-            <VBox id="vboxInventory" class="splitterSection">
+            <VBox id="invBox" class="splitterSection">
                 <layoutData>
-                    <layout:SplitterLayoutData id="sldInventory" size="50%"/>
+                    <layout:SplitterLayoutData id="invLay" size="50%"/>
                 </layoutData>
-                <Toolbar id="tbInventory" class="splitterSectionHeader">
-                    <Title id="titleInventory" text="Inventory" level="H4"/>
-                    <ToolbarSpacer id="_IDGenToolbarSpacer3I" ></ToolbarSpacer>
-                    <Button id="_IDGenButton22I"  icon="sap-icon://copy" type="Transparent"/>
-                    <Button id="_IDGenButton23I"  icon="sap-icon://action-settings" type="Transparent"/>
-                    <Button id="_IDGenButton24I"  icon="sap-icon://table-view" type="Transparent"/>
+                <Toolbar id="invBar" class="splitterSectionHeader">
+                    <Title id="invTitle" text="Inventory" level="H4"/>
+                    <ToolbarSpacer id="invSpc" ></ToolbarSpacer>
+                   
+                    <MenuButton id="_IDGenMenuButton3" icon="sap-icon://excel-attachment" type="Transparent">
+                        <menu>
+                            <Menu id="_IDGenMenu2">
+                                <MenuItem id="_IDGenMenuItem4" text="Export" press=".onExport"/>
+                                <MenuItem id="_IDGenMenuItem5" text="Export As." press=".onExportAs"/>
+                            </Menu>
+                        </menu>
+                    </MenuButton>
+                    <Button id="entFullBtnI" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent"/>
                     
-                    <Button id="_IDGenButton25I"  icon="sap-icon://slim-arrow-down"
-                    type="Transparent"/>
                 </Toolbar>
-                <ScrollContainer id="scInventory" horizontal="true" vertical="false" width="100%">
-                    <Table id="tableInventory">
+                <ScrollContainer id="invScroll" horizontal="true" vertical="true" width="100%" height="100%">
+                    <Table id="invTbl" fixedLayout="false" items="{/InvDetails}">
                         <columns>
-                            <Column id="colInv_DealId"         width="7rem"><header><Text id="_IDGenText96" text="Deal ID"/></header></Column>
-                            <Column id="colInv_CounterParty"   width="7rem"><header><Text id="_IDGenText97" text="CounterParty"/></header></Column>
-                            <Column id="colInv_CPName"         width="7rem"><header><Text id="_IDGenText98" text="CounterParty Name"/></header></Column>
-                            <Column id="colInv_DealType"       width="7rem"><header><Text id="_IDGenText99" text="Deal Type"/></header></Column>
-                            <Column id="colInv_Commodity"      width="7rem"><header><Text id="_IDGenText100" text="Commodity"/></header></Column>
-                            <Column id="colInv_Status"         width="7rem"><header><Text id="_IDGenText101" text="Status"/></header></Column>
-                            <Column id="colInv_TradeDate"      width="7rem"><header><Text id="_IDGenText102" text="Trade Date"/></header></Column>
-                            <Column id="colInv_ValidFrom"      width="7rem"><header><Text id="_IDGenText103" text="Valid From"/></header></Column>
-                            <Column id="colInv_ValidTo"        width="7rem"><header><Text id="_IDGenText104" text="Valid To"/></header></Column>
-                            <Column id="colInv_SchedDate"      width="7rem"><header><Text id="_IDGenText105" text="Schedule Date"/></header></Column>
-                            <Column id="colInv_SchedQty"       width="7rem"><header><Text id="_IDGenText106" text="Schedule Quantity"/></header></Column>
-                            <Column id="colInv_CalledQty"      width="7rem"><header><Text id="_IDGenText107" text="Called-off Quantity"/></header></Column>
-                            <Column id="colInv_Origin"         width="7rem"><header><Text id="_IDGenText108" text="Origin"/></header></Column>
-                            <Column id="colInv_OriginId"       width="7rem"><header><Text id="_IDGenText109" text="Origin ID"/></header></Column>
-                            <Column id="colInv_Dest"           width="7rem"><header><Text id="_IDGenText110" text="Destination"/></header></Column>
-                            <Column id="colInv_DestId"         width="7rem"><header><Text id="_IDGenText111" text="Destination ID"/></header></Column>
-                            <Column id="colInv_MarketZone"     width="7rem"><header><Text id="_IDGenText112" text="MarketZone"/></header></Column>
-                            <Column id="colInv_MarketZoneId"   width="7rem"><header><Text id="_IDGenText113" text="MarketZone ID"/></header></Column>
-                            <Column id="colInv_MOT"            width="7rem"><header><Text id="_IDGenText114" text="MOT"/></header></Column>
-                            <Column id="colInv_Pricing"        width="7rem"><header><Text id="_IDGenText115" text="Pricing"/></header></Column>
+                            <Column id="_IDGenColumn43"><header><Text id="_IDGenText42" text="Commodity"/></header></Column>
+                            <Column id="_IDGenColumn44"><header><Text id="_IDGenText43" text=" Plant"/></header></Column>
+                            <Column id="_IDGenColumn45"><header><Text id="_IDGenText44" text="Storage location"/></header></Column>
+                            <Column id="_IDGenColumn46"><header><Text id="_IDGenText45" text="Bussiness Location Id"/></header></Column>
+                            <Column id="_IDGenColumn47"><header><Text id="_IDGenText46" text="Location Name"/></header></Column>
+                            <Column id="_IDGenColumn48"><header><Text id="_IDGenText47" text="OnHand Inventory"/></header></Column>
+                            <Column id="_IDGenColumn49"><header><Text id="_IDGenText48" text="Inbound Qunatity"/></header></Column>
+                            <Column id="_IDGenColumn50"><header><Text id="_IDGenText49" text="Outbound Qunatity"/></header></Column>
                         </columns>
+                        <items>
+                            <ColumnListItem id="123c" >
+                                <cells>
+                                <Text id="INV11" text="{Commodity}"></Text>
+                                <Text id="INV12" text="{Plant}"></Text>
+                                <Text id="INV12E" text="{StorageLocation}"></Text>
+                                 <Text id="INV17" text="{LocId}"></Text>                                
+                                <Text id="INV13" text="{UOM}"></Text>
+                                <Text id="INV14" text="{OnHandInventory}"></Text>
+                                <Text id="INV15" text="{InboundQuantity}"></Text>
+                                <Text id="INV16" text="{OutboundQuantity}"></Text>
+                                <!-- <Text id="INV18" text="{PlantName}"></Text>  -->
+                               
+                                </cells>
+                            </ColumnListItem>
+                        </items>
                     </Table>
                 </ScrollContainer>
             </VBox>
 
             <!-- Selected Items section -->
-            <VBox id="vboxSelected" class="splitterSection">
+            <VBox id="selBox" class="splitterSection">
                 <layoutData>
-                    <layout:SplitterLayoutData id="sldSelected" size="50%"/>
+                    <layout:SplitterLayoutData id="selLay" size="50%"/>
                 </layoutData>
-                <Toolbar id="tbSelected" class="splitterSectionHeader">
-                    <Title id="titleSelected" text="Selected Items" level="H4"/>
-                    <ToolbarSpacer id="_IDGenToolbarSpacer3S" ></ToolbarSpacer>
-                    <Button id="_IDGenButton27" icon="sap-icon://collapse-group"  type="Transparent"/>
+                <Toolbar id="selBar" class="splitterSectionHeader">
+                    <Title id="selTitle" text="Selected Items" level="H4"/>
+                    <ToolbarSpacer id="selSpc" ></ToolbarSpacer>
+                    <Button id="crtmthntn" text="CreateMatch" icon="sap-icon://add"  type="Emphasized"/>
+                    <Button id="collapseBtn" icon="sap-icon://collapse-group"  type="Transparent"/>
  
-                    <Button id="_IDGenButton28"  text="Confirm-Match" icon="sap-icon://accept" type="Accept"/> 
-                    <Button id="_IDGenButton29" text="Clear-All" icon="sap-icon://decline"  type="Transparent" />   
-                    <Button id="_IDGenButton30" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent" />
+                    <Button id="confirmMatchBtn"  text="Confirm-Match" icon="sap-icon://accept" type="Accept"/> 
+                    <Button id="clearSelBtn" text="Clear-All" icon="sap-icon://decline"  type="Ghost" />   
+                    <Button id="selFullBtnSE" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent" />
                 </Toolbar>
-                <ScrollContainer id="scSelected" horizontal="true" vertical="false" width="100%">
-                    <Table id="tableSelected">
+                <ScrollContainer id="selScroll" horizontal="true" vertical="true" width="100%" height="100%">
+                    <Table id="selTbl" fixedLayout="false">
                         <columns>
-                            <Column id="colSel_DealId"         width="7rem"><header><Text id="_IDGenText116" text="Deal ID"/></header></Column>
-                            <Column id="colSel_CounterParty"   width="7rem"><header><Text id="_IDGenText117" text="CounterParty"/></header></Column>
-                            <Column id="colSel_CPName"         width="7rem"><header><Text id="_IDGenText118" text="CounterParty Name"/></header></Column>
-                            <Column id="colSel_DealType"       width="7rem"><header><Text id="_IDGenText119" text="Deal Type"/></header></Column>
-                            <Column id="colSel_Commodity"      width="7rem"><header><Text id="_IDGenText120" text="Commodity"/></header></Column>
-                            <Column id="colSel_Status"         width="7rem"><header><Text id="_IDGenText121" text="Status"/></header></Column>
-                            <Column id="colSel_TradeDate"      width="7rem"><header><Text id="_IDGenText122" text="Trade Date"/></header></Column>
-                            <Column id="colSel_ValidFrom"      width="7rem"><header><Text id="_IDGenText123" text="Valid From"/></header></Column>
-                            <Column id="colSel_ValidTo"        width="7rem"><header><Text id="_IDGenText124" text="Valid To"/></header></Column>
-                            <Column id="colSel_SchedDate"      width="7rem"><header><Text id="_IDGenText125" text="Schedule Date"/></header></Column>
-                            <Column id="colSel_SchedQty"       width="7rem"><header><Text id="_IDGenText126" text="Schedule Quantity"/></header></Column>
-                            <Column id="colSel_CalledQty"      width="7rem"><header><Text id="_IDGenText127" text="Called-off Quantity"/></header></Column>
-                            <Column id="colSel_Origin"         width="7rem"><header><Text id="_IDGenText128" text="Origin"/></header></Column>
-                            <Column id="colSel_OriginId"       width="7rem"><header><Text id="_IDGenText129" text="Origin ID"/></header></Column>
-                            <Column id="colSel_Dest"           width="7rem"><header><Text id="_IDGenText130" text="Destination"/></header></Column>
-                            <Column id="colSel_DestId"         width="7rem"><header><Text id="_IDGenText131" text="Destination ID"/></header></Column>
-                            <Column id="colSel_MarketZone"     width="7rem"><header><Text id="_IDGenText132" text="MarketZone"/></header></Column>
-                            <Column id="colSel_MarketZoneId"   width="7rem"><header><Text id="_IDGenText133" text="MarketZone ID"/></header></Column>
-                            <Column id="colSel_MOT"            width="7rem"><header><Text id="_IDGenText134" text="MOT"/></header></Column>
-                            <Column id="colSel_Pricing"        width="7rem"><header><Text id="_IDGenText135" text="Pricing"/></header></Column>
+                            <Column id="_IDGenColumn51"><header><Text id="_IDGenText50" text="Deal ID"/></header></Column>
+                            <Column id="_IDGenColumn52"><header><Text id="_IDGenText51" text=" Doc.no"/></header></Column>
+                            <Column id="_IDGenColumn53"><header><Text id="_IDGenText52" text="Doc item"/></header></Column>
+                            <Column id="_IDGenColumn54"><header><Text id="_IDGenText53" text="Commodity"/></header></Column>
+                            <Column id="_IDGenColumn55"><header><Text id="_IDGenText54" text=" Quantity"/></header></Column>
+                            <Column id="_IDGenColumn56"><header><Text id="_IDGenText55" text="VOM"/></header></Column>
+                            <Column id="_IDGenColumn57"><header><Text id="_IDGenText56" text="Tx Type"/></header></Column>
+                            <Column id="_IDGenColumn58"><header><Text id="_IDGenText57" text="Inco terms"/></header></Column>
+                            <Column id="_IDGenColumn59"><header><Text id="_IDGenText58" text="Mode of Transport"/></header></Column>
+                            <Column id="_IDGenColumn60"><header><Text id="_IDGenText59" text="Delivery / due date"/></header></Column>
+                            <Column id="_IDGenColumn61"><header><Text id="_IDGenText60" text="Month"/></header></Column>
+                            <Column id="_IDGenColumn62"><header><Text id="_IDGenText61" text="Supplier/Customer"/></header></Column>
+                            <Column id="_IDGenColumn63"><header><Text id="_IDGenText62" text="Origin"/></header></Column>
+                            <Column id="_IDGenColumn64"><header><Text id="_IDGenText63" text="Destination"/></header></Column>
+                            <Column id="_IDGenColumn65"><header><Text id="_IDGenText64" text="Week(Plan)"/></header></Column>
+                            <Column id="_IDGenColumn66"><header><Text id="_IDGenText65" text="Planned Qunatity"/></header></Column>
+                            <Column id="_IDGenColumn67"><header><Text id="_IDGenText66" text="Planned UOM"/></header></Column>
+                            <Column id="_IDGenColumn68"><header><Text id="_IDGenText67" text="Source"/></header></Column>
+                            <Column id="_IDGenColumn69"><header><Text id="_IDGenText68" text="Status"/></header></Column>
+                            <Column id="_IDGenColumn70"><header><Text id="_IDGenText69" text="Delete"/></header></Column>
+
                         </columns>
                     </Table>
                 </ScrollContainer>
@@ -302,83 +392,112 @@
         </layout:Splitter>
      </layout:Splitter>
     </Panel>
-    <Panel id="_IDGenPanel4" class="sapUiTinyMargin">
-       <Toolbar id="_IDGenToolbar1" >
-        <Title id="_IDGenTitle9" text="Monthly Planning Summary"></Title>
-        <DateRangeSelection id="_IDGenDateRangeSelection" width="15rem" placeholder="MM/DD/YYYY - MM/DD/YYYY"></DateRangeSelection>
-        <ToolbarSpacer id="_IDGenToolbarSpacer2" ></ToolbarSpacer>
-        <Button  id="BtnRefresh"  text="Refresh" icon="sap-icon://refresh" type="Ghost"></Button>
+<Panel id="monthPanel" class="sapUiTinyMargin" headerText="Monthly Planning Summary" expandable="true" expanded="true">
+    <headerToolbar>
+        <Toolbar id="monthBar" >
+           <Title id="idmpt1" text="Monthly Planning Summary">  </Title>  
+            <DateRangeSelection id="monthDrs" width="15rem" placeholder="MM/DD/YYYY - MM/DD/YYYY"></DateRangeSelection>
+            <ToolbarSpacer id="monthSpc" ></ToolbarSpacer>
+            <Button  id="monthRefreshBtn"  text="Refresh" icon="sap-icon://refresh" type="Ghost"></Button>
        </Toolbar> 
-        <Table id="_IDGenTable1" >
+    </headerToolbar>
+       
+        <Table id="monthTbl" fixedLayout="false" >
             <columns>
-                 <Column id="_IDGenMatchedColumn1PS" width="7rem"><header><Text id="_IDGenMatchedText1ps" text="Entitlements()" /></header></Column>
-                    <Column id="_IDGenMatchedColumn2ps" width="10rem"><header><Text id="_IDGenMatchedText2ps" text="Obligations()" /></header></Column>
-                    <Column id="_IDGenMatchedColumn3ps" width="10rem"><header><Text id="_IDGenMatchedText3ps" text="Matched" /></header></Column>
-                    <Column id="_IDGenMatchedColumn4PS" width="7rem"><header><Text id="_IDGenMatchedText4ps" text="Net Positions" /></header></Column>
-                    <Column id="_IDGenMatchedColumn5PS" width="10rem"><header><Text id="_IDGenMatchedText5ps" text="status " /></header></Column>
-                    
-            </columns><items>
-                <ColumnListItem id="_IDColumnListItem">
+                <Column id="_IDGenColumn71"><header><Text id="_IDGenText70" text="Month" /></header></Column>
+                <Column id="_IDGenColumn72"><header><Text id="_IDGenText71" text="Entitlements()" /></header></Column> 
+                <Column id="_IDGenColumn73"><header><Text id="_IDGenText72" text="Obligations()" /></header></Column>
+                <Column id="_IDGenColumn74"><header><Text id="_IDGenText73" text="Matched" /></header></Column>
+                <Column id="_IDGenColumn75"><header><Text id="_IDGenText74" text="Net Positions" /></header></Column>
+                <Column id="_IDGenColumn76"><header><Text id="_IDGenText75" text="status " /></header></Column>
+            </columns>
+            <items>
+                <ColumnListItem id="monthRow">
                     <cells>
-                       
-                        
-                        <Text id="_IDText36" text="2,40,000 lbs"/>
-                        <Text id="_IDText37" text="2,02,000 lbs"/>
-                        <Text id="_IDText38" text="2,02,000 lbs"/>
-                        <Text id="_IDText39" text="+38,000 lbs"/>
-                        <ObjectStatus id="_IDObjectStatus" text="Long" state="Success"/>
+                        <Text id="monthTxt" text="2,40,000 lbs"/>
+                        <Text id="monthEntTxt" text="2,02,000 lbs"/>
+                        <Text id="monthOblTxt" text="2,02,000 lbs"/>
+                        <Text id="monthMatchTxt" text="2,02,000 lbs"/>
+                        <Text id="monthNetTxt" text="+38,000 lbs"/>
+                        <ObjectStatus id="monthSts" text="Long" state="Success"/>
                     </cells>
                 </ColumnListItem>
             </items>
         </Table>
-    </Panel>
+</Panel>
 
-<Panel id="_IDGenPanel5" class="sapUiTinyMargin">
-    <headerToolbar>
-    <Toolbar id="_IDGenToolbar" >  
-    <Title id="_IDGenTitle3" text="Matched Positions"></Title>
-    <ToolbarSpacer id="_IDGenToolbarSpacer1" ></ToolbarSpacer>
-    <Button id="btnMp" text="Create Nominations" icon="sap-icon://add" type="Emphasized"></Button>
+<Panel id="matchPanel" headerText="Matched Details" class="sapUiTinyMargin"  expandable="true" expanded="true">
+<headerToolbar >
+
+    <Toolbar id="matchBar" >
+     <Title id="hdmdid"     text="Matched Positions"></Title>
+    <ToolbarSpacer id="matchSpc" ></ToolbarSpacer>
+    <Button id="nomBtn" text="Create Nominations" icon="sap-icon://add" type="Emphasized"></Button>
+    <Button id="nomdelBtn" text="DeleteSelected" icon="sap-icon://delete" type="Reject"></Button>
+    <Button id="nomref" text="Refresh" icon="sap-icon://refresh" type="Ghost"></Button>
     </Toolbar>
-    </headerToolbar>
-    <Table id="tableMatchedPositions">
-    <columns>
-    <Column id="_IDGenMatchedColumn1M" width="7rem"><header><Text id="_IDGenMatchedText1M" text="Match Source" /></header></Column>
-    <Column id="_IDGenMatchedColumn2M" width="10rem"><header><Text id="_IDGenMatchedText2M" text="Supplier" /></header></Column>
-    <Column id="_IDGenMatchedColumn3M" width="10rem"><header><Text id="_IDGenMatchedText3M" text="Customer" /></header></Column>
-    <Column id="_IDGenMatchedColumn4M" width="7rem"><header><Text id="_IDGenMatchedText4M" text="Origin" /></header></Column>
-    <Column id="_IDGenMatchedColumn5M" width="10rem"><header><Text id="_IDGenMatchedText5M" text="Origin Name" /></header></Column>
-    <Column id="_IDGenMatchedColumn6M" width="7rem"><header><Text id="_IDGenMatchedText6M" text="Destination" /></header></Column>
-    <Column id="_IDGenMatchedColumn7M" width="10rem"><header><Text id="_IDGenMatchedText7M" text="Dest. Name" /></header></Column>
-    
-    <Column id="_IDGenMatchedColumn8M" width="8rem"><header><Text id="_IDGenMatchedText8M" text="Purch. Sched. Date" /></header></Column>
-    <Column id="_IDGenMatchedColumn9M" width="5rem"><header><Text id="_IDGenMatchedText9M" text="Purch. Month" /></header></Column>
-    <Column id="_IDGenMatchedColumn10M" width="6rem"><header><Text id="_IDGenMatchedText10M" text="P IncoTerms" /></header></Column>
-    <Column id="_IDGenMatchedColumn11M" width="8rem"><header><Text id="_IDGenMatchedText11M" text="Sales Sched. Date" /></header></Column>
-    <Column id="_IDGenMatchedColumn12M" width="5rem"><header><Text id="_IDGenMatchedText12M" text="Sales Month" /></header></Column>
-    <Column id="_IDGenMatchedColumn13M" width="6rem"><header><Text id="_IDGenMatchedText13M" text="S IncoTerms" /></header></Column>
-    
-    <Column id="_IDGenMatchedColumn14M" width="8rem"><header><Text id="_IDGenMatchedText14M" text="Sales Quantity" /></header></Column>
-    <Column id="_IDGenMatchedColumn15M" width="5rem"><header><Text id="_IDGenMatchedText15M" text="MOT" /></header></Column>
-    <Column id="_IDGenMatchedColumn16M" width="8rem"><header><Text id="_IDGenMatchedText16M" text="Mode of Trans." /></header></Column>
-    <Column id="_IDGenMatchedColumn17M" width="5rem"><header><Text id="_IDGenMatchedText17M" text="Week ID" /></header></Column>
-    <Column id="_IDGenMatchedColumn18M" width="8rem"><header><Text id="_IDGenMatchedText18M" text="Planned Qty" /></header></Column>
-    <Column id="_IDGenMatchedColumn19M" width="5rem"><header><Text id="_IDGenMatchedText19M" text="Plant" /></header></Column>
-    <Column id="_IDGenMatchedColumn20M" width="8rem"><header><Text id="_IDGenMatchedText20M" text="Storage Loc." /></header></Column>
-    <Column id="_IDGenMatchedColumn21EM" width="8rem"><header><Text id="_IDGenMatchedText21M" text="Plant Loc. ID" /></header></Column>
-    <Column id="_IDGenMatchedColumn22M" width="10rem"><header><Text id="_IDGenMatchedText22M" text="Plant Loc. Name" /></header></Column>
-    <Column id="_IDGenMatchedColumn23M" width="8rem"><header><Text id="_IDGenMatchedText23M" text="On-Hand Inv." /></header></Column>
-    <Column id="_IDGenMatchedColumn24M" width="8rem"><header><Text id="_IDGenMatchedText24M" text="Match Status" /></header></Column>
-    
-    <Column id="_IDGenMatchedColumn25M" width="8rem"><header><Text id="_IDGenMatchedText25M" text="Commodity" /></header></Column>
-    <Column id="_IDGenMatchedColumn26M" width="10rem"><header><Text id="_IDGenMatchedText26M" text="Purchase Deal" /></header></Column>
-    <Column id="_IDGenMatchedColumn27M" width="10rem"><header><Text id="_IDGenMatchedText27M" text="Purchase Doc." /></header></Column>
-    <Column id="_IDGenMatchedColumn28M" width="6rem"><header><Text id="_IDGenMatchedText28M" text="Purch. Doc Item" /></header></Column>
-    <Column id="_IDGenMatchedColumn29M" width="10rem"><header><Text id="_IDGenMatchedText29M" text="Purch. Trans. Type" /></header></Column>
-    <Column id="_IDGenMatchedColumn30M" width="8rem"><header><Text id="_IDGenMatchedText30M" text="Purchase Qty" /></header></Column>
-    <Column id="_IDGenMatchedColumn31M" width="10rem"><header><Text id="_IDGenMatchedText31M" text="Sales Deal" /></header></Column>
-    <Column id="_IDGenMatchedColumn32M" width="10rem"><header><Text id="_IDGenMatchedText32M" text="Sales Document" /></header></Column>
-</columns>
-    </Table>
+</headerToolbar>
+    <Toolbar id="idtbmb">
+        <Title id="tmd2m" text="Matched Positions ( )" > </Title>
+        <ToolbarSpacer id="mdspacer" ></ToolbarSpacer>
+                            <MenuButton id="_IDGenMenuButtonmd3" icon="sap-icon://excel-attachment" type="Transparent">
+                        <menu>
+                            <Menu id="_IDGenMenumd2">
+                                <MenuItem id="_IDGenMenuItemd4" text="Export" press=".onExport"/>
+                                <MenuItem id="_IDGenMenuItemd5" text="Export As." press=".onExportAs"/>
+                            </Menu>
+                        </menu>
+                    </MenuButton>
+                    <Button id="entFullBtnImd" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent"/>
+
+    </Toolbar>
+
+    <ScrollContainer id="scmd" >
+            <Table id="matchTbl" fixedLayout="false" items="{/MatchPosSet}">
+                <columns>
+                    <Column id="srcCol"><header><Text id="_IDGenText76" text="Match Source" /></header></Column>
+                    <Column id="matchMonthCol"><header><Text id="_IDGenText77" text="Match Scheduled Month" /></header></Column>
+                    <Column id="weekCol"><header><Text id="_IDGenText78" text="Week ID" /></header></Column>
+                    <Column id="commCol"><header><Text id="_IDGenText79" text="Commodity" /></header></Column>
+                    <Column id="planQtyCol"><header><Text id="_IDGenText80" text="Planned Qty" /></header></Column>
+                    <Column id="purDealCol"><header><Text id="_IDGenText81" text="Purchase Deal" /></header></Column>
+                    <Column id="purDocCol"><header><Text id="_IDGenText82" text="Purchase Doc." /></header></Column>
+                    <Column id="purItemCol"><header><Text id="_IDGenText83" text="Purch. Doc Item" /></header></Column>
+                    <Column id="purQtyCol"><header><Text id="_IDGenText84" text="Purchase Qty" /></header></Column>
+                    <Column id="salesDealCol"><header><Text id="_IDGenText85" text="Sales Deal" /></header></Column>
+                    <Column id="salesDocCol"><header><Text id="_IDGenText86" text="Sales Document" /></header></Column>
+                    <Column id="salesItemCol"><header><Text id="_IDGenText87" text="Sales Document Item" /></header></Column>
+                    <Column id="salesQtyCol"><header><Text id="_IDGenText88" text="Sales Quantity" /></header></Column>
+                    <Column id="plantCol"><header><Text id="_IDGenText89" text="Plant" /></header></Column>
+                    <Column id="storageCol"><header><Text id="_IDGenText90" text="Storage Loc." /></header></Column>
+                    <Column id="onHandCol"><header><Text id="_IDGenText91" text="On-Hand Inv." /></header></Column>
+                    <Column id="supplierCol"><header><Text id="_IDGenText92" text="Supplier" /></header></Column>
+                    <Column id="customerCol"><header><Text id="_IDGenText93" text="Customer" /></header></Column>
+                    <Column id="originCol"><header><Text id="_IDGenText94" text="Origin" /></header></Column>
+                    <Column id="originNameCol"><header><Text id="_IDGenText95" text="Origin Name" /></header></Column>
+                    <Column id="destCol"><header><Text id="_IDGenText96" text="Destination" /></header></Column>
+                    <Column id="destNameCol"><header><Text id="_IDGenText97" text="Dest. Name" /></header></Column>
+                    <Column id="motCol"><header><Text id="_IDGenText98" text="MOT" /></header></Column>
+                    <Column id="modeCol"><header><Text id="_IDGenText99" text="Mode of Trans." /></header></Column>
+                    <Column id="matchStatusCol"><header><Text id="_IDGenText100" text="Match Status" /></header></Column>
+                    <Column id="purSchedDateCol"><header><Text id="_IDGenText101" text="Purch. Sched. Date" /></header></Column>
+                    <Column id="purIncotermsCol"><header><Text id="_IDGenText102" text="P IncoTerms" /></header></Column>
+                    <Column id="purTxCol"><header><Text id="_IDGenText103" text="Purch. Trans. Type" /></header></Column>
+                    <Column id="salesSchedDateCol"><header><Text id="_IDGenText104" text="Sales Sched. Date" /></header></Column>
+                    <Column id="salesIncotermsCol"><header><Text id="_IDGenText105" text="S IncoTerms" /></header></Column>
+                    <Column id="salesTxCol"><header><Text id="_IDGenText106" text="Sales transation type" /></header></Column>
+                    <Column id="createdAtCol"><header><Text id="_IDGenText107" text="Created At" /></header></Column>
+                    <Column id="createdByCol"><header><Text id="_IDGenText108" text="Created By" /></header></Column>
+            </columns>
+            <items>
+                <ColumnListItem id="monthRo">
+                    <cells>
+                         <Text id="mpsr" text="{Matchsource}"></Text>
+                       
+                    </cells>
+                </ColumnListItem>
+            </items>
+        </Table>
+        </ScrollContainer>
     </Panel>
 </core:FragmentDefinition>

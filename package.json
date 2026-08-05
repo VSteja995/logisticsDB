@@ -1,0 +1,19 @@
+{
+  "name": "logistics-work-benchs-cds",
+  "version": "1.0.0",
+  "description": "genslogiques logistic workbench",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MALLEPAKAVENUSURYATEJA/Logistics-Work-Benchs-Cds.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/MALLEPAKAVENUSURYATEJA/Logistics-Work-Benchs-Cds/issues"
+  },
+  "homepage": "https://github.com/MALLEPAKAVENUSURYATEJA/Logistics-Work-Benchs-Cds#readme"
+}

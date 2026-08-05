@@ -1,7 +1,332 @@
-<core:FragmentDefinition 
-xmlns="sap.m"
-xmlns:core="sap.ui.core"
-xmlns:f="sap.f">
- 
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.f"
+    xmlns:layout="sap.ui.layout">
+
+    <!-- ═══════════════════════════════════════════════════════
+         PANEL 1 : Nomination Filters
+         ═══════════════════════════════════════════════════════ -->
+    <Panel id="NomPnl1Pnl001" class="sapUiTinyMargin">
+
+        <!-- Row 1: Deal ID | Nomination ID | Deal Type | Commodity | Location | Status  | Scheduled Date From | Scheduled Date To -->
+        <HBox id="NomPnl1Hbx002" alignItems="End" wrap="Wrap"
+              class="filterContainer sapUiSmallMargin">
+
+            <VBox id="NomPnl1Vbx003" class="sapUiSmallMarginEnd">
+                <Label id="NomPnl1Lbl004" text="Deal ID :" class="sapUiTinyMarginBottom"/>
+                <Input id="NomPnl1Inp005" placeholder="Search Deal Id" width="8rem"/>
+            </VBox>
+
+            <VBox id="NomPnl1Vbx006" class="sapUiSmallMarginEnd">
+                <Label id="NomPnl1Lbl007" text="Nomination ID :"/>
+                <Input id="NomPnl1Inp008" placeholder="Search Nominations Id" width="9rem"/>
+            </VBox>
+
+            <!-- <VBox id="NomPnl1Vbx009" class="sapUiSmallMarginEnd">
+                <Label id="NomPnl1Lbl010" text="Deal Type :"/>
+                <Select id="NomPnl1Sel011" width="8rem">
+                    <core:Item id="NomPnl1Ite012" key="" text="None"/>
+                    <core:Item id="NomPnl1Ite013" key="Purchase" text="Purchase"/>
+                    <core:Item id="NomPnl1Ite014" key="Sales" text="Sales"/>
+                    <core:Item id="NomPnl1Ite015" key="Swap" text="Swap"/>
+                </Select>
+            </VBox> -->
+
+            <VBox id="NomPnl1Vbx016" class="sapUiSmallMarginEnd">
+                <Label id="NomPnl1Lbl017" text="Commodity"/>
+                <Select id="NomPnl1Sel018" width="8rem">
+                    <core:Item id="NomPnl1Ite019" key="" text=""/>
+                    <core:Item id="NomPnl1Ite020" key="GAS87" text="GAS87"/>
+                    <core:Item id="NomPnl1Ite021" key="GAS88" text="GAS88"/>
+                    <core:Item id="NomPnl1Ite022" key="Diesel" text="Diesel"/>
+                </Select>
+            </VBox>
+
+            <VBox id="NomPnl1Vbx023" class="sapUiSmallMarginEnd">
+                <Label id="NomPnl1Lbl024" text="Location"/>
+                <Select id="NomPnl1Sel025" width="8rem">
+                    <core:Item id="NomPnl1Ite026" key="" text=""/>
+                    <core:Item id="NomPnl1Ite027" key="North" text="North"/>
+                    <core:Item id="NomPnl1Ite028" key="South" text="South"/>
+                    <core:Item id="NomPnl1Ite029" key="East" text="East"/>
+                    <core:Item id="NomPnl1Ite030" key="West" text="West"/>
+                </Select>
+            </VBox>
+
+            <VBox id="NomPnl1Vbx031" class="sapUiSmallMarginEnd">
+                <Label id="NomPnl1Lbl032" text="Status"/>
+                <Select id="NomPnl1Sel033" width="8rem">
+                    <core:Item id="NomPnl1Ite034" key="" text=""/>
+                    <core:Item id="NomPnl1Ite035" key="Active" text="Active"/>
+                    <core:Item id="NomPnl1Ite036" key="Pending" text="Pending"/>
+                    <core:Item id="NomPnl1Ite037" key="Cancelled" text="Cancelled"/>
+                    <core:Item id="NomPnl1Ite038" key="Completed" text="Completed"/>
+                </Select>
+            </VBox>
+            <VBox id="NomPnl1Vbx039" class="sapUiSmallMarginEnd">
+                <Label id="NomPnl1Lbl040" text="Scheduled Date from:"/>
+                <DatePicker id="NomPnl1Dat041" placeholder="e.g. Dec 31, 2026" width="10rem"/>
+            </VBox>
+
+            <VBox id="NomPnl1Vbx042" class="sapUiSmallMarginEnd">
+                <Label id="NomPnl1Lbl043" text="Scheduled Date To:"/>
+                <DatePicker id="NomPnl1Dat044" placeholder="e.g. Dec 31, 2026" width="10rem"/>
+            </VBox>
+
+        </HBox>
+
+        
+
+    </Panel>
+
+    <!-- ═══════════════════════════════════════════════════════
+         PANEL 2 : Nominations Details Table
+         ═══════════════════════════════════════════════════════ -->
+    <Panel id="NomPnl2Pnl045" class="sapUiTinyMargin">
+
+        <headerToolbar>
+            <OverflowToolbar id="NomPnl2Tbr046">
+                
+                <ToolbarSpacer id="NomPnl2Too047"/>
+                
+                <Button id="NomPnl2Btn048"
+                        text="Cancel Nominations"
+                        icon="sap-icon://decline"
+                        type="Reject" press="navToCreateNomination"/>
+                <Button id="NomPnl2Btn049"
+                        text="Create Ticket"
+                        icon="sap-icon://add"/>
+                <Button id="NomPnl2Btn050"
+                        text="Refresh"
+                        icon="sap-icon://refresh"
+                        type="Ghost"/>
+            </OverflowToolbar>
+        </headerToolbar>
+        <VBox id="NomPnl2Vbx051" >
+            <OverflowToolbar id="NomPnl2Tbr052" >
+                    <Title id="NomPnl2Ttl053" text="Nominations Details"/>
+                    <ToolbarSpacer id="NomPnl2Too054" ></ToolbarSpacer>
+                    <MenuButton id="NomPnl2Mnu055"
+                        icon="sap-icon://excel-attachment" type="Transparent">
+                        <menu>
+                        <Menu id="NomPnl2Mnu056"  >
+                        <MenuItem id="NomPnl2MnI057"  text="Export" press=".onExport"/>
+                        <MenuItem id="NomPnl2MnI058"  text="Export As." press=".onExportAs"/>
+                        </Menu>
+                        </menu>
+                        </MenuButton>
+                    
+                    
+                    <!-- <Button id="NomPnl3Btn134"  icon="sap-icon://slim-arrow-down"
+                    type="Transparent"/> -->
+                    <Button id="NomPnl2Btn060" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent"/>
+
+                </OverflowToolbar>
+        <ScrollContainer id="NomPnl2Scr061" height="240px" horizontal="true" vertical="true" width="100%">
+            <Table id="NomPnl2Tbl062" mode="MultiSelect" fixedLayout="false" noDataText="No data">
+                <columns>
+                    <Column id="NomPnl2Col063"      ><header><Text id="NomPnl2Txt064"       text="Deal Number"/></header></Column>
+                    <Column id="NomPnl2Col065"          ><header><Text id="NomPnl2Txt066"           text="Nomination Key"/></header></Column>
+                    <Column id="NomPnl2Col067"         ><header><Text id="NomPnl2Txt068"          text="Nomination Item"/></header></Column>
+                    <Column id="NomPnl2Col069"         ><header><Text id="NomPnl2Txt070"          text="Commodity"/></header></Column>
+                    <Column id="NomPnl2Col071"          ><header><Text id="NomPnl2Txt072"           text="Status"/></header></Column>
+                    <Column id="NomPnl2Col073"          ><header><Text id="NomPnl2Txt074"           text="Ticket"/></header></Column>
+                    <Column id="NomPnl2Col075"          ><header><Text id="NomPnl2Txt076"           text="Ticket Item"/></header></Column>
+                    <Column id="NomPnl2Col077"          ><header><Text id="NomPnl2Txt078"           text="Ticket Version"/></header></Column>
+                    <Column id="NomPnl2Col079"          ><header><Text id="NomPnl2Txt080"           text="Ticket Start Number"/></header></Column>
+
+
+                    <Column id="NomPnl2Col081"    ><header><Text id="NomPnl2Txt082"     text="Schedule Date"/></header></Column>
+                    <Column id="NomPnl2Col083"      ><header><Text id="NomPnl2Txt084"       text="Loaction ID"/></header></Column>
+                    <Column id="NomPnl2Col085"        ><header><Text id="NomPnl2Txt086"         text="Loaction"/></header></Column>
+                    <Column id="NomPnl2Col087"    ><header><Text id="NomPnl2Txt088"     text="MarketZone ID"/></header></Column>
+                    <Column id="NomPnl2Col089"      ><header><Text id="NomPnl2Txt090"       text="Market Zone"/></header></Column>
+                    <Column id="NomPnl2Col091"      ><header><Text id="NomPnl2Txt092"       text="Planned Schedule Qty"/></header></Column>
+                    <Column id="NomPnl2Col093"             ><header><Text id="NomPnl2Txt094"              text="Actualized Qunatity"/></header></Column>
+                 
+                     <Column id="NomPnl2Col097"        ><header><Text id="NomPnl2Txt098"         text="Scheduled Material"/></header></Column>
+                        <Column id="NomPnl2Col095"         ><header><Text id="NomPnl2Txt096"          text="Carrier/Pipline"/></header></Column>
+                    <Column id="NomPnl2Col099"    ><header><Text id="NomPnl2Txt100"     text="Counterparty"/></header></Column>
+                    <Column id="NomPnl2Col101"       ><header><Text id="NomPnl2Txt102"        text="Contractt Number"/></header></Column>
+                </columns>
+                <items>
+                    <ColumnListItem id="NomPnl2ClL103" type="Inactive">
+                        <cells>
+                            <Text id="NomPnl2Txt104"   text="{DealNumber}"/>
+                            <Text id="NomPnl2Txt105"       text="{NominationKey}"/>
+                            <Text id="NomPnl2Txt106"      text="{NominationItem}"/>
+                            <Text id="NomPnl2Txt107"      text="{Product}"/>
+                            <ObjectStatus id="NomPnl2Obj108" text="{Status}"
+                                state="{= ${Status} === 'Active' ? 'Success' : ${Status} === 'Pending' ? 'Warning' : 'Error'}"/>
+                            <Text id="NomPnl2Txt109" text="{ScheduleDate}"/>
+                            <Text id="NomPnl2Txt110"   text="{LocationId}"/>
+                            <Text id="NomPnl2Txt111"     text="{Location}"/>
+                            <Text id="NomPnl2Txt112" text="{MarketZoneId}"/>
+                            <Text id="NomPnl2Txt113"   text="{MarketZone}"/>
+                            <Text id="NomPnl2Txt114"   text="{PlannedQty}"/>
+                            <Text id="NomPnl2Txt115"          text="{UOM}"/>
+                            <Text id="NomPnl2Txt116"      text="{Carrier}"/>
+                            <Text id="NomPnl2Txt117" text="{Counterparty}"/>
+                            <Text id="NomPnl2Txt118"     text="{DealType}"/>
+                            <ObjectStatus id="NomPnl2Obj119" text="{NomStatus}"
+                                state="{= ${NomStatus} === 'Confirmed' ? 'Success' : ${NomStatus} === 'Pending' ? 'Warning' : 'Error'}"/>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </ScrollContainer>
+    </VBox>
+    </Panel>
+
+    <!-- ═══════════════════════════════════════════════════════
+         PANEL 3 : Ticket Details Table
+         ═══════════════════════════════════════════════════════ -->
+    <Panel id="NomPnl3Pnl120" class="sapUiTinyMargin">
+
+        <headerToolbar>
+            <OverflowToolbar id="NomPnl3Tbr121">
                
+                <ToolbarSpacer id="NomPnl3Too122"/>
+                
+                <Button id="NomPnl3Btn123"
+                        text="Cancel Ticket"
+                        icon="sap-icon://decline"
+                        type="Reject"/>
+                <Button id="NomPnl3Btn124"
+                        text="Reverse Ticket"
+                        icon="sap-icon://undo"/>
+                <Button id="NomPnl3Btn125"
+                        text="Upload File"
+                        icon="sap-icon://upload"/>
+                <Button id="NomPnl3Btn126"
+                        text="Refresh"
+                        icon="sap-icon://refresh"
+                        type="Ghost"/>
+            </OverflowToolbar>
+        </headerToolbar>
+        <OverflowToolbar id="NomPnl3Tbr127" >
+         <Title id="NomPnl3Ttl128" text="Ticket Details"/>
+            <ToolbarSpacer id="NomPnl3Too129" ></ToolbarSpacer>
+                    <MenuButton id="NomPnl3Mnu130"
+                        icon="sap-icon://excel-attachment" type="Transparent">
+                        <menu>
+                        <Menu id="NomPnl3Mnu131"  >
+                        <MenuItem id="NomPnl3MnI132"  text="Export" press=".onExport"/>
+                        <MenuItem id="NomPnl3MnI133"  text="Export As." press=".onExportAs"/>
+                        </Menu>
+                        </menu>
+                        </MenuButton>
+                    
+                    
+                    <!-- <Button id="NomPnl3Btn134"  icon="sap-icon://slim-arrow-down"
+                    type="Transparent"/> -->
+                    <Button id="NomPnl3Btn135" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent"/>
+        </OverflowToolbar>
+        <ScrollContainer id="NomPnl3Scr136" height="240px" horizontal="true" vertical="true" width="100%">
+            <Table id="NomPnl3Tbl137" mode="MultiSelect" fixedLayout="false" noDataText="No data">
+                <columns>
+                    <Column id="NomPnl3Col138"    ><header><Text id="NomPnl3Txt139"        text="Ticket Key"/></header></Column>
+                    <Column id="NomPnl3Col140"    ><header><Text id="NomPnl3Txt141"     text="Nom. Doc Number"/></header></Column>
+                    <Column id="NomPnl3Col142"    ><header><Text id="NomPnl3Txt143"       text="Ticket Item"/></header></Column>
+                    <Column id="NomPnl3Col144"    ><header><Text id="NomPnl3Txt145"       text="Ticket Extension Number"/></header></Column>
+                    <Column id="NomPnl3Col146"    ><header><Text id="NomPnl3Txt147"        text="Nomination Item"/></header></Column>
+                    <Column id="NomPnl3Col148"    ><header><Text id="NomPnl3Txt149"     text="Ticket Status"/></header></Column>
+                    <Column id="NomPnl3Col150"    ><header><Text id="NomPnl3Txt151"      text="Location ID"/></header></Column>
+                    <Column id="NomPnl3Col152"    ><header><Text id="NomPnl3Txt153"        text="Vechile ID"/></header></Column>
+                    <Column id="NomPnl3Col154"  ><header><Text id="NomPnl3Txt155"   text="Ticket Quantity"/></header></Column>
+                    <Column id="NomPnl3Col156"  ><header><Text id="NomPnl3Txt157"   text="Ticket Material"/></header></Column>
+                    <Column id="NomPnl3Col158"       ><header><Text id="NomPnl3Txt159"        text="Ticket Posting Date"/></header></Column>
+                    <Column id="NomPnl3Col160"      ><header><Text id="NomPnl3Txt161"       text="Ticket Start date Time"/></header></Column>
+                    <Column id="NomPnl3Col162"        ><header><Text id="NomPnl3Txt163"         text="Ticket Enddate Time"/></header></Column>
+                    <Column id="NomPnl3Col164"      ><header><Text id="NomPnl3Txt165"       text="Ticket Created by User"/></header></Column>
+                    <Column id="NomPnl3Col166"      ><header><Text id="NomPnl3Txt167"       text="Ticket Change Date "/></header></Column>
+                    
+                </columns>
+                <items>
+                    <ColumnListItem id="NomPnl3ClL168" type="Inactive">
+                        <cells>
+                            <Text id="NomPnl3Txt169"        text="{TicketKey}"/>
+                            <Text id="NomPnl3Txt170"     text="{NomDocNumber}"/>
+                            <Text id="NomPnl3Txt171"       text="{TicketItem}"/>
+                            <Text id="NomPnl3Txt172"        text="{NominationItem}"/>
+                            <ObjectStatus id="NomPnl3Obj173" text="{TicketStatus}"
+                                state="{= ${TicketStatus} === 'Confirmed' ? 'Success' : ${TicketStatus} === 'Pending' ? 'Warning' : 'Error'}"/>
+                            <Text id="NomPnl3Txt174"     text="{TicketSubStatus}"/>
+                            <Text id="NomPnl3Txt175"      text="{LocationId}"/>
+                            <Text id="NomPnl3Txt176"        text="{VehicleId}"/>
+                            <Text id="NomPnl3Txt177"   text="{TicketQuantity}"/>
+                            <Text id="NomPnl3Txt178"        text="{TicketUOM}"/>
+                            <Text id="NomPnl3Txt179"       text="{TicketDate}"/>
+                            <Text id="NomPnl3Txt180"         text="{DriverId}"/>
+                            <Text id="NomPnl3Txt181"       text="{Carrier}"/>
+                            <Text id="NomPnl3Txt182"       text="{Product}"/>
+                            <Text id="NomPnl3Txt183"      text="{NetQuantity}"/>
+                            <Text id="NomPnl3Txt184"    text="{GrossQuantity}"/>
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </ScrollContainer>
+    </Panel>
+    <!-- ═══════════════════════════════════════════════════════
+         PANEL 4 : KPI  CARDS
+         ═══════════════════════════════════════════════════════ -->
+    <Panel id="NomPnl4Pnl185">
+    <HBox id="NomPnl4Hbx186" wrap="Wrap" height="8rem">
+        <VBox id="NomPnl4Vbx187" class="kpiCard sapUiSmallMarginEnd">
+            
+            <!-- Top row with SpaceBetween to push text left and icon right -->
+            <HBox id="_IDGenHBox" justifyContent="SpaceBetween" alignItems="Center" width="100%">
+                <Text id="_IDGenText109" text="Draft" />
+                <core:Icon id="NomPnl4Ico188" src="sap-icon://document-text"
+                            size="1.8rem"
+                             color="#1905f7" />
+            </HBox>
+            
+            <!-- Bottom text -->
+            <Text id="NomPnl4Txt189" text="nomination" />
+            
+        </VBox>
+
+        <VBox id="NomPnl4Vbx190" class="kpiCard sapUiSmallMarginEnd" >
+            <HBox id="_IDGenHBox2" justifyContent="SpaceBetween" alignItems="Center"  width="100%" >
+                <Text id="NomPnl4Txt192E" text="Submitted" />
+                <core:Icon id="NomPnl4Ico191" src="sap-icon://upload"
+                                size="1.8rem"
+                                color="#f1b207"></core:Icon>
+            </HBox>
+            
+                <Text id="NomPnl4Txt192" text="nomination" />
+                
+            </VBox>
+            <VBox id="NomPnl4Vbx193" class="kpiCard sapUiSmallMarginEnd">
+            <HBox id="_IDGenHBox3" justifyContent="SpaceBetween" alignItems="Center" width="100%" >
+                <Text id="NomPnl4Txt192r" text="Confirmed" />
+                <core:Icon id="NomPnl4Ico191r" src="sap-icon://accept"
+                             size="1.8rem"
+                             color="#107e3e"></core:Icon>
+            </HBox>
+            
+                <Text id="NomPnl4Txt192p" text="nomination" />
+               
+            </VBox>
+
+            <VBox id="NomPnl4Vbx196" class="kpiCard top-right-container sapUiSmallMarginEnd">
+            
+            <HBox id="_IDGenHBox4" justifyContent="SpaceBetween" alignItems="Center" width="100%" >
+                <Text id="NomPnl4Txt192Ew" text="Rejected" />
+                <core:Icon id="NomPnl4Ico191w" src="sap-icon://decline"
+                             size="1.8rem"
+                             color="#bb0000"></core:Icon>
+            </HBox>
+            
+                <Text id="NomPnl4Txt192w" text="nomination" />
+             
+               
+            </VBox>
+        </HBox>
+    
+    </Panel>
+
 </core:FragmentDefinition>

@@ -1,6 +1,6 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
-    "your/namespace/utils/LayoutHelper"
+    "genslogiques/logisticsdashboard/utils/LayoutHelper"
 ], function (Controller, LayoutHelper) {
     "use strict";
     return Controller.extend("genslogiques.logisticsdashboard.controller.BaseController", {

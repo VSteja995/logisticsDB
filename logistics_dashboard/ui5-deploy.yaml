@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://sap.github.io/ui5-tooling/schema/ui5.yaml.json
+
+specVersion: "3.0"
+metadata:
+  name: genslogiques.logisticsdashboard
+type: application
+builder:
+  resources:
+    excludes:
+      - /test/**
+      - /localService/**
+  customTasks:
+    - name: deploy-to-abap
+      afterTask: generateCachebusterInfo
+      configuration:
+        target:
+          url: http://gens.sapvista.com:50000
+          client: '100'
+        app:
+          name: ZLOGISTIC
+          description: logistic dashboard app
+          package: ZFIORIPACK
+          transport: S4HK903379
+        exclude:
+          - /test/
