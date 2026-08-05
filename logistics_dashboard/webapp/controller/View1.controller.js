@@ -168,7 +168,7 @@ sap.ui.define([
                 MessageToast.show("Error loading UniqDealCmdty.");
             }
         });        
-        var oCommodity = this.aSelectedKeys.length ===0;
+        // var oCommodity = this.aSelectedKeys.length ===0;
             var mParameters = { 
                 p_FromDate: dFrom,
                 p_ToDate:   dTo,
