@@ -2,11 +2,44 @@
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
     xmlns:layout="sap.ui.layout"
-    xmlns:smartTable="sap.ui.comp.smarttable">
+    xmlns:smartTable="sap.ui.comp.smarttable"
+    xmlns:table="sap.ui.table">
 
     <!-- ═══════════════════════════════════════════════════════
          PANEL 1 : Filters + KPI Summary Cards
          ═══════════════════════════════════════════════════════ -->
+
+     <Panel id="_IDGenPanel1"  headerText="KPI Summary Cards" class="sapUiTinyMargin" expanded="true" expandable="true" >
+        <!-- KPI Cards -->
+        <HBox id="kpiBox" wrap="Wrap">
+            <VBox id="entCard" class="kpiCard green-border sapUiSmallMarginEnd">
+                <Text id="entLbl" text="Total Entitlements" class="kpiLabel"/>
+                <Title id="entVal" text="2,40,000" class="kpiValue"/>
+                <Text id="entSub" text="6 positions" class="kpiSubtext"/>
+                
+                <core:Icon id="entIcon" size="25px" src="sap-icon://trend-up"  color="#2b7d2b"/>
+            </VBox>
+            <VBox id="oblCard" class="kpiCard red-border sapUiSmallMarginEnd">
+                <Text id="oblLbl" text="Total Obligations" class="kpiLabel"/>
+                <Title id="oblVal" text="2,02,000" class="kpiValue"/>
+                <Text id="oblSub" text="6 positions" class="kpiSubtext"/>
+                <core:Icon id="oblIcon" size="25px" src="sap-icon://trend-down"  color="#fb0404"/>
+            </VBox>
+            <VBox id="planCard" class="kpiCard blue-border sapUiSmallMarginEnd">
+                <Text id="planLbl" text="Total Planned" class="kpiLabel"/>
+                <Title id="planVal" text="2,02,000" class="kpiValue"/>
+                <Text id="planSub" text="6 positions" class="kpiSubtext"/>
+                <core:Icon id="planIcon" size="25px" src="sap-icon://select-appointments"  color="#048ef7"/>
+            </VBox>
+            <VBox id="netCard" class="kpiCard green-border sapUiSmallMarginEnd">
+                <Text id="netLbl" text="Net Position" class="kpiLabel"/>
+                <Title id="netVal" text="2,02,000" class="kpiValue"/>
+                <Text id="netSub" text="6 positions" class="kpiSubtext"/>
+               
+            </VBox>
+        </HBox>
+    </Panel>
+
 
     <Panel id="sumPanel" class="sapUiTinyMargin" headerText="Planning Summary" expandable="true" expanded="true" >
 
@@ -38,62 +71,30 @@
                 </items>
             </MultiComboBox>
         </HBox>
-
-        <!-- KPI Cards -->
-        <HBox id="kpiBox" wrap="Wrap">
-            <VBox id="entCard" class="kpiCard green-border sapUiSmallMarginEnd">
-                <Text id="entLbl" text="Total Entitlements" class="kpiLabel"/>
-                <Title id="entVal" text="2,40,000" class="kpiValue"/>
-                <Text id="entSub" text="6 positions" class="kpiSubtext"/>
-                
-                <core:Icon id="entIcon" size="25px" src="sap-icon://trend-up"  color="#2b7d2b"/>
-            </VBox>
-            <VBox id="oblCard" class="kpiCard red-border sapUiSmallMarginEnd">
-                <Text id="oblLbl" text="Total Obligations" class="kpiLabel"/>
-                <Title id="oblVal" text="2,02,000" class="kpiValue"/>
-                <Text id="oblSub" text="6 positions" class="kpiSubtext"/>
-                <core:Icon id="oblIcon" size="25px" src="sap-icon://trend-down"  color="#fb0404"/>
-            </VBox>
-            <VBox id="planCard" class="kpiCard blue-border sapUiSmallMarginEnd">
-                <Text id="planLbl" text="Total Planned" class="kpiLabel"/>
-                <Title id="planVal" text="2,02,000" class="kpiValue"/>
-                <Text id="planSub" text="6 positions" class="kpiSubtext"/>
-                <core:Icon id="planIcon" size="25px" src="sap-icon://select-appointments"  color="#048ef7"/>
-            </VBox>
-            <VBox id="netCard" class="kpiCard green-border sapUiSmallMarginEnd">
-                <Text id="netLbl" text="Net Position" class="kpiLabel"/>
-                <Title id="netVal" text="2,02,000" class="kpiValue"/>
-                <Text id="netSub" text="6 positions" class="kpiSubtext"/>
-               
-            </VBox>
-        </HBox>
-
     </Panel>
-
+   
    
          PANEL 2 : Planning Summary by UOM (Summary Table)
 
     <Panel id="uomPanel"  headerText="Planning Summary by UOM" class="sapUiTinyMargin" expandable="true" expanded="true" >
-        <Table id="uomTbl" fixedLayout="false" inset="false" class="TableContainer sapUiSmallMargin" width="100%">
+        <Table id="uomTbl" fixedLayout="false" inset="false" class="TableContainer sapUiSmallMargin" width="100%" items="{TotalSummaryData>/TotalSummarySet}">
             <columns>
                 <Column id="uomColCom"><Text id="uomComTxt" text="Commodity"/></Column>
                 <Column id="uomColUnit"><Text id="uomUnitTxt" text="Base Unit"/></Column>
                 <Column id="uomColEnt"><Text id="uomEntTxt" text="Total Entitlements (Long)"/></Column>
                 <Column id="uomColObl"><Text id="uomOblTxt" text="Total Obligations (Short)"/></Column>
                 <Column id="uomColMatch"><Text id="uomMatchTxt" text="Total Matched"/></Column>
-                <Column id="uomColNet"><Text id="uomNetTxt" text="Net Position"/></Column>
-                <Column id="uomColStatus"><Text id="uomStatusTxt" text="Status"/></Column>
+                <!-- <Column id="uomColNet"><Text id="uomNetTxt" text="Net Position"/></Column>
+                <Column id="uomColStatus"><Text id="uomStatusTxt" text="Status"/></Column> -->
             </columns>
             <items>
                 <ColumnListItem id="uomRow">
                     <cells>
-                        <ObjectStatus id="uomComSts" text="87 e10 Gaoline" state="Success" icon="sap-icon://product"/>
-                        <Text id="uomMonthTxt" text="March 2026"/>
-                        <Text id="uomEntVal" text="2,40,000 lbs"/>
-                        <Text id="uomOblVal" text="2,02,000 lbs"/>
-                        <Text id="uomMatchVal" text="2,02,000 lbs"/>
-                        <Text id="uomNetVal" text="+38,000 lbs"/>
-                        <ObjectStatus id="uomSts" text="Long" state="Success"/>
+                       <Text id="uomComT0" text="{TotalSummaryData>Commodity}"/>
+                       <Text id="uomUnitT1" text="{TotalSummaryData>UOM}"/>
+                       <Text id="uomEntT2" text="{TotalSummaryData>TotalEntitlements}"/>
+                       <Text id="uomOblT3" text="{TotalSummaryData>TotalObligations}"/>
+                       <Text id="uomMatchT4" text="{TotalSummaryData>TotalMatched}"/>
                     </cells>
                 </ColumnListItem>
             </items>
@@ -103,7 +104,7 @@
     
          PANEL 3 : Planning Details (4-quadrant split view)
    
-    <Panel id="planPanel" class="sapUiTinyMargin" headerText="Planning Detail" expandable="true" expanded="true"  >
+    <Panel id="planPanel" class="sapUiTinyMargin planclass" headerText="Planning Detail" expandable="true" expanded="true"  >
 
         <!-- Toolbar -->
         <headerToolbar>
@@ -126,12 +127,12 @@
                     <layout:SplitterLayoutData id="entLay" size="50%"/>
                 </layoutData>
                 <Toolbar id="entBar" class="splitterSectionHeader">
-                    <Title id="entTitle" text="Entitlements" level="H4"/>
+                    <Title id="entTitle" text="Supply" level="H4"/>
                     <ToolbarSpacer id="entSpc" ></ToolbarSpacer>
                  <Button id="entFullBtnI12" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent"/>
                 </Toolbar>
                <ScrollContainer id="entScroll" horizontal="true" vertical="true" width="100%" height="100%">
-                    <smartTable:SmartTable
+                    <!-- <smartTable:SmartTable
                         id="entSmartTable"
                         entitySet="EntDetailSet"
                         tableType="Table"
@@ -139,14 +140,16 @@
                         useVariantManagement="false"
                         useTablePersonalisation="false"
                         beforeRebindTable="onBeforeRebindEntitlementsTable"
-                        showRowCount="true"
+                        showRowCount="false"
                         enableAutoBinding="false"
                         enableCopy="false"   
                         editable="false"
                         showFullScreenButton="false"
-                       >
+                        sticky="ColumnHeaders,HeaderToolbar"
+                        
+                       > -->
                     
-                    <Table id="entTbl" fixedLayout="false" items="{EntDetailData>/EntDetailSet}" mode="MultiSelect" >
+                    <Table id="entTbl" fixedLayout="false" items="{EntDetailData>/EntDetailSet}" mode="MultiSelect" sticky="ColumnHeaders,HeaderToolbar" selectionChange="onSelectionChangeENT" >
                         <columns>
                             <Column id="_IDGenColumn1"><header><Text id="_IDGenText" text="Deal ID"/></header></Column>
                             <Column id="_IDGenColumn2"><header><Text id="_IDGenText1" text="Commodity"/></header></Column>
@@ -174,7 +177,7 @@
                             <ColumnListItem id="123a" >
                                 <cells>
                                     <Text id="_IDGenText111" text="{EntDetailData>DealNumber}"></Text>
-                                    <Text id="_IDGenText112" text="{EntDetailData>CommodityDesc}"></Text>
+                                    <Text id="_IDGenText112" text="{EntDetailData>Commodity}"></Text>
                                     <Text id="_IDGenText113" text="{EntDetailData>DocumentNumber}"></Text>
                                     <Text id="_IDGenText114" text="{EntDetailData>DocumentItem}"></Text>
                                     <Text id="_IDGenText115" text="{EntDetailData>PurchaseQuantity}"></Text>
@@ -200,15 +203,13 @@
                                     <Text id="_IDGenText129" text="{EntDetailData>ModeOfTransport}"></Text>
                                     <Text id="_IDGenText130" text="{EntDetailData>ModeOfTransportText}"></Text>
                                     <Text id="_IDGenText131" text="{EntDetailData>IncoTerms}"></Text>
-                                    <Text id="_IDGenText132" text="{EntDetailData>Commodity}"></Text>
-                                    
                                 </cells>
                             </ColumnListItem>
                         </items>
 
                     </Table>
                    
-                    </smartTable:SmartTable>
+                    <!-- </smartTable:SmartTable> -->
                      </ScrollContainer>
                 
             </VBox>
@@ -219,26 +220,26 @@
                     <layout:SplitterLayoutData id="oblLay" size="50%"/>
                 </layoutData>
                 <Toolbar id="oblBar" class="splitterSectionHeader">
-                    <Title id="oblTitle" text="Obligations" level="H4"/>
+                    <Title id="oblTitle" text="Demand" level="H4"/>
                     <ToolbarSpacer id="oblSpc" ></ToolbarSpacer>
                      <Button id="entFullBtnI34" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent"/>
                 </Toolbar>
-                    <smartTable:SmartTable
-                        id="oblSmartTable"
-                        entitySet="OblDetailSet"
-                        tableType="ResponsiveTable"
+                <!-- <smartTable:SmartTable
+                        id="entSmartTable"
+                        entitySet="EntDetailSet"
+                        tableType="Table"
                         enableExport="false"
                         useVariantManagement="false"
                         useTablePersonalisation="false"
-                        beforeRebindTable="onBeforeRebindEntitlementsTable"
-                        showRowCount="true"
+                        beforeRebindTable="onBeforeRebindObligationsTable"
+                        showRowCount="false"
                         enableAutoBinding="false"
-                        enableCopy="false"
+                        enableCopy="false"   
                         editable="false"
-                        showFullScreenButton="false" >
-
-                        <ScrollContainer id="oblScroll" horizontal="true" vertical="true" width="100%" height="100%" >
-                    <Table id="oblTbl" fixedLayout="false" items="{OblDetailData>/OblDetailSet}" mode="MultiSelect" >
+                        showFullScreenButton="false"
+                       > -->
+                <ScrollContainer id="oblScroll" horizontal="true" vertical="true" width="100%" height="100%" >    
+                        <Table id="oblTbl" fixedLayout="false" items="{OblDetailData>/OblDetailSet}" mode="MultiSelect" sticky="ColumnHeaders,HeaderToolbar" >
                         <columns>
                             <Column id="_IDGenColumn22"><header><Text id="_IDGenText21" text="Deal ID"/></header></Column>
                             <Column id="_IDGenColumn23"><header><Text id="_IDGenText22" text="Commodity"/></header></Column>
@@ -256,40 +257,47 @@
                             <Column id="_IDGenColumn35"><header><Text id="_IDGenText34" text="Origin"/></header></Column>
                             <Column id="_IDGenColumn36"><header><Text id="_IDGenText35" text="Destination ID"/></header></Column>
                             <Column id="_IDGenColumn37"><header><Text id="_IDGenText36" text="Destination"/></header></Column>
-                            <Column id="_IDGenColumn38"><header><Text id="_IDGenText37" text="MarketZone Id"/></header></Column>
-                            <Column id="_IDGenColumn39"><header><Text id="_IDGenText38" text="MarketZone"/></header></Column>
                             <Column id="_IDGenColumn40"><header><Text id="_IDGenText39" text="MOT"/></header></Column>
                             <Column id="_IDGenColumn41"><header><Text id="_IDGenText40" text="Mode of transportation"/></header></Column>
                             <Column id="_IDGenColumn42"><header><Text id="_IDGenText41" text="Inco Terms"/></header></Column>
-
                         </columns>
                         <items>
                             <ColumnListItem id="123b" >
                                 <cells>
-                               
                                      <Text id="_IDGenText133" text="{OblDetailData>DealNumber}"></Text>
-                                     <Text id="_IDGenText134" text="{OblDetailData>CommodityDesc}"></Text>
+                                     <Text id="_IDGenText134" text="{OblDetailData>Commodity}"></Text>
                                      <Text id="_IDGenText135" text="{OblDetailData>DocumentNumber}"></Text>
                                      <Text id="_IDGenText136" text="{OblDetailData>DocumentItem}"></Text>
                                      <Text id="_IDGenText137" text="{OblDetailData>SalesQuantity}"></Text>
                                      <Text id="_IDGenText138" text="{OblDetailData>MatchQuantity}"></Text>
-                                     <Text id="_IDGenText139" text="{OblDetailData>DueDate}"></Text>
+                                     <Text id="_IDGenText139" text="{
+                                     path :'OblDetailData>DueDate',
+                                     type :'sap.ui.model.type.Date',
+                                     formatOptions :{
+                                          pattern :'YYYY/MMM/dd'
+                                     }
+                                     }"></Text>
                                      <Text id="_IDGenText140" text="{OblDetailData>ScheduleMonth}"></Text>
                                      <Text id="_IDGenText141" text="{OblDetailData>TransactionType}"></Text>
+                                     <Text id="_IDGenText141E" text="{OblDetailData>WeekID}"></Text>
+                                     <Text id="_IDGenText141F" text="{OblDetailData>Customer}"></Text>
+                                     <Text id="_IDGenText141G" text="{OblDetailData>CustomerID}"></Text>
                                      <Text id="_IDGenText142" text="{OblDetailData>Origin}"></Text>
-                                  
-                                    
+                                     <Text id="_IDGenText143"  text="{OblDetailData>OriginName}"/>  
+                                     <Text id="_IDGenText144"  text="{OblDetailData>Destination}"/>  
+                                     <Text id="_IDGenText145"  text="{OblDetailData>DestinationName}"/>  
+                                     <Text id="_IDGenText146"  text="{OblDetailData>ModeOfTransport}"/>  
+                                     <Text id="_IDGenText147"  text="{OblDetailData>ModeOfTransportText}"/>  
+                                     <Text id="_IDGenText148"  text="{OblDetailData>IncoTerms}"/>  
+                                        
                                 </cells>
                             </ColumnListItem>
                         </items>
-                    </Table>
-                    </ScrollContainer>
-                    </smartTable:SmartTable>
-                
+                    </Table> 
+                </ScrollContainer>
+            <!-- </smartTable:SmartTable> -->
             </VBox>
-
         </layout:Splitter>
-
         <!-- ROW 2 : Inventory | Selected Items -->
         <layout:Splitter id="botSplit" orientation="Horizontal" >
 
@@ -301,20 +309,19 @@
                 <Toolbar id="invBar" class="splitterSectionHeader">
                     <Title id="invTitle" text="Inventory" level="H4"/>
                     <ToolbarSpacer id="invSpc" ></ToolbarSpacer>
-                   
-                    <MenuButton id="_IDGenMenuButton3" icon="sap-icon://excel-attachment" type="Transparent">
+                    <!-- <MenuButton id="_IDGenMenuButton3" icon="sap-icon://excel-attachment" type="Transparent">
                         <menu>
                             <Menu id="_IDGenMenu2">
                                 <MenuItem id="_IDGenMenuItem4" text="Export" press=".onExport"/>
                                 <MenuItem id="_IDGenMenuItem5" text="Export As." press=".onExportAs"/>
                             </Menu>
                         </menu>
-                    </MenuButton>
+                    </MenuButton> -->
                     <Button id="entFullBtnI" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent"/>
                     
                 </Toolbar>
-                <ScrollContainer id="invScroll" horizontal="true" vertical="true" width="100%" height="100%">
-                    <Table id="invTbl" fixedLayout="false" items="{/InvDetails}">
+                <ScrollContainer id="invScroll" horizontal="true" vertical="true" width="100%" height="100%" >
+                    <Table id="invTbl"  mode="MultiSelect" fixedLayout="false" items="{/InvDetails}" sticky="ColumnHeaders,HeaderToolbar">
                         <columns>
                             <Column id="_IDGenColumn43"><header><Text id="_IDGenText42" text="Commodity"/></header></Column>
                             <Column id="_IDGenColumn44"><header><Text id="_IDGenText43" text=" Plant"/></header></Column>
@@ -350,18 +357,16 @@
                 <layoutData>
                     <layout:SplitterLayoutData id="selLay" size="50%"/>
                 </layoutData>
-                <Toolbar id="selBar" class="splitterSectionHeader">
-                    <Title id="selTitle" text="Selected Items" level="H4"/>
-                    <ToolbarSpacer id="selSpc" ></ToolbarSpacer>
-                    <Button id="crtmthntn" text="CreateMatch" icon="sap-icon://add"  type="Emphasized"/>
-                    <Button id="collapseBtn" icon="sap-icon://collapse-group"  type="Transparent"/>
- 
-                    <Button id="confirmMatchBtn"  text="Confirm-Match" icon="sap-icon://accept" type="Accept"/> 
-                    <Button id="clearSelBtn" text="Clear-All" icon="sap-icon://decline"  type="Ghost" />   
-                    <Button id="selFullBtnSE" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent" />
-                </Toolbar>
+<Toolbar id="selBar" class="splitterSectionHeader">
+    <Title id="selTitle" text="Selected Items" level="H4"/>
+    <ToolbarSpacer id="selSpc" />
+    <Button id="crtmthntn" text="Create Match" icon="sap-icon://add" type="Emphasized" press=".onCreateMatch"/>
+    <Button id="confirmMatchBtn" text="Confirm Match" icon="sap-icon://accept" type="Accept" press=".onConfirmMatch"/> 
+    <Button id="clearSelBtn" text="Clear All" icon="sap-icon://decline" type="Ghost" press=".onClearAllSelections"/>   
+    <Button id="selFullBtnSE" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent"/>
+</Toolbar>
                 <ScrollContainer id="selScroll" horizontal="true" vertical="true" width="100%" height="100%">
-                    <Table id="selTbl" fixedLayout="false">
+                    <!-- <Table id="selTbl" fixedLayout="false" sticky="ColumnHeaders,HeaderToolbar">
                         <columns>
                             <Column id="_IDGenColumn51"><header><Text id="_IDGenText50" text="Deal ID"/></header></Column>
                             <Column id="_IDGenColumn52"><header><Text id="_IDGenText51" text=" Doc.no"/></header></Column>
@@ -385,7 +390,189 @@
                             <Column id="_IDGenColumn70"><header><Text id="_IDGenText69" text="Delete"/></header></Column>
 
                         </columns>
-                    </Table>
+                        
+                    </Table> -->
+                            <table:TreeTable id="matchedTable" rows="{path: 'matchedPositionsModel>/results', parameters: {arrayNames: ['children']}}" selectionMode="None" alternateRowColors="true" noData="No staged matches yet — select rows from 2+ tables, then click 'Create Match'." class="pos-matched-grid-table" width="100%">
+            <table:columns>
+                <!-- Col 1: Check / Warning -->
+                                <table:Column id="colCheck" width="6rem" hAlign="Center">
+                    <Label id="_IDGenLabel1" text="✓ / ⚠"/>
+                    <table:template>
+                        <FlexBox id="_IDGenFlexBox" alignItems="Center" justifyContent="Center" class="pos-check-cell">
+                            <core:Icon id="_IDGenIcon" src="sap-icon://warning" color="{= ${matchedPositionsModel>_validationSeverity} === 'Error' ? '#BB0000' : '#E9730C' }" visible="{= !!${matchedPositionsModel>_validationMsg} }" tooltip="{matchedPositionsModel>_validationMsg}" class="pos-validation-icon sapUiTinyMarginBegin"/>
+                            <CheckBox id="_IDGenCheckBox" selected="{matchedPositionsModel>_checked}" partiallySelected="{matchedPositionsModel>_partiallyChecked}" select="onMatchCheckChange" tooltip="Include / exclude this row from Confirm Match"/>
+                        </FlexBox>
+                    </table:template>
+                </table:Column>
+                <!-- Col 2: Deal ID -->
+                <table:Column id="colNodeLabel" width="13rem">
+                    <Label id="_IDGenLabel2" text="Deal ID"/>
+                    <table:template>
+                        <Text id="_IDGenText37" text="{matchedPositionsModel>NodeLabel}" wrapping="false" tooltip="{matchedPositionsModel>NodeLabel}" class="{= ${matchedPositionsModel>RowType} === 'parent' ? 'pos-tree-parent-label' : 'pos-tree-child-label'}"/>
+                    </table:template>
+                </table:Column>
+                <!-- Col 3: Document Number -->
+                <table:Column id="colDisplayDoc" width="6rem">
+                    <Label id="_IDGenLabel3" text="Doc No."/>
+                    <table:template>
+                        <Text id="_IDGenText38" text="{matchedPositionsModel>DocumentNumber}" wrapping="false" tooltip="{matchedPositionsModel>DocumentNumber}"/>
+                    </table:template>
+                </table:Column>
+                <!-- Col 4: Doc Item -->
+                <table:Column id="colDisplayDocItem" width="5rem" hAlign="Center">
+                    <Label id="_IDGenLabel4" text="Doc Item"/>
+                    <table:template>
+                        <Text id="_IDGenText50" text="{matchedPositionsModel>DocumentItem}" wrapping="false"/>
+                    </table:template>
+                </table:Column>
+                <!-- Col 5: Commodity -->
+                <table:Column id="colTreeCommodity" width="6rem" hAlign="Center">
+                    <Label id="_IDGenLabel5" text="Commodity"/>
+                    <table:template>
+                        <Text id="_IDGenText51" text="{matchedPositionsModel>Commodity}" wrapping="false"/>
+                    </table:template>
+                </table:Column>
+                <!-- Col 6: Quantity -->
+                <table:Column id="colDisplayQty" width="6rem">
+                    <Label id="_IDGenLabel6" text="Quantity"/>
+                    <table:template>
+                        <Text id="_IDGenText52" text="{matchedPositionsModel>DisplayQty}" wrapping="false" class="{= ${matchedPositionsModel>RowType} === 'parent' ? 'pos-table-green' : 'pos-table-blue'}"/>
+                    </table:template>
+                </table:Column>
+                <!-- Col 7: UOM -->
+                <table:Column id="colDisplayUOM" width="4rem">
+                    <Label id="_IDGenLabel7" text="UOM"/>
+                    <table:template>
+                        <Text id="_IDGenText53" text="{matchedPositionsModel>DisplayUOM}" wrapping="false"/>
+                    </table:template>
+                </table:Column>
+                <!-- Col 8: Transaction Type -->
+                <table:Column id="colTransactionType" width="4rem" hAlign="Center">
+                    <Label id="_IDGenLabel8" text="Tx Type"/>
+                    <table:template>
+                        <ObjectStatus id="_IDGenObjectStatus" text="{matchedPositionsModel>TransactionType}" state="{= ${matchedPositionsModel>TransactionType} === 'P' ? 'Success' : ${matchedPositionsModel>TransactionType} === 'S' ? 'Warning' : 'None' }" tooltip="{= ${matchedPositionsModel>TransactionType} === 'P' ? 'Purchase' : ${matchedPositionsModel>TransactionType} === 'S' ? 'Sales' : '' }"/>
+                    </table:template>
+                </table:Column>
+                <!-- Col 9: Incoterms -->
+                <table:Column id="colIncoterms" width="5rem" hAlign="Center">
+                    <Label id="_IDGenLabel9" text="Incoterms"/>
+                    <table:template>
+                        <Text id="_IDGenText54" text="{matchedPositionsModel>Incoterms}" wrapping="false"/>
+                    </table:template>
+                </table:Column>
+                <table:Column id="colScheduleType" width="5rem" hAlign="Center">
+                    <Label id="_IDGenLabel10" text="Schedule Type"/>
+                    <table:template>
+                        <Text id="_IDGenText55" text="{matchedPositionsModel>ScheduleType}" wrapping="false"/>
+                    </table:template>
+                </table:Column>
+                <table:Column id="colRefDocType" width="5rem" hAlign="Center">
+                    <Label id="_IDGenLabel11" text="Ref Doc Type"/>
+                    <table:template>
+                        <Text id="_IDGenText56" text="{matchedPositionsModel>RefDocType}" wrapping="false"/>
+                    </table:template>
+                </table:Column>
+                <!-- Col 10: Mode of Transport -->
+                <table:Column id="colModeOfTransport" width="8rem" hAlign="Center">
+                    <Label id="_IDGenLabel12" text="Mode of Transport"/>
+                    <table:template>
+                        <FlexBox id="_IDGenFlexBox1" alignItems="Center">
+                            <Text id="_IDGenText57" text="{matchedPositionsModel>ModeOfTransportLabel}" wrapping="false" visible="{= ${matchedPositionsModel>RowType} === 'parent'}"/>
+                            <Select id="_IDGenSelect" selectedKey="{matchedPositionsModel>_selectedMoT}" visible="{= ${matchedPositionsModel>RowType} === 'child' &amp;&amp; ${matchedPositionsModel>_motConflict} === true}" change="onMoTSelectionChange" width="8rem" items="{matchedPositionsModel>_motOptions}">
+                                <core:Item id="_IDGenItem" key="{matchedPositionsModel>key}" text="{matchedPositionsModel>text}"/>
+                            </Select>
+                            <Text id="_IDGenText58" text="{matchedPositionsModel>ModeOfTransportLabel}" wrapping="false" visible="{= ${matchedPositionsModel>RowType} === 'child' &amp;&amp; ${matchedPositionsModel>_motConflict} !== true}"/>
+                        </FlexBox>
+                    </table:template>
+                </table:Column>
+                <!-- Col 11: Delivery / Due Date -->
+                <table:Column id="colDisplayDate" width="8rem" hAlign="Center">
+                    <Label id="_IDGenLabel13" text="Delivery/Due Date"/>
+                    <table:template>
+                        <Text id="_IDGenText59" text="{matchedPositionsModel>DisplayDate}" wrapping="false"/>
+                    </table:template>
+                </table:Column>
+                <!-- Col 12: Month -->
+                <table:Column id="colDisplayMonth" width="4rem" hAlign="Center">
+                    <Label id="_IDGenLabel14" text="Month"/>
+                    <table:template>
+                        <Text id="_IDGenText60" text="{matchedPositionsModel>DisplayMonth}" wrapping="false"/>
+                    </table:template>
+                </table:Column>
+                <!-- Col 13: Supplier / Customer -->
+                <table:Column id="colDisplayParty" width="14rem" hAlign="Center">
+                    <Label id="_IDGenLabel15" text="Supplier/Customer"/>
+                    <table:template>
+                        <Text id="_IDGenText61" text="{matchedPositionsModel>DisplayParty}" wrapping="false"/>
+                    </table:template>
+                </table:Column>
+                <!-- Col 14: Origin -->
+                <table:Column id="colOrigin" width="6rem" hAlign="Center">
+                    <Label id="_IDGenLabel16" text="Origin"/>
+                    <table:template>
+                        <Text id="_IDGenText62" text="{matchedPositionsModel>Origin}" wrapping="false" tooltip="{matchedPositionsModel>OriginName}"/>
+                    </table:template>
+                </table:Column>
+                <!-- Col 15: Destination -->
+                <table:Column id="colDestination" width="6rem" hAlign="Center">
+                    <Label id="_IDGenLabel17" text="Destination"/>
+                    <table:template>
+                        <Text id="_IDGenText63" text="{matchedPositionsModel>Destination}" wrapping="false" tooltip="{matchedPositionsModel>DestinationName}"/>
+                    </table:template>
+                </table:Column>
+                <!-- Col 16: Week (Plan) with conflict toggle -->
+                <table:Column id="colDisplayWeekID" width="6rem" hAlign="Center">
+                    <Label id="_IDGenLabel18" text="Week (Plan)"/>
+                    <table:template>
+                        <FlexBox id="_IDGenFlexBox2" alignItems="Center">
+                            <Text id="_IDGenText64" text="{matchedPositionsModel>DisplayWeekID}" wrapping="false" visible="{= !${matchedPositionsModel>_weekConflict} }"/>
+                            <Select id="_IDGenSelect1" selectedKey="{matchedPositionsModel>_selectedWeekID}" visible="{= !!${matchedPositionsModel>_weekConflict} &amp;&amp; ${matchedPositionsModel>RowType} === 'child' }" change="onWeekIDSelectionChange" width="10rem" tooltip="Select delivery week for this planned match">
+                                <core:Item id="_IDGenItem1" key="{matchedPositionsModel>_srcWeekID}" text="{matchedPositionsModel>_srcWeekID}"/>
+                                <core:Item id="_IDGenItem2" key="{matchedPositionsModel>_tgtWeekID}" text="{matchedPositionsModel>_tgtWeekID}"/>
+                            </Select>
+                        </FlexBox>
+                    </table:template>
+                </table:Column>
+                <!-- Col 17: Planned Quantity (editable on child) -->
+                <table:Column id="colTreeMatchedQty" width="11rem" hAlign="End">
+                    <Label id="_IDGenLabel19" text="Planned Quantity"/>
+                    <table:template>
+                        <FlexBox id="_IDGenFlexBox3" justifyContent="End" width="100%">
+                            <Text id="_IDGenText65" text="{matchedPositionsModel>MatchedQtyFormatted}" wrapping="false" class="pos-table-blue" visible="{= ${matchedPositionsModel>RowType} === 'parent'}"/>
+                            <Input id="_IDGenInput" value="{ path: 'matchedPositionsModel>MatchedQty', type: 'sap.ui.model.type.Float', formatOptions: { minFractionDigits: 0, maxFractionDigits: 3 } }" width="9rem" textAlign="Right" visible="{= ${matchedPositionsModel>RowType} === 'child'}" change="onMatchedQtyChange" tooltip="Edit matched quantity"/>
+                        </FlexBox>
+                    </table:template>
+                </table:Column>
+                <!-- Col 18: Planned UOM -->
+                <table:Column id="colTreeMatchedUOM" width="6rem">
+                    <Label id="_IDGenLabel20" text="Planned UOM"/>
+                    <table:template>
+                        <Text id="_IDGenText66" text="{matchedPositionsModel>MatchedUOM}" wrapping="false"/>
+                    </table:template>
+                </table:Column>
+                <!-- Col 19: Source -->
+                <table:Column id="colTreeMatchSrc" width="5rem" hAlign="Center">
+                    <Label id="_IDGenLabel21" text="Source"/>
+                    <table:template>
+                        <ObjectStatus id="_IDGenObjectStatus1" text="{matchedPositionsModel>MatchSrc}" state="Information"/>
+                    </table:template>
+                </table:Column>
+                <!-- Col 20: Status -->
+                <table:Column id="colTreeMatchStatus" width="6rem" hAlign="Center">
+                    <Label id="_IDGenLabel22" text="Status"/>
+                    <table:template>
+                        <ObjectStatus id="_IDGenObjectStatus2" text="{matchedPositionsModel>Status}" state="{= ${matchedPositionsModel>Status} === 'Pending' ? 'Warning' : ${matchedPositionsModel>Status} === 'Confirmed' ? 'Success' : ${matchedPositionsModel>Status} === 'Warning' ? 'Warning' : ${matchedPositionsModel>Status} === 'Failed' ? 'Error' : ${matchedPositionsModel>Status} === 'Blocked' ? 'Error' : 'None' }"/>
+                    </table:template>
+                </table:Column>
+                <!-- Col 21: Delete -->
+                <table:Column id="colDelete" width="4rem" hAlign="Center">
+                    <Label id="_IDGenLabel23" text="Delete"/>
+                    <table:template>
+                        <Button id="_IDGenButton" icon="sap-icon://delete" tooltip="Delete this match" press="onDeleteMatchedRow" type="Transparent" class="sapUiTinyMargin"/>
+                    </table:template>
+                </table:Column>
+            </table:columns>
+        </table:TreeTable>
                 </ScrollContainer>
             </VBox>
 
@@ -432,12 +619,13 @@
     <Toolbar id="matchBar" >
      <Title id="hdmdid"     text="Matched Positions"></Title>
     <ToolbarSpacer id="matchSpc" ></ToolbarSpacer>
-    <Button id="nomBtn" text="Create Nominations" icon="sap-icon://add" type="Emphasized"></Button>
+    <Button id="nomBtn" text="Create Nominations" icon="sap-icon://add" type="Emphasized" press="navToCreateNomination" ></Button>
     <Button id="nomdelBtn" text="DeleteSelected" icon="sap-icon://delete" type="Reject"></Button>
     <Button id="nomref" text="Refresh" icon="sap-icon://refresh" type="Ghost"></Button>
     </Toolbar>
 </headerToolbar>
     <Toolbar id="idtbmb">
+    
         <Title id="tmd2m" text="Matched Positions ( )" > </Title>
         <ToolbarSpacer id="mdspacer" ></ToolbarSpacer>
                             <MenuButton id="_IDGenMenuButtonmd3" icon="sap-icon://excel-attachment" type="Transparent">

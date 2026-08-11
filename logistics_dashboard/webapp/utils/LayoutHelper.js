@@ -29,12 +29,31 @@ sap.ui.define([], function () {
             var oSection = oButton.getParent().getParent();
             
             if (!bIsFullScreen) {
+                // ENTERING FULL SCREEN MODE
                 oSection.addStyleClass("fullScreenSection");
+                
+                // Lock body scroll to prevent background scrolling
+                document.body.classList.add("fullScreenLock");
+                
+                // Update button appearance
                 oButton.setIcon("sap-icon://exit-full-screen");
+                oButton.setTooltip("Exit Full Screen");
+                
+                // Store state
                 oButton.data("isFullScreen", true);
+                
             } else {
+                // EXITING FULL SCREEN MODE
                 oSection.removeStyleClass("fullScreenSection");
+                
+                // Unlock body scroll to restore normal scrolling
+                document.body.classList.remove("fullScreenLock");
+                
+                // Update button appearance
                 oButton.setIcon("sap-icon://full-screen");
+                oButton.setTooltip("Full Screen");
+                
+                // Store state
                 oButton.data("isFullScreen", false);
             }
         }

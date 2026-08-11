@@ -22,7 +22,9 @@
                      <Label id="DlPnl1Lbl010"  text="Commodity :"></Label>
                     <MultiComboBox id="DlPnl1Cbo011" placeholder="Select Commodity" width="100%" selectionChange="onCommodityFilterChange" selectionFinish="onCommoditySelectionFinish" items="{UniqDealCmdtyData>/UniqDealCmdtySet}">
                         <items>
-                            <core:Item id="DlPnl1Ite012" key="{UniqDealCmdtyData>Commodity}" text="{UniqDealCmdtyData>CommodityDesc}"/>
+                            <core:Item id="DlPnl1Ite012" key="{UniqDealCmdtyData>Commodity}" text="{UniqDealCmdtyData>Commodity}"/>
+                            <!-- <core:Item id="DlPnl1Ite013" key="SOYBNOIL" text="SOYBNOIL"/> -->
+                            <!-- <core:Item id="DlPnl1Ite014" key="CRUACCE01" text="CRUACCE01"/> -->
                             
                             </items>
                     </MultiComboBox>
@@ -47,7 +49,7 @@
                 <Title id="DlPnl1Ttl021" text="{= ['January','February','March','April','May','June','July','August','September','October','November','December']
                 [ parseInt(${dealQtyMotData>ScheduleMonth}, 10) - 1 ] }" />
                 
-                <ScrollContainer id="DlPnl1Scr022" height="160px" vertical="true" horizontal="false" width="100%">
+                <ScrollContainer id="DlPnl1Scr022" height="100px" vertical="true" horizontal="false" width="100%">
 <Table id="DlPnl1Tbl023" class="cardTable" fixedLayout="false">
     <columns>
         <Column id="DlPnl1Col024" width="40%" ><Text id="DlPnl1Txt025" text="Commodity" /></Column>
@@ -70,7 +72,7 @@
     </f:GridContainer>
 
 </Panel>
-<Panel id="DlPnl2Pnl034" class="sapUiSmallMargin">
+<Panel id="DlPnl2Pnl034" class="sapUiSmallMargin planclass">
 <OverflowToolbar id="DlPnl2Tbr035">
     <ToolbarSpacer id="DlPnl2Too036" />          
     
@@ -97,7 +99,7 @@
     </OverflowToolbar>
 <!-- Table Header section& Button -->
     <ScrollContainer id="DlPnl2Scr050" height="280px" class="dealsTableWrapper" horizontal="true" vertical="true" width="100%">
-    <Table id="DlPnl2Tbl051" mode="MultiSelect" fixedLayout="false" items="{DealDetailData>/DealDetailSet}" >
+    <Table id="DlPnl2Tbl051" mode="MultiSelect" fixedLayout="false" items="{DealDetailData>/DealDetailSet}" sticky="ColumnHeaders,HeaderToolbar">
         <!-- Table Body  -->
         <columns>
             <Column id="DlPnl2Col052">
@@ -258,6 +260,8 @@
     </ScrollContainer>
 </VBox >
 </Panel>
+
+<Panel id="_IDGenPanel" class="sapUiSmallMargin" expanded="true" expandable="true" >
 <HBox id="DlPnl2Hbx119" wrap="Wrap" class="sapUiContentPadding sapUiSmallMargin">
     <Panel id="DlPnl3Pnl120" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" width="14rem">
         <VBox id="DlPnl3Vbx121" class="sapUiSmallMargin">
@@ -300,5 +304,6 @@
         </VBox>
     </Panel>
 </HBox>
+</Panel>
 
 </core:FragmentDefinition>
