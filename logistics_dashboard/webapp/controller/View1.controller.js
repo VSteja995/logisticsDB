@@ -17,11 +17,16 @@ sap.ui.define([
                 this._oCrossNav = sap.ushell.Container.getService("CrossApplicationNavigation");
             }
 
-            this._oDateFilterState = {
-                fromDate:     null,
-                toDate:       null,
-                motKey:       "11",   // Default mode of transport key matching backend expectation
-                commodityKeys: []     // Selected commodity keys from the MultiComboBox
+            // ── Separate filter state per tab ─────────────────────────────────
+            this._oDealFilterState = {
+                fromDate:      null,
+                toDate:        null,
+                commodityKeys: []
+            };
+            this._oPosFilterState = {
+                fromDate:      null,
+                toDate:        null,
+                commodityKeys: []
             };
 
             // Initialise JSON models for both controls
@@ -47,17 +52,11 @@ sap.ui.define([
             // this.getView().setModel(oMatDetailModel, "MatDetailData");
         },
 
-        // ── Helper: resolve the DateRangeSelection control ───────────────────────
-        _getDRS: function () {
-            return this.byId("DlPnl1DRS005") ||
-                   this.byId("MainPnlFra011--DlPnl1DRS005") ||
-                   this.byId("dateDrs") ||
-                   this.byId("MainPnlFra013--dateDrs")||
-                   this.byId("monthDrs")
-        },
+        // ══════════════════════════════════════════════════════════════════════
+        //  DEALS OVERVIEW TAB — Filter Handlers
+        // ══════════════════════════════════════════════════════════════════════
 
-        // ── O/E Schedule  –  Date-Range filter logic ─────────────────────────────
-        onOEScheduleDateRangeChange: function (oEvent) {
+        onDealDateRangeChange: function (oEvent) {
             var oDRS  = oEvent.getSource();
             var dFrom = oDRS.getDateValue();
             var dTo   = oDRS.getSecondDateValue();
@@ -68,233 +67,259 @@ sap.ui.define([
                 return;
             }
             oDRS.setValueState("None");
-            this._oDateFilterState.fromDate = dFrom;
-            this._oDateFilterState.toDate   = dTo;
-        },
-
-        onModeChange: function (oEvent) {
-            var sKey = oEvent.getParameter("key");
-            var sMot;
-            if (sKey === "Train") {
-                sMot = "02";
-            } else if (sKey === "Truck") {
-                sMot = "01";
-            }
-            this._oDateFilterState.motKey = sMot;
-
-            var oDRS  = this._getDRS();
-            var dFrom = oDRS ? oDRS.getDateValue()       : null;
-            var dTo   = oDRS ? oDRS.getSecondDateValue() : null;
+            this._oDealFilterState.fromDate = dFrom;
+            this._oDealFilterState.toDate   = dTo;
 
             if (dFrom && dTo) {
-                this._applyOEScheduleFilters(dFrom, dTo);
+                this._applyDealsFilters(dFrom, dTo);
             }
         },
 
-        onOEScheduleApply: function () {
-            var oDRS  = this._getDRS();
-
-            if (!oDRS) {
-                MessageToast.show("Date range control not found.");
-                return;
+        onDealModeChange: function (oEvent) {
+            var sKey = oEvent.getParameter("key");
+            if (sKey === "Train") {
+                this._oDealFilterState.motKey = "02";
+            } else if (sKey === "Truck") {
+                this._oDealFilterState.motKey = "01";
+            }
+            else
+            {
+                this._oDealFilterState.motKey = " ";
             }
 
+            var dFrom = this._oDealFilterState.fromDate;
+            var dTo   = this._oDealFilterState.toDate;
+            if (dFrom && dTo) {
+                this._applyDealsFilters(dFrom, dTo);
+            }
+        },
+
+        onDealCommoditySelectionFinish: function (oEvent) {
+            var aSelectedKeys = oEvent.getSource().getSelectedKeys();
+            this._oDealFilterState.commodityKeys = aSelectedKeys;
+
+            var dFrom = this._oDealFilterState.fromDate;
+            var dTo   = this._oDealFilterState.toDate;
+            if (dFrom && dTo) {
+                this._applyDealsFilters(dFrom, dTo);
+            }
+        },
+
+        // ── Deals Overview: OData reads (UniqDealCmdty, DealQtyMot, DealDetail) ─
+        _applyDealsFilters: function (dFrom, dTo) {
+            var sMotKey        = this._oDealFilterState.motKey;
+            var aCommodityKeys = this._oDealFilterState.commodityKeys || [];
+            var oModel         = this.getView().getModel();
+            var oView          = this.getView();
+
+            oView.setBusy(true);
+
+            var sFormattedFrom = this._formatODataDate(dFrom);
+            var sFormattedTo   = this._formatODataDate(dTo);
+
+            var iCompleted = 0;
+            var iTotal     = 3;
+            var checkDone  = function () {
+                iCompleted++;
+                if (iCompleted === iTotal) { oView.setBusy(false); }
+            };
+
+            // 1. UniqDealCmdty
+            var UcmKeyPath = oModel.createKey("/UniqDealCmdty", {
+                p_FromDate: sFormattedFrom,
+                p_ToDate:   sFormattedTo
+            }) + "/Set";
+
+            oModel.read(UcmKeyPath, {
+                success: function (oData) {
+                    var aResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
+                    if (aCommodityKeys.length > 0) {
+                        aResults = aResults.filter(function (oItem) {
+                            return aCommodityKeys.indexOf(oItem.Commodity) !== -1;
+                        });
+                    }
+                    var oJM = oView.getModel("UniqDealCmdtyData");
+                    if (oJM) { oJM.setProperty("/UniqDealCmdtySet", aResults); }
+                    checkDone();
+                },
+                error: function () { checkDone(); MessageToast.show("Error loading UniqDealCmdty."); }
+            });
+
+            // 2. DealQtyMot
+            var dqKeyPath = oModel.createKey("/DealQtyMot", {
+                p_FromDate: sFormattedFrom,
+                p_ToDate:   sFormattedTo,
+                p_MoT:      sMotKey
+            }) + "/Set";
+
+            oModel.read(dqKeyPath, {
+                success: function (oData) {
+                    var aResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
+                    if (aCommodityKeys.length > 0) {
+                        aResults = aResults.filter(function (oItem) {
+                            return aCommodityKeys.indexOf(oItem.Commodity) !== -1;
+                        });
+                    }
+                    var oJM = oView.getModel("dealQtyMotData");
+                    if (oJM) { oJM.setProperty("/DealQtyMotSet", aResults); }
+                    checkDone();
+                },
+                error: function () { checkDone(); MessageToast.show("Error loading DealQtyMot."); }
+            });
+
+            // 3. DealDetail
+            var ddKeyPath = oModel.createKey("/DealDetail", {
+                p_FromDate: sFormattedFrom,
+                p_ToDate:   sFormattedTo,
+                p_MoT:      sMotKey
+            }) + "/Set";
+
+            oModel.read(ddKeyPath, {
+                success: function (oData) {
+                    var aResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
+                    if (aCommodityKeys.length > 0) {
+                        aResults = aResults.filter(function (oItem) {
+                            return aCommodityKeys.indexOf(oItem.Commodity) !== -1;
+                        });
+                    }
+                    var oJM = oView.getModel("DealDetailData");
+                    if (oJM) { oJM.setProperty("/DealDetailSet", aResults); }
+                    checkDone();
+                },
+                error: function () { checkDone(); MessageToast.show("Error loading DealDetail."); }
+            });
+        },
+
+        // ══════════════════════════════════════════════════════════════════════
+        //  LOGISTICS PLANNING TAB — Filter Handlers
+        // ══════════════════════════════════════════════════════════════════════
+
+        onPosDateRangeChange: function (oEvent) {
+            var oDRS  = oEvent.getSource();
             var dFrom = oDRS.getDateValue();
             var dTo   = oDRS.getSecondDateValue();
 
             if (dFrom && dTo && dFrom > dTo) {
                 oDRS.setValueState("Error");
                 oDRS.setValueStateText("'From' date must not be after 'To' date.");
-                MessageToast.show("Please correct the date range before applying.");
                 return;
             }
-
-            if (!dFrom || !dTo) {
-                MessageToast.show("Please select a From and To date.");
-                return;
-            }
-
             oDRS.setValueState("None");
-            this._oDateFilterState.fromDate = dFrom;
-            this._oDateFilterState.toDate   = dTo;
-
-            this._applyOEScheduleFilters(dFrom, dTo);
-        },
-
-        onCommoditySelectionFinish : function (oEvent)
-        {
-            var oMultiComboBox = oEvent.getSource();
-            var aSelectedKeys = oMultiComboBox.getSelectedKeys();
-
-            this._oDateFilterState.commodityKeys = aSelectedKeys;
-
-            // Re-run the read set if a date range is already active, so the
-            // commodity filter takes effect immediately.
-            var oDRS  = this._getDRS();
-            var dFrom = oDRS ? oDRS.getDateValue()       : null;
-            var dTo   = oDRS ? oDRS.getSecondDateValue() : null;
+            this._oPosFilterState.fromDate = dFrom;
+            this._oPosFilterState.toDate   = dTo;
 
             if (dFrom && dTo) {
-                this._applyOEScheduleFilters(dFrom, dTo);
+                this._applyPositionFilters(dFrom, dTo);
             }
         },
-        _applyOEScheduleFilters: function (dFrom, dTo) {
-            var sMotKey = (this._oDateFilterState && this._oDateFilterState.motKey) || "11";
-            
-            var oModel = this.getView().getModel();
-            var oView  = this.getView();
-        
+
+        onPosModeChange: function (oEvent) {
+            var sKey = oEvent.getParameter("key");
+            if (sKey === "Train") {
+                this._oPosFilterState.motKey = "02";
+            } else if (sKey === "Truck") {
+                this._oPosFilterState.motKey = "01";
+            }
+
+            var dFrom = this._oPosFilterState.fromDate;
+            var dTo   = this._oPosFilterState.toDate;
+            if (dFrom && dTo) {
+                this._applyPositionFilters(dFrom, dTo);
+            }
+        },
+
+        onPosCommoditySelectionFinish: function (oEvent) {
+            var aSelectedKeys = oEvent.getSource().getSelectedKeys();
+            this._oPosFilterState.commodityKeys = aSelectedKeys;
+
+            var dFrom = this._oPosFilterState.fromDate;
+            var dTo   = this._oPosFilterState.toDate;
+            if (dFrom && dTo) {
+                this._applyPositionFilters(dFrom, dTo);
+            }
+        },
+
+        // ── Logistics Planning: OData reads (EntDetails, OblDetails, TotalSummary)
+        _applyPositionFilters: function (dFrom, dTo) {
+            var sMotKey        = this._oPosFilterState.motKey || "11";
+            var aCommodityKeys = this._oPosFilterState.commodityKeys || [];
+            var sCommodity     = aCommodityKeys.join(",");
+            var oModel         = this.getView().getModel();
+            var oView          = this.getView();
+
             oView.setBusy(true);
-        
-            // Format dates as strings (YYYY-MM-DD) to prevent timezone and time component issues
+
             var sFormattedFrom = this._formatODataDate(dFrom);
             var sFormattedTo   = this._formatODataDate(dTo);
-        
-            var iCompletedRequests = 0;
-            var iTotalRequests = 6; // Total number of parallel reads below
-            var checkCompleted = function () {
-                iCompletedRequests++;
-                if (iCompletedRequests === iTotalRequests) {
-                    oView.setBusy(false);
-                }
+
+            var iCompleted = 0;
+            var iTotal     = 3;
+            var checkDone  = function () {
+                iCompleted++;
+                if (iCompleted === iTotal) { oView.setBusy(false); }
             };
-        
-            // 1. UniqDealCmdty
-            var UcmParameters = {
+
+            // 1. EntDetails
+            var EntKeyPath = oModel.createKey("/EntDetails", {
                 p_FromDate: sFormattedFrom,
                 p_ToDate:   sFormattedTo
-            };
-            var UcmKeyPath = oModel.createKey("/UniqDealCmdty", UcmParameters) + "/Set";
-        
-            oModel.read(UcmKeyPath, {
-                success: function (oData) {
-                    var UcmResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
-                    var oJSONModel = oView.getModel("UniqDealCmdtyData");
-                    if (oJSONModel) {
-                        oJSONModel.setProperty("/UniqDealCmdtySet", UcmResults);
-                    }
-                    checkCompleted();
-                },
-                error: function (oError) {
-                    checkCompleted();
-                    MessageToast.show("Error loading UniqDealCmdty.");
-                }
-            });        
-        
-            // 2. DealQtyMot
-            var dqParameters = { 
-                p_FromDate: sFormattedFrom,
-                p_ToDate:   sFormattedTo,
-                p_MoT:      sMotKey
-            };
-            var dqKeyPath = oModel.createKey("/DealQtyMot", dqParameters) + "/Set";
-        
-            oModel.read(dqKeyPath, {
-                success: function (oData) {
-                    var dqResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
-                    var oJSONModel = oView.getModel("dealQtyMotData");
-                    if (oJSONModel) {
-                        oJSONModel.setProperty("/DealQtyMotSet", dqResults);
-                    }
-                    checkCompleted();
-                },
-                error: function (oError) {
-                    checkCompleted();
-                    MessageToast.show("Error loading DealQtyMot.");
-                }
-            });
-        
-            // 3. DealDetail
-            var dParameters = {
-                p_FromDate: sFormattedFrom,
-                p_ToDate:   sFormattedTo,
-                p_MoT:      sMotKey
-            };
-            var ddKeyPath = oModel.createKey("/DealDetail", dParameters) + "/Set";
-        
-            oModel.read(ddKeyPath, {
-                success: function (oData) {
-                    var ddResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
-                    var oJSONModel = oView.getModel("DealDetailData");
-                    if (oJSONModel) {
-                        oJSONModel.setProperty("/DealDetailSet", ddResults);
-                    }
-                    checkCompleted();
-                },
-                error: function (oError) {
-                    checkCompleted();
-                    MessageToast.show("Error loading DealDetail.");
-                }
-            });
-        
-            // 4. EntDetails
-            var EntParameters = {
-                p_FromDate: sFormattedFrom,
-                p_ToDate:   sFormattedTo
-            };
-            var EntKeyPath = oModel.createKey("/EntDetails", EntParameters) + "/Set";
-        
+            }) + "/Set";
+
             oModel.read(EntKeyPath, {
                 success: function (oData) {
-                    var EntResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
-                    var oJSONModel = oView.getModel("EntDetailData");
-                    if (oJSONModel) {
-                        oJSONModel.setProperty("/EntDetailSet", EntResults);
+                    var aResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
+                    if (aCommodityKeys.length > 0) {
+                        aResults = aResults.filter(function (oItem) {
+                            return aCommodityKeys.indexOf(oItem.Commodity) !== -1;
+                        });
                     }
-                    checkCompleted();
+                    var oJM = oView.getModel("EntDetailData");
+                    if (oJM) { oJM.setProperty("/EntDetailSet", aResults); }
+                    checkDone();
                 },
-                error: function (oError) {
-                    checkCompleted();
-                    MessageToast.show("Error loading EntDetails.");
-                }
+                error: function () { checkDone(); MessageToast.show("Error loading EntDetails."); }
             });
-        
-            // 5. OblDetails
-            var OblParameters = {
+            // 2. OblDetails
+            var OblKeyPath = oModel.createKey("/OblDetails", {
                 p_FromDate: sFormattedFrom,
                 p_ToDate:   sFormattedTo
-            };
-            var OblKeyPath = oModel.createKey("/OblDetails", OblParameters) + "/Set";
-        
+            }) + "/Set";
+
             oModel.read(OblKeyPath, {
                 success: function (oData) {
-                    var OblResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
-                    var oJSONModel = oView.getModel("OblDetailData");
-                    if (oJSONModel) {
-                        oJSONModel.setProperty("/OblDetailSet", OblResults);
+                    var aResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
+                    if (aCommodityKeys.length > 0) {
+                        aResults = aResults.filter(function (oItem) {
+                            return aCommodityKeys.indexOf(oItem.Commodity) !== -1;
+                        });
                     }
-                    checkCompleted();
+                    var oJM = oView.getModel("OblDetailData");
+                    if (oJM) { oJM.setProperty("/OblDetailSet", aResults); }
+                    checkDone();
                 },
-                error: function (oError) {
-                    checkCompleted();
-                    MessageToast.show("Error loading OblDetails.");
-                }
+                error: function () { checkDone(); MessageToast.show("Error loading OblDetails."); }
             });
-        
-            // 6. TotalSummary
-            var aCommodityKeys = (this._oDateFilterState && this._oDateFilterState.commodityKeys) || [];
-            var sCommodity     = aCommodityKeys.join(",");
-        
-            var TSParameters = {
+
+            // 3. TotalSummary
+            var TSKeyPath = oModel.createKey("/TotalSummary", {
                 p_FromDate:  sFormattedFrom,
                 p_ToDate:    sFormattedTo,
                 p_commodity: sCommodity
-            };    
-            var TSKeyPath = oModel.createKey("/TotalSummary", TSParameters) + "/Set";
-        
+            }) + "/Set";
+
             oModel.read(TSKeyPath, {
                 success: function (oData) {
-                    var TSResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
-                    var oJSONModel = oView.getModel("TotalSummaryData");
-                    if (oJSONModel) {
-                        oJSONModel.setProperty("/TotalSummarySet", TSResults);
+                    var aResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
+                    if (aCommodityKeys.length > 0) {
+                        aResults = aResults.filter(function (oItem) {
+                            return aCommodityKeys.indexOf(oItem.Commodity) !== -1;
+                        });
                     }
-                    checkCompleted();
+                    var oJM = oView.getModel("TotalSummaryData");
+                    if (oJM) { oJM.setProperty("/TotalSummarySet", aResults); }
+                    checkDone();
                 },
-                error: function (oError) {
-                    checkCompleted();
-                    MessageToast.show("Error loading TotalSummary.");
-                }
+                error: function () { checkDone(); MessageToast.show("Error loading TotalSummary."); }
             });
         },
         _formatODataDate: function (oDate) {
@@ -359,11 +384,12 @@ sap.ui.define([
                  
                  var nTotalSel = aEntRows.length + aOblRows.length + aInvRows.length;
                  if (nTotalSel < 2) {
-                     sap.m.MessageBox.warning("Please select rows from at least 2 tables to create a match.\n\nYou can select from Supply (Entitlements), Demand (Obligations), and/or Inventory.", { 
-                         title: "Create Match — Selection Required" 
-                     });
-                     return;
-                 }
+                    sap.m.MessageBox.warning("Please select rows from at least 2 tables to create a match.\n You can select from Supply (Entitlements), Demand (Obligations), and/or Inventory.", { 
+                        title: "Create Match — Selection Required" 
+                    });
+                    return;
+                }
+                 
      
                  var aSourceRows, aTargetGroups;
                  if (aEntRows.length > 0) {
@@ -455,6 +481,36 @@ sap.ui.define([
             this._navigateToIntent("Ticket", "create");
         },
 
+        // _navigateToIntent: function (sSemanticObject, sAction) {
+        //     var oCrossNav = this._oCrossNav;
+        //     if (!oCrossNav) {
+        //         MessageToast.show(
+        //             "Navigation service is unavailable. " +
+        //             "Please run the app inside the SAP Fiori Launchpad."
+        //         );
+        //         return;
+        //     }
+
+        //     var oTarget = {
+        //         target: { semanticObject: sSemanticObject, action: sAction }
+        //     };
+
+        //     oCrossNav.isIntentSupported([sSemanticObject + "-" + sAction])
+        //         .done(function (oSupportedIntents) {
+        //             var sIntent = sSemanticObject + "-" + sAction;
+        //             if (oSupportedIntents[sIntent] && oSupportedIntents[sIntent].supported) {
+        //                 oCrossNav.toExternal(oTarget);
+        //             } else {
+        //                 MessageToast.show(
+        //                     "Navigation to '" + sSemanticObject + "#" + sAction +
+        //                     "' is not supported for your user role."
+        //                 );
+        //             }
+        //         })
+        //         .fail(function () {
+        //             MessageToast.show("Could not verify navigation intent. Please try again.");
+        //         });
+        // }
         _navigateToIntent: function (sSemanticObject, sAction) {
             var oCrossNav = this._oCrossNav;
             if (!oCrossNav) {
@@ -464,16 +520,25 @@ sap.ui.define([
                 );
                 return;
             }
-
-            var oTarget = {
-                target: { semanticObject: sSemanticObject, action: sAction }
-            };
-
-            oCrossNav.isIntentSupported([sSemanticObject + "-" + sAction])
+        
+            var sIntent = sSemanticObject + "-" + sAction;
+        
+            oCrossNav.isIntentSupported([sIntent])
                 .done(function (oSupportedIntents) {
-                    var sIntent = sSemanticObject + "-" + sAction;
                     if (oSupportedIntents[sIntent] && oSupportedIntents[sIntent].supported) {
-                        oCrossNav.toExternal(oTarget);
+                        // Generate the target intent URL hash
+                        var sHash = oCrossNav.hrefForExternal({
+                            target: {
+                                semanticObject: sSemanticObject,
+                                action: sAction
+                            }
+                        });
+        
+                        if (sHash) {
+                            // Combine launchpad base URL with the hash and open in new tab
+                            var sFullUrl = window.location.href.split('#')[0] + sHash;
+                            window.open(sFullUrl, '_blank');
+                        }
                     } else {
                         MessageToast.show(
                             "Navigation to '" + sSemanticObject + "#" + sAction +
@@ -486,7 +551,7 @@ sap.ui.define([
                 });
         },
 
-        // ── Layout helpers ───────────────────────────────────────────────────────
+        // ── GIT ayout helpers ───────────────────────────────────────────────────────
         onFullScreenToggle: function (oEvent) {
             LayoutHelper.toggleFullScreen(oEvent);
         }

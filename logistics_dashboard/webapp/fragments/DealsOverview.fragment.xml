@@ -11,16 +11,16 @@
                     <DateRangeSelection id="DlPnl1DRS005"
                         displayFormat="MM/dd/yyyy"
                         placeholder="MM/DD/YYYY - MM/DD/YYYY"
-                        change=".onOEScheduleDateRangeChange" />
+                        change=".onDealDateRangeChange" />
                     <Label id="DlPnl1Lbl006"  text="Mode :"></Label>
-                    <SegmentedButton id="DlPnl1SgB007" selectedKey="All" selectionChange=".onModeChange" >
+                    <SegmentedButton id="DlPnl1SgB007" selectedKey="All" selectionChange=".onDealModeChange" >
                         <items>
                             <SegmentedButtonItem id="DlPnl1SBI008" key="Train" text="Rail"  icon="sap-icon://cargo-train" />
                             <SegmentedButtonItem id="DlPnl1SBI009" key="Truck" text="Truck" icon="sap-icon://shipping-status" />
                         </items>
                     </SegmentedButton>
                      <Label id="DlPnl1Lbl010"  text="Commodity :"></Label>
-                    <MultiComboBox id="DlPnl1Cbo011" placeholder="Select Commodity" width="100%" selectionChange="onCommodityFilterChange" selectionFinish="onCommoditySelectionFinish" items="{UniqDealCmdtyData>/UniqDealCmdtySet}">
+                    <MultiComboBox id="DlPnl1Cbo011" placeholder="Select Commodity" width="100%" selectionChange=".onDealCommoditySelectionFinish" selectionFinish=".onDealCommoditySelectionFinish" items="{UniqDealCmdtyData>/UniqDealCmdtySet}">
                         <items>
                             <core:Item id="DlPnl1Ite012" key="{UniqDealCmdtyData>Commodity}" text="{UniqDealCmdtyData>Commodity}"/>
                             <!-- <core:Item id="DlPnl1Ite013" key="SOYBNOIL" text="SOYBNOIL"/> -->
@@ -38,7 +38,7 @@
             </HBox>
            
     
-    <f:GridContainer id="DlPnl1Grd018" snapToRow="true"
+    <f:GridContainer id="DlPnl1Grd018" 
         items="{dealQtyMotData>/DealQtyMotSet}"
         class="sapUiSmallMargin">
         <f:items>
@@ -107,6 +107,21 @@
                     <Text id="DlPnl2Txt053" text="Deal ID" />
                 </header>
             </Column>
+            <Column id="DlPnl2Col074">
+                <header>
+                    <Text id="DlPnl2Txt075" text="Schedule Date" />
+                </header>
+            </Column>
+            <Column id="DlPnl2Col060">
+                <header>
+                    <Text id="DlPnl2Txt061" text="Commodity" />
+                </header>
+            </Column>
+            <Column id="DlPnl2Col092">
+                <header>
+                    <Text id="DlPnl2Txt093" text="MOT" />
+                </header>
+            </Column>
             <Column id="DlPnl2Col054">
                 <header>
                     <Text id="DlPnl2Txt055" text="CounterParty" />
@@ -120,11 +135,6 @@
             <Column id="DlPnl2Col058">
                 <header>
                     <Text id="DlPnl2Txt059" text="Deal Type" />
-                </header>
-            </Column>
-            <Column id="DlPnl2Col060">
-                <header>
-                    <Text id="DlPnl2Txt061" text="Commodity" />
                 </header>
             </Column>
             <Column id="DlPnl2Col062">
@@ -152,16 +162,12 @@
                     <Text id="DlPnl2Txt071" text="Valid To" />
                 </header>
             </Column>
-            <Column id="DlPnl2Col072">
+            <Column id="DlPnl2Col070E">
                 <header>
-                    <Text id="DlPnl2Txt073" text="Schedule Date" />
+                    <Text id="DlPnl2Txt071E" text="Schedule Quantity" />
                 </header>
             </Column>
-            <Column id="DlPnl2Col074">
-                <header>
-                    <Text id="DlPnl2Txt075" text="Schedule Quantity" />
-                </header>
-            </Column>
+            
             <Column id="DlPnl2Col076">
                 <header>
                     <Text id="DlPnl2Txt077" text="Called-of Quantity"/>
@@ -193,11 +199,7 @@
                 </header>
             </Column>
            
-            <Column id="DlPnl2Col092">
-                <header>
-                    <Text id="DlPnl2Txt093" text="MOT" />
-                </header>
-            </Column>
+            
             <Column id="DlPnl2Col094">
                 <header>
                     <Text id="DlPnl2Txt095" text="Pricing" />
@@ -208,10 +210,20 @@
         <ColumnListItem id="DlPnl2ClL096" type="Inactive">
             <cells>
                 <Text id="DlPnl2Txt097" text="{DealDetailData>DealId}" />
+
+                <Text id="DlPnl2Txt108"  text="{
+                path: 'DealDetailData>ScheduleDate',
+                type: 'sap.ui.model.type.Date', 
+                formatOptions: {
+                      pattern: 'yyyy/MMM/dd' 
+                      }
+                      }"/>
+                <Text id="DlPnl2Txt101" text="{DealDetailData>Commodity}" />
+                <Text id="DlPnl2Txt117" text="{DealDetailData>ModeOfTransportText}" />
                 <Text id="DlPnl2Txt098" text="{DealDetailData>CounterParty}" />
                 <Text id="DlPnl2Txt099" text="{DealDetailData>CounterPartyName}" />
                 <Text id="DlPnl2Txt100" text="{DealDetailData>DealType}" />
-                <Text id="DlPnl2Txt101" text="{DealDetailData>Commodity}" />
+                
                 <ObjectStatus id="DlPnl2Obj102" text="{DealDetailData>Status}" state="{= ${DealDetailData>Status} === 'Active' ? 'Success' : 'Warning'}" />
                 <Text id="DlPnl2Txt103" text="{DealDetailData>ContractNumber}"/>
                 <Text id="DlPnl2Txt104" text="{
@@ -236,13 +248,7 @@
                       pattern: 'yyyy/MMM/dd' 
                       }
                       }"/>
-                      <Text id="DlPnl2Txt108"  text="{
-                path: 'DealDetailData>ScheduleDate',
-                type: 'sap.ui.model.type.Date', 
-                formatOptions: {
-                      pattern: 'yyyy/MMM/dd' 
-                      }
-                      }"/>
+                     
                 <Text id="DlPnl2Txt109" text="{DealDetailData>ScheduleQty}" />
                 <Text id="DlPnl2Txt110" text="{DealDetailData>CallOffQty}"/> 
                 <Text id="DlPnl2Txt112" text="{DealDetailData>DiffQty}" />
@@ -250,7 +256,7 @@
                 <Text id="DlPnl2Txt114" text="{DealDetailData>Origin}" />
                 <Text id="DlPnl2Txt115" text="{DealDetailData>DestinationName}" />
                 <Text id="DlPnl2Txt116" text="{DealDetailData>Destination}" />
-                <Text id="DlPnl2Txt117" text="{DealDetailData>ModeOfTransportText}" />
+                
 
                 <Text id="DlPnl2Txt118" text="{DealDetailData>Pricing}" />
             </cells>

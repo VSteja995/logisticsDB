@@ -48,19 +48,20 @@
               class="filterContainer sapUiSmallMargin">
            
             <Label id="dtLbl" text="DateRange :"/>
-            <DateRangeSelection id="dateDrs" placeholder="MM/DD/YYYY - MM/DD/YYYY" change=".onOEScheduleDateRangeChange"/>
+            <DateRangeSelection id="dateDrs" placeholder="MM/DD/YYYY - MM/DD/YYYY" change=".onPosDateRangeChange"/>
             <Label id="modeLbl" text="Mode :"/>
-            <SegmentedButton id="modeSeg" selectedKey="All" selectionChange=".onModeChange">
+            <SegmentedButton id="modeSeg" selectedKey="All" selectionChange=".onPosModeChange">
                 <items>
                     <SegmentedButtonItem id="trainSeg" key="Train" icon="sap-icon://cargo-train"/>
                     <SegmentedButtonItem id="truckSeg" key="Truck" icon="sap-icon://shipping-status"/>
                 </items>
             </SegmentedButton>
             <Label id="commLbl" text="Commodity :"/>
-            <MultiComboBox id="commBox" placeholder="Select Commodity" width="100%">
+            <MultiComboBox id="commBox" placeholder="Select Commodity" width="100%" selectionChange=".onPosCommoditySelectionFinish" selectionFinish=".onPosCommoditySelectionFinish" items="{UniqDealCmdtyData>/UniqDealCmdtySet}">
                 <items>
-                    <core:Item id="gas87Item" key="GAS87" text="GAS87"/>
-                    <core:Item id="gas88Item" key="GAS88" text="GAS88"/>
+                    <core:Item id="gas87Item" key="{UniqDealCmdtyData>Commodity}" text="{UniqDealCmdtyData>Commodity}"/>
+                     <!-- <core:Item id="DlPnl1Ite013" key="SOYBNOIL" text="SOYBNOIL"/> -->
+                     <!-- <core:Item id="DlPnl1Ite014" key="CRUACCE01" text="CRUACCE01"/> -->
                 </items>
             </MultiComboBox>
             <Label id="zoneLbl" text="Market Zone :"/>
@@ -360,7 +361,7 @@
 <Toolbar id="selBar" class="splitterSectionHeader">
     <Title id="selTitle" text="Selected Items" level="H4"/>
     <ToolbarSpacer id="selSpc" />
-    <Button id="crtmthntn" text="Create Match" icon="sap-icon://add" type="Emphasized" press=".onCreateMatch"/>
+    <Button id="crtmthntn" text="Create Match" icon="sap-icon://add" type="Emphasized" press="onCreateMatch"/>
     <Button id="confirmMatchBtn" text="Confirm Match" icon="sap-icon://accept" type="Accept" press=".onConfirmMatch"/> 
     <Button id="clearSelBtn" text="Clear All" icon="sap-icon://decline" type="Ghost" press=".onClearAllSelections"/>   
     <Button id="selFullBtnSE" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent"/>
