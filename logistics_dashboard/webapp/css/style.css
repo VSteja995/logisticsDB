@@ -5,7 +5,7 @@
 
 /* ─── CSS Custom Properties (Brand Tokens) ─── */
 :root {
-    --gl-orange: #F7941D;
+    --gl-orange: #F7941D; 
     --gl-orange-dark: #E07A0C;
     --gl-orange-light: #FDB850;
     --gl-orange-tint: #FFF7ED;
@@ -706,10 +706,10 @@
     height: 100vh !important;
     
     /* Ensure it sits on top of everything */
-    z-index: 9999 !important;
+    z-index: 999999 !important;
     
     /* Background color to hide content underneath */
-    background-color: var(--gl-white) !important;
+    background-color: #ffffff !important;
     
     /* Flexbox layout: Toolbar at top, Table fills rest */
     display: flex !important;
@@ -742,6 +742,66 @@
     overflow: auto !important;
 }
 
+.dealsTableFullScreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 999999 !important;
+    background-color: #ffffff !important;
+    display: flex !important;
+    flex-direction: column !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+.dealsTableFullScreen > .sapMPanelHdr,
+.dealsTableFullScreen > .sapMTB,
+.dealsTableFullScreen > header {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.dealsTableFullScreen .sapMPanelContent {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+}
+
+/* The VBox wrapping toolbar + table */
+.dealsTableFullScreen .dealsFlexBody {
+    display: flex !important;
+    flex-direction: column !important;
+    flex: 1 1 auto !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+.dealsTableFullScreen .dealsFlexBody > .sapMTB,
+.dealsTableFullScreen .dealsFlexBody > .sapMBar {
+    flex: 0 0 auto !important;
+}
+
+/* The ScrollContainer itself */
+.dealsTableFullScreen .dealsTableWrapper {
+    flex: 1 1 auto !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: auto !important;
+}
 /* Lock body scroll when full screen is active */
 body.fullScreenLock {
     overflow: hidden !important;

@@ -240,7 +240,7 @@
                         showFullScreenButton="false"
                        > -->
                 <ScrollContainer id="oblScroll" horizontal="true" vertical="true" width="100%" height="100%" >    
-                        <Table id="oblTbl" fixedLayout="false" items="{OblDetailData>/OblDetailSet}" mode="MultiSelect" sticky="ColumnHeaders,HeaderToolbar" >
+                        <Table id="oblTbl" fixedLayout="false" items="{OblDetailData>/OblDetailSet}" mode="MultiSelect" sticky="ColumnHeaders,HeaderToolbar" selectionChange="onSelectionChangeOBL" >
                         <columns>
                             <Column id="_IDGenColumn22"><header><Text id="_IDGenText21" text="Deal ID"/></header></Column>
                             <Column id="_IDGenColumn23"><header><Text id="_IDGenText22" text="Commodity"/></header></Column>
@@ -574,7 +574,7 @@
                 </table:Column>
             </table:columns>
         </table:TreeTable>
-                </ScrollContainer>
+                </ScrollContainer> 
             </VBox>
 
         </layout:Splitter>
@@ -642,7 +642,7 @@
     </Toolbar>
 
     <ScrollContainer id="scmd" >
-            <Table id="matchTbl" fixedLayout="false" items="{/MatchPosSet}">
+            <Table id="matchTbl" fixedLayout="false" >
                 <columns>
                     <Column id="srcCol"><header><Text id="_IDGenText76" text="Match Source" /></header></Column>
                     <Column id="matchMonthCol"><header><Text id="_IDGenText77" text="Match Scheduled Month" /></header></Column>

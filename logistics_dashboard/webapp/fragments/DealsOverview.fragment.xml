@@ -15,8 +15,8 @@
                     <Label id="DlPnl1Lbl006"  text="Mode :"></Label>
                     <SegmentedButton id="DlPnl1SgB007" selectedKey="All" selectionChange=".onDealModeChange" >
                         <items>
-                            <SegmentedButtonItem id="DlPnl1SBI008" key="Train" text="Rail"  icon="sap-icon://cargo-train" />
                             <SegmentedButtonItem id="DlPnl1SBI009" key="Truck" text="Truck" icon="sap-icon://shipping-status" />
+                            <SegmentedButtonItem id="DlPnl1SBI008" key="Train" text="Rail"  icon="sap-icon://cargo-train" />  
                         </items>
                     </SegmentedButton>
                      <Label id="DlPnl1Lbl010"  text="Commodity :"></Label>
@@ -81,21 +81,20 @@
     <Button id="DlPnl2Btn039" text="Search Deal" icon="sap-icon://search" type="Transparent" press="navToEditDeals"/>
     <Button id="DlPnl2Btn040"  icon="sap-icon://refresh" type="Ghost" press=""/>
 </OverflowToolbar>
-<VBox id="DlPnl2Vbx041">
+<VBox id="DlPnl2Vbx041" class="dealsFlexBody">
     <OverflowToolbar id="DlPnl2Tbr042">
         <Title id="DlPnl2Ttl043" text="Deals Details( )"  />
         <ToolbarSpacer id="DlPnl2Too044"></ToolbarSpacer>
-            <MenuButton id="DlPnl2Mnu045"
-            icon="sap-icon://excel-attachment" type="Transparent">
-            <menu>
-            <Menu id="DlPnl2Mnu046"  >
-            <MenuItem id="DlPnl2MnI047"  text="Export" press=".onExport"/>
-            <MenuItem id="DlPnl2MnI048"  text="Export As." press=".onExportAs"/>
-            </Menu>
-            </menu>
-            </MenuButton>
- 
-        <Button id="DlPnl2Btn049" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent"/>
+            <Button id="loadMoreDealsBtn" 
+            text="Load More" 
+            type="Transparent" 
+            icon="sap-icon://down" 
+            press=".onLoadMoreDeals" 
+            visible="{DealDetailData>/hasMore}" />
+        <Button id="DlPnl2Btn049" icon="{= ${view>/isTableFullScreen} ? 'sap-icon://exit-full-screen' : 'sap-icon://full-screen'}" 
+        tooltip="{= ${view>/isTableFullScreen} ? 'Exit Full Screen' : 'Full Screen'}"
+        type="Transparent" press=".onDealToggleFullScreen"/>
+
     </OverflowToolbar>
 <!-- Table Header section& Button -->
     <ScrollContainer id="DlPnl2Scr050" height="280px" class="dealsTableWrapper" horizontal="true" vertical="true" width="100%">

@@ -3,9 +3,10 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "genslogiques/logisticsdashboard/utils/LayoutHelper",
     "sap/m/MessageToast",
+    "sap/m/MessageBox",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator"
-], (Controller, JSONModel, LayoutHelper, MessageToast, Filter, FilterOperator) => {
+], (Controller, JSONModel, LayoutHelper, MessageToast, MessageBox, Filter, FilterOperator) => {
     "use strict";
 
     return Controller.extend("genslogiques.logisticsdashboard.controller.View1", {
@@ -16,12 +17,16 @@ sap.ui.define([
             if (sap.ushell && sap.ushell.Container) {
                 this._oCrossNav = sap.ushell.Container.getService("CrossApplicationNavigation");
             }
-
+           
+                
+            
+                
             // ── Separate filter state per tab ─────────────────────────────────
             this._oDealFilterState = {
                 fromDate:      null,
                 toDate:        null,
-                commodityKeys: []
+                commodityKeys: [],
+                motKey: null
             };
             this._oPosFilterState = {
                 fromDate:      null,
@@ -36,8 +41,13 @@ sap.ui.define([
             var oDealQtyMotModel = new JSONModel({ DealQtyMotSet: [] });
             this.getView().setModel(oDealQtyMotModel, "dealQtyMotData");
 
-            var oDealDetailModel = new JSONModel({ DealDetailSet: [] });
+            var oDealDetailModel = new JSONModel({ DealDetailSet: [] , hasMore: false });
             this.getView().setModel(oDealDetailModel, "DealDetailData");
+            // Pagination tracking state for DealDetail
+            this._sNextDealUrl = null;
+            this._aAllDealResults = [];
+            this._aDealBuffer = [];
+            this._onDealDetailLoadedCallback = null;
 
             var oTotalSummaryModel = new JSONModel({  TotalSummaryData: [] });
             this.getView().setModel(oTotalSummaryModel, "TotalSummaryData");
@@ -46,10 +56,260 @@ sap.ui.define([
             this.getView().setModel(oEntDetailModel, "EntDetailData");
 
             var oOblDetailModel = new JSONModel({ OblDetailSet: [] });
-            this.getView().setModel(oOblDetailModel, "OblDetailData");
+                this.getView().setModel(oOblDetailModel, "OblDetailData");
+            
+                // Local UI state for view-level toggles (e.g. Deals table full screen)
+                var oViewModel = new JSONModel({ isTableFullScreen: false });
+                this.getView().setModel(oViewModel, "view");
 
-            // var oMatDetailModel = new JSONModel({  MatDetailSet: [] });
-            // this.getView().setModel(oMatDetailModel, "MatDetailData");
+            
+        
+           
+        },
+
+        onAfterRendering: function () {
+ 
+            // =====================================================
+            // Deals Overview default filters
+            // =====================================================
+         
+            if (!this._bDefaultDealsInitialized) {
+         
+                this._bDefaultDealsInitialized = true;
+         
+                this._initializeDefaultDealsFilters();
+            }
+         
+         
+            // =====================================================
+            // Logistics Planning default filters
+            // =====================================================
+         
+            if (!this._bDefaultPlanningInitialized) {
+         
+                this._bDefaultPlanningInitialized = true;
+         
+                this._initializeDefaultPlanningFilters();
+            }
+        },
+
+
+        _initializeDefaultDealsFilters: function () {
+ 
+            // =====================================================
+            // 1. Calculate default date range
+            // =====================================================
+         
+            var dToday = new Date();
+         
+            var dFromDate = new Date(dToday);
+         
+            dFromDate.setMonth(
+                dFromDate.getMonth() - 1
+            );
+         
+         
+            // =====================================================
+            // 2. Store default filter values
+            // =====================================================
+         
+            this._oDealFilterState.fromDate = dFromDate;
+            this._oDealFilterState.toDate = dToday;
+         
+            // Truck
+            this._oDealFilterState.motKey = "01";
+         
+            // No commodity filter
+            this._oDealFilterState.commodityKeys = [];
+         
+         
+            // =====================================================
+            // 3. Get controls from DealsOverview fragment
+            // =====================================================
+         
+            var oDateRange = this.byId(
+                "MainPnlFra011--DlPnl1DRS005"
+            );
+         
+            var oMode = this.byId(
+                "MainPnlFra011--DlPnl1SgB007"
+            );
+         
+         
+            // =====================================================
+            // 4. Set Date Range
+            // =====================================================
+         
+            if (oDateRange) {
+         
+                oDateRange.setDateValue(dFromDate);
+                oDateRange.setSecondDateValue(dToday);
+         
+                console.log(
+                    "Default Date Range set:",
+                    dFromDate,
+                    dToday
+                );
+         
+            } else {
+         
+                console.error(
+                    "DateRangeSelection not found"
+                );
+         
+                return;
+            }
+         
+         
+            // =====================================================
+            // 5. Set Mode = Truck
+            // =====================================================
+         
+            if (oMode) {
+         
+                oMode.setSelectedKey("Truck");
+         
+                console.log(
+                    "Default Mode set: Truck"
+                );
+         
+            } else {
+         
+                console.error(
+                    "SegmentedButton not found"
+                );
+         
+                return;
+            }
+         
+         
+            // =====================================================
+            // 6. Load Deals data using default filters
+            // =====================================================
+         
+            var oModel = this.getView().getModel();
+         
+            if (!oModel) {
+         
+                console.error(
+                    "OData model not available"
+                );
+         
+                return;
+            }
+         
+         
+            // Wait until OData metadata is available
+            oModel.metadataLoaded().then(function () {
+         
+                console.log(
+                    "Loading Deals data with default filters..."
+                );
+         
+                this._applyDealsFilters(
+                    dFromDate,
+                    dToday
+                );
+         
+            }.bind(this));
+         
+        },
+         
+        _initializeDefaultPlanningFilters: function () {
+         
+            // =====================================================
+            // 1. Calculate default date range
+            //    From = today - 1 month
+            //    To   = today
+            // =====================================================
+         
+            var dToday = new Date();
+         
+            var dFromDate = new Date(dToday);
+         
+            dFromDate.setMonth(
+                dFromDate.getMonth() - 1
+            );
+         
+         
+            // =====================================================
+            // 2. Store default date range in filter state
+            // =====================================================
+         
+            this._oPosFilterState.fromDate = dFromDate;
+            this._oPosFilterState.toDate = dToday;
+         
+            // No commodity selected initially
+            this._oPosFilterState.commodityKeys = [];
+         
+         
+            // =====================================================
+            // 3. Get Logistics Planning DateRangeSelection
+            // =====================================================
+         
+            var oDateRange = this.byId(
+                "MainPnlFra013--dateDrs"
+            );
+         
+         
+            // =====================================================
+            // 4. Set default date range in UI
+            // =====================================================
+         
+            if (oDateRange) {
+         
+                oDateRange.setDateValue(dFromDate);
+         
+                oDateRange.setSecondDateValue(dToday);
+         
+                console.log(
+                    "Default Logistics Date Range set:",
+                    dFromDate,
+                    dToday
+                );
+         
+            } else {
+         
+                console.error(
+                    "Logistics DateRangeSelection not found"
+                );
+         
+                return;
+            }
+         
+         
+            // =====================================================
+            // 5. Get OData model
+            // =====================================================
+         
+            var oModel = this.getView().getModel();
+         
+            if (!oModel) {
+         
+                console.error(
+                    "OData model not available"
+                );
+         
+                return;
+            }
+         
+         
+            // =====================================================
+            // 6. Wait for metadata and load default data
+            // =====================================================
+         
+            oModel.metadataLoaded().then(function () {
+         
+                console.log(
+                    "Loading default Logistics Planning data..."
+                );
+         
+                this._applyPositionFilters(
+                    dFromDate,
+                    dToday
+                );
+         
+            }.bind(this));
         },
 
         // ══════════════════════════════════════════════════════════════════════
@@ -168,6 +428,7 @@ sap.ui.define([
             });
 
             // 3. DealDetail
+            
             var ddKeyPath = oModel.createKey("/DealDetail", {
                 p_FromDate: sFormattedFrom,
                 p_ToDate:   sFormattedTo,
@@ -188,8 +449,148 @@ sap.ui.define([
                 },
                 error: function () { checkDone(); MessageToast.show("Error loading DealDetail."); }
             });
-        },
+            // Register completion callback for the parallel loader counter
+            
+            // 3. DealDetail-With Pagination
+        //     var ddKeyPath = oModel.createKey("/DealDetail", {
+        //         p_FromDate: sFormattedFrom,
+        //         p_ToDate:   sFormattedTo,
+        //         p_MoT:      sMotKey
+        //     }) + "/Set";
 
+        //     // Register completion callback for the parallel loader counter
+        //     this._onDealDetailLoadedCallback = checkDone;
+        //     this._loadDealDetails(ddKeyPath, false);
+        // },
+
+        // // ══════════════════════════════════════════════════════════════════════
+        // //  DEALS OVERVIEW TAB — Incremental Pagination & Load More
+        // // ══════════════════════════════════════════════════════════════════════
+
+        // onLoadMoreDeals: function () {
+        //     var sMotKey        = this._oDealFilterState.motKey;
+        //     var oModel         = this.getView().getModel();
+        //     var dFrom          = this._oDealFilterState.fromDate;
+        //     var dTo            = this._oDealFilterState.toDate;
+
+        //     var sFormattedFrom = this._formatODataDate(dFrom);
+        //     var sFormattedTo   = this._formatODataDate(dTo);
+
+        //     var ddKeyPath = oModel.createKey("/DealDetail", {
+        //         p_FromDate: sFormattedFrom,
+        //         p_ToDate:   sFormattedTo,
+        //         p_MoT:      sMotKey
+        //     }) + "/Set";
+
+        //     this._loadDealDetails(ddKeyPath, true);
+        // },
+
+        // _loadDealDetails: function (sPath, bAppend) {
+        //     var oModel = this.getView().getModel();
+        //     var oView  = this.getView();
+
+        //     oView.setBusy(true);
+
+        //     if (!bAppend) {
+        //         this._sNextDealUrl = null;
+        //         this._aAllDealResults = [];
+        //         this._aDealBuffer = [];
+        //     }
+
+        //     var iTargetCount = 250;
+        //     var aBatchRecords = [];
+        //     var that = this;
+
+        //     var fetchBatch = function (sUrlToFetch) {
+        //         while (that._aDealBuffer.length > 0 && aBatchRecords.length < iTargetCount) {
+        //             aBatchRecords.push(that._aDealBuffer.shift());
+        //         }
+
+        //         if (aBatchRecords.length >= iTargetCount || (!sUrlToFetch && that._aDealBuffer.length === 0)) {
+        //             that._finalizeBatch(aBatchRecords, bAppend);
+        //             return;
+        //         }
+
+        //         if (!sUrlToFetch) {
+        //             that._finalizeBatch(aBatchRecords, bAppend);
+        //             return;
+        //         }
+
+        //         oModel.read(sUrlToFetch, {
+        //             success: function (oData) {
+        //                 var aResults = (oData && oData.results) ? oData.results : [];
+        //                 var sNext = (oData && oData.__next) ? oData.__next : null;
+
+        //                 // Normalize __next URL so ODataModel.read receives a valid path starting with '/'
+        //                 if (sNext) {
+        //                     if (sNext.indexOf("http") === 0) {
+        //                         var aMatch = sNext.match(/\/sap\/opu\/odata\/.*?\/(.*)/);
+        //                         if (aMatch && aMatch[1]) {
+        //                             sNext = "/" + aMatch[1];
+        //                         }
+        //                     } else if (!sNext.startsWith("/")) {
+        //                         sNext = "/" + sNext;
+        //                     }
+        //                 }
+        //                 that._sNextDealUrl = sNext;
+
+        //                 that._aDealBuffer = that._aDealBuffer.concat(aResults);
+
+        //                 if (that._aDealBuffer.length < (iTargetCount - aBatchRecords.length) && that._sNextDealUrl) {
+        //                     fetchBatch(that._sNextDealUrl);
+        //                 } else {
+        //                     while (that._aDealBuffer.length > 0 && aBatchRecords.length < iTargetCount) {
+        //                         aBatchRecords.push(that._aDealBuffer.shift());
+        //                     }
+        //                     that._finalizeBatch(aBatchRecords, bAppend);
+        //                 }
+        //             },
+        //             error: function (oError) {
+        //                 oView.setBusy(false);
+        //                 console.error("OData read error:", oError);
+        //                 MessageToast.show("Error loading DealDetail.");
+        //             }
+        //         });
+        //     };
+
+        //     var sStartUrl = (!bAppend || !this._sNextDealUrl) ? sPath : this._sNextDealUrl;
+        //     if (sStartUrl && !sStartUrl.startsWith("/")) {
+        //         sStartUrl = "/" + sStartUrl;
+        //     }
+        //     fetchBatch(sStartUrl);
+        // },
+
+        // _finalizeBatch: function (aBatchRecords, bAppend) {
+        //     var oView = this.getView();
+        //     var aCommodityKeys = this._oDealFilterState.commodityKeys || [];
+
+        //     if (aCommodityKeys.length > 0) {
+        //         aBatchRecords = aBatchRecords.filter(function (oItem) {
+        //             return aCommodityKeys.indexOf(oItem.Commodity) !== -1;
+        //         });
+        //     }
+
+        //     if (bAppend) {
+        //         this._aAllDealResults = this._aAllDealResults.concat(aBatchRecords);
+        //     } else {
+        //         this._aAllDealResults = aBatchRecords;
+        //     }
+
+        //     var oJM = oView.getModel("DealDetailData");
+        //     if (oJM) {
+        //         oJM.setProperty("/DealDetailSet", this._aAllDealResults);
+        //         oJM.setProperty("/hasMore", (this._aDealBuffer.length > 0 || !!this._sNextDealUrl));
+        //     }
+
+        //     if (this._onDealDetailLoadedCallback) {
+        //         this._onDealDetailLoadedCallback();
+        //         this._onDealDetailLoadedCallback = null;
+        //     }
+
+        //     oView.setBusy(false);
+     },
+
+      
         // ══════════════════════════════════════════════════════════════════════
         //  LOGISTICS PLANNING TAB — Filter Handlers
         // ══════════════════════════════════════════════════════════════════════
@@ -333,17 +734,20 @@ sap.ui.define([
              // ── Selection & Match Creation Logic ────────────────────────────────────
      
              _getSelectedRowData: function (sTableId) {
-                 var oTable = this.byId(sTableId);
+                 var oTable = this.byId("MainPnlFra013--" + sTableId) || this.byId(sTableId);
                  if (!oTable) { return []; }
                  
                  var aSelectedItems = oTable.getSelectedItems() || [];
+                 var oBindingInfo = oTable.getBindingInfo("items");
+                 var sModelName = oBindingInfo ? oBindingInfo.model : undefined;
+
                  return aSelectedItems.reduce(function (acc, oItem) {
-                     var oCtx = oItem.getBindingContext();
+                     var oCtx = (sModelName ? oItem.getBindingContext(sModelName) : null) || oItem.getBindingContext();
                      if (!oCtx) { return acc; }
                      var oRow = Object.assign({}, oCtx.getObject()); // Shallow copy to avoid mutating model directly
      
                      if (sTableId === "entTbl") {
-                         oRow.Quantity = oRow.PurchaseQuantity;
+                         oRow.Quantity = parseFloat(oRow.PurchaseQuantity) || 0;
                          oRow.DealNumber = oRow.DealNumber || oRow.DocumentNumber;
                          oRow.OriginName = oRow.OriginName || oRow.Origin;
                          oRow.ScheduleDate = oRow.DeliveryDate || oRow.ScheduleDate;
@@ -351,7 +755,7 @@ sap.ui.define([
                          oRow.SupplierName = oRow.SupplierID || "";
                          oRow._tableId = sTableId;
                      } else if (sTableId === "oblTbl") {
-                         oRow.Quantity = oRow.SalesQuantity;
+                         oRow.Quantity = parseFloat(oRow.SalesQuantity) || 0;
                          oRow.DealNumber = oRow.DealNumber || oRow.DocumentNumber;
                          oRow.DestinationName = oRow.DestinationName || oRow.Destination;
                          oRow.ScheduleDate = oRow.DueDate || oRow.ScheduleDate;
@@ -360,7 +764,7 @@ sap.ui.define([
                          oRow.CustomerName = oRow.CustomerID || "";
                          oRow._tableId = sTableId;
                      } else if (sTableId === "invTbl") {
-                         oRow.Quantity = oRow.OnHandInventory || oRow.InventoryQty;
+                         oRow.Quantity = parseFloat(oRow.OnHandInventory || oRow.InventoryQty) || 0;
                          oRow.InventoryQty = oRow.Quantity;
                          oRow.InventoryUOM = oRow.UOM;
                          oRow.DisplayParty = oRow.Plant;
@@ -384,7 +788,7 @@ sap.ui.define([
                  
                  var nTotalSel = aEntRows.length + aOblRows.length + aInvRows.length;
                  if (nTotalSel < 2) {
-                    sap.m.MessageBox.warning("Please select rows from at least 2 tables to create a match.\n You can select from Supply (Entitlements), Demand (Obligations), and/or Inventory.", { 
+                    MessageBox.warning("Please select rows from at least 2 tables to create a match.\n You can select from Supply (Entitlements), Demand (Obligations), and/or Inventory.", { 
                         title: "Create Match — Selection Required" 
                     });
                     return;
@@ -401,14 +805,14 @@ sap.ui.define([
                      aSourceRows = aInvRows.map(function (r) { return { row: r, type: "inventory" }; });
                      aTargetGroups = aOblRows.map(function (r) { return { row: r, type: "sales" }; });
                  } else {
-                     sap.m.MessageBox.warning("Please select at least one Entitlement or Inventory row as a match source.", { 
+                     MessageBox.warning("Please select at least one Entitlement or Inventory row as a match source.", { 
                          title: "Create Match — Source Required" 
                      });
                      return;
                  }
      
                  if (!aTargetGroups || aTargetGroups.length === 0) {
-                     sap.m.MessageBox.warning("Please select at least one Obligation or Inventory row as a match target.", { 
+                     MessageBox.warning("Please select at least one Obligation or Inventory row as a match target.", { 
                          title: "Create Match — Target Required" 
                      });
                      return;
@@ -416,44 +820,90 @@ sap.ui.define([
      
                  // Staging new parent nodes into the matched model
                  var aNewParentNodes = aSourceRows.map(function(oSrc) {
+                     var nSrcQty = parseFloat(oSrc.row.Quantity) || 0;
                      return {
                          NodeLabel: "Match: " + oSrc.row.DealNumber,
                          DealNumber: oSrc.row.DealNumber,
+                         DocumentNumber: oSrc.row.DocumentNumber || oSrc.row.DealNumber,
+                         DocumentItem: oSrc.row.DocumentItem || oSrc.row.PurchaseItem || "",
                          Commodity: oSrc.row.Commodity,
-                         DisplayQty: oSrc.row.Quantity,
+                         DisplayQty: nSrcQty,
+                         MatchedQtyFormatted: nSrcQty.toLocaleString(),
+                         DisplayUOM: oSrc.row.UOM || oSrc.row.PurchaseUOM || "LB",
+                         TransactionType: "P",
+                         Incoterms: oSrc.row.IncoTerms || "",
+                         ScheduleType: oSrc.row.ScheduleType || "",
+                         RefDocType: oSrc.row.RefDocType || "",
+                         ModeOfTransportLabel: oSrc.row.ModeOfTransportText || oSrc.row.ModeOfTransport || "",
+                         DisplayDate: oSrc.row.DeliveryDate || oSrc.row.ScheduleDate || "",
+                         DisplayMonth: oSrc.row.ScheduleMonth || "",
+                         DisplayParty: oSrc.row.SupplierName || oSrc.row.Supplier || "",
+                         Origin: oSrc.row.Origin || "",
+                         OriginName: oSrc.row.OriginName || "",
+                         Destination: oSrc.row.Destination || "",
+                         DestinationName: oSrc.row.DestinationName || "",
+                         DisplayWeekID: oSrc.row.WeekID || "",
+                         MatchSrc: "Supply",
                          Status: "Draft",
                          RowType: "parent",
+                         _checked: true,
                          children: aTargetGroups.map(function(oTgt) {
+                             var nTgtQty = parseFloat(oTgt.row.Quantity) || 0;
+                             var nMatchQty = Math.min(nSrcQty, nTgtQty);
                              return {
                                  NodeLabel: "Target: " + oTgt.row.DealNumber,
                                  DealNumber: oTgt.row.DealNumber,
-                                 MatchedQty: Math.min(oSrc.row.Quantity || 0, oTgt.row.Quantity || 0),
+                                 DocumentNumber: oTgt.row.DocumentNumber || oTgt.row.DealNumber,
+                                 DocumentItem: oTgt.row.DocumentItem || oTgt.row.SalesItem || "",
+                                 Commodity: oTgt.row.Commodity,
+                                 MatchedQty: nMatchQty,
+                                 MatchedQtyFormatted: nMatchQty.toLocaleString(),
+                                 MatchedUOM: oTgt.row.UOM || oTgt.row.SalesUOM || "LB",
+                                 TransactionType: "S",
+                                 Incoterms: oTgt.row.IncoTerms || "",
+                                 ScheduleType: oTgt.row.ScheduleType || "",
+                                 RefDocType: oTgt.row.RefDocType || "",
+                                 ModeOfTransportLabel: oTgt.row.ModeOfTransportText || oTgt.row.ModeOfTransport || "",
+                                 DisplayDate: oTgt.row.DueDate || oTgt.row.ScheduleDate || "",
+                                 DisplayMonth: oTgt.row.ScheduleMonth || "",
+                                 DisplayParty: oTgt.row.CustomerName || oTgt.row.Customer || "",
+                                 Origin: oTgt.row.Origin || "",
+                                 OriginName: oTgt.row.OriginName || "",
+                                 Destination: oTgt.row.Destination || "",
+                                 DestinationName: oTgt.row.DestinationName || "",
+                                 DisplayWeekID: oTgt.row.WeekID || "",
+                                 MatchSrc: "Demand",
                                  Status: "Pending",
-                                 RowType: "child"
+                                 RowType: "child",
+                                 _checked: true
                              };
                          })
                      };
                  });
      
                  var oMM = this.getView().getModel("matchedPositionsModel");
-                 if (!oMM) {
-                     oMM = new JSONModel({ results: [] });
-                     this.getView().setModel(oMM, "matchedPositionsModel");
-                 }
-                 
-                 var aExisting = (oMM.getProperty("/results") || []).concat(aNewParentNodes);
-                 oMM.setProperty("/results", aExisting);
-     
-                 this._clearAllTableSelections();
-                 MessageToast.show(aNewParentNodes.length + " match pair(s) staged successfully.");
-             },
+                  if (!oMM) {
+                      oMM = new JSONModel({ results: [] });
+                      this.getView().setModel(oMM, "matchedPositionsModel");
+                  }
+                  
+                  var aExisting = (oMM.getProperty("/results") || []).concat(aNewParentNodes);
+                  oMM.setProperty("/results", aExisting);
+
+                  this._clearAllTableSelections();
+                  MessageToast.show(aNewParentNodes.length + " match pair(s) staged successfully.");
+              },
      
              _clearAllTableSelections: function () {
                  var aTableIds = ["entTbl", "oblTbl", "invTbl"];
                  aTableIds.forEach(function (sId) {
-                     var oTable = this.byId(sId);
-                     if (oTable && oTable.clearSelection) {
-                         oTable.clearSelection();
+                     var oTable = this.byId("MainPnlFra013--" + sId) || this.byId(sId);
+                     if (oTable) {
+                         if (typeof oTable.removeSelections === "function") {
+                             oTable.removeSelections(true);
+                         } else if (typeof oTable.clearSelection === "function") {
+                             oTable.clearSelection();
+                         }
                      }
                  }, this);
              },
@@ -461,6 +911,105 @@ sap.ui.define([
              onClearAllSelections: function () {
                  this._clearAllTableSelections();
                  MessageToast.show("Selections cleared.");
+             },
+
+             onSelectionChangeENT: function () {
+                 // Entitlements table selection changed
+             },
+
+             onSelectionChangeOBL: function () {
+                 // Obligations table selection changed
+             },
+
+             onConfirmMatch: function () {
+                 var oMM = this.getView().getModel("matchedPositionsModel");
+                 if (!oMM) {
+                     MessageToast.show("No matches to confirm.");
+                     return;
+                 }
+                 var aResults = oMM.getProperty("/results") || [];
+                 if (aResults.length === 0) {
+                     MessageToast.show("No matches to confirm.");
+                     return;
+                 }
+                 var nConfirmed = 0;
+                 aResults.forEach(function (oParent) {
+                     if (oParent._checked) {
+                         oParent.Status = "Confirmed";
+                         nConfirmed++;
+                     }
+                     if (oParent.children) {
+                         oParent.children.forEach(function (oChild) {
+                             if (oChild._checked) {
+                                 oChild.Status = "Confirmed";
+                             }
+                         });
+                     }
+                 });
+                 oMM.refresh(true);
+                 MessageToast.show(nConfirmed + " match(es) confirmed.");
+             },
+
+             onMatchCheckChange: function (oEvent) {
+                 var oSource = oEvent.getSource();
+                 var oCtx = oSource.getBindingContext("matchedPositionsModel");
+                 if (!oCtx) { return; }
+                 var oObj = oCtx.getObject();
+                 var bSelected = oEvent.getParameter("selected");
+                 if (oObj.RowType === "parent" && oObj.children) {
+                     oObj.children.forEach(function (oChild) {
+                         oChild._checked = bSelected;
+                     });
+                 }
+                 var oMM = this.getView().getModel("matchedPositionsModel");
+                 if (oMM) { oMM.refresh(true); }
+             },
+
+             onMoTSelectionChange: function () {
+                 // Mode of Transport selection changed
+             },
+
+             onWeekIDSelectionChange: function () {
+                 // Week ID selection changed
+             },
+
+             onMatchedQtyChange: function (oEvent) {
+                 var oSource = oEvent.getSource();
+                 var oCtx = oSource.getBindingContext("matchedPositionsModel");
+                 if (!oCtx) { return; }
+                 var oObj = oCtx.getObject();
+                 var nVal = parseFloat(oSource.getValue()) || 0;
+                 oObj.MatchedQty = nVal;
+                 oObj.MatchedQtyFormatted = nVal.toLocaleString();
+                 var oMM = this.getView().getModel("matchedPositionsModel");
+                 if (oMM) { oMM.refresh(true); }
+             },
+
+             onDeleteMatchedRow: function (oEvent) {
+                 var oSource = oEvent.getSource();
+                 var oCtx = oSource.getBindingContext("matchedPositionsModel");
+                 if (!oCtx) { return; }
+                 var sPath = oCtx.getPath();
+                 var oMM = this.getView().getModel("matchedPositionsModel");
+                 if (!oMM) { return; }
+                 var aResults = oMM.getProperty("/results") || [];
+                 var aParts = sPath.split("/");
+                 if (aParts.length === 3 && aParts[1] === "results") {
+                     var iIdx = parseInt(aParts[2], 10);
+                     aResults.splice(iIdx, 1);
+                 } else if (aParts.length === 5 && aParts[1] === "results" && aParts[3] === "children") {
+                     var iParentIdx = parseInt(aParts[2], 10);
+                     var iChildIdx = parseInt(aParts[4], 10);
+                     if (aResults[iParentIdx] && aResults[iParentIdx].children) {
+                         aResults[iParentIdx].children.splice(iChildIdx, 1);
+                         if (aResults[iParentIdx].children.length === 0) {
+                             aResults.splice(iParentIdx, 1);
+                         }
+                     }
+                 }
+                 oMM.setProperty("/results", aResults);
+                 oMM.refresh(true);
+                 MessageToast.show("Matched row removed.");
              },
         
 
@@ -554,6 +1103,58 @@ sap.ui.define([
         // ── GIT ayout helpers ───────────────────────────────────────────────────────
         onFullScreenToggle: function (oEvent) {
             LayoutHelper.toggleFullScreen(oEvent);
+        },
+        onDealToggleFullScreen: function (oEvent) {
+            var oViewModel = this.getView().getModel("view");
+            var bFullScreen = true;
+            if (oViewModel) {
+                bFullScreen = !oViewModel.getProperty("/isTableFullScreen");
+                oViewModel.setProperty("/isTableFullScreen", bFullScreen);
+            }
+
+            var sPrefix = "MainPnlFra011--";
+            var oPanel = this.byId(sPrefix + "DlPnl2Pnl034") || this.byId("DlPnl2Pnl034");
+            if (!oPanel && oEvent && typeof oEvent.getSource === "function") {
+                var oBtn = oEvent.getSource();
+                var oParent1 = oBtn ? oBtn.getParent() : null;
+                var oParent2 = oParent1 ? oParent1.getParent() : null;
+                oPanel = oParent2 ? oParent2.getParent() : null;
+            }
+
+            var oScrollContainer = this.byId(sPrefix + "DlPnl2Scr050") || this.byId("DlPnl2Scr050");
+            var oSchedulePanel = this.byId(sPrefix + "DlPnl1Pnl001") || this.byId("DlPnl1Pnl001");
+            var oKpiPanel = this.byId(sPrefix + "_IDGenPanel") || this.byId("_IDGenPanel");
+
+            if (bFullScreen) {
+                if (oPanel) {
+                    oPanel.addStyleClass("dealsTableFullScreen");
+                }
+                if (oScrollContainer) {
+                    oScrollContainer.setHeight("100%");
+                }
+                if (oSchedulePanel) {
+                    oSchedulePanel.setVisible(false);
+                }
+                if (oKpiPanel) {
+                    oKpiPanel.setVisible(false);
+                }
+                document.body.classList.add("fullScreenLock");
+            } else {
+                if (oPanel) {
+                    oPanel.removeStyleClass("dealsTableFullScreen");
+                }
+                if (oScrollContainer) {
+                    oScrollContainer.setHeight("280px");
+                }
+                if (oSchedulePanel) {
+                    oSchedulePanel.setVisible(true);
+                }
+                if (oKpiPanel) {
+                    oKpiPanel.setVisible(true);
+                }
+                document.body.classList.remove("fullScreenLock");
+            }
         }
+        
     });
 });
