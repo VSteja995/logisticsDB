@@ -13,7 +13,7 @@
                         placeholder="MM/DD/YYYY - MM/DD/YYYY"
                         change=".onDealDateRangeChange" />
                     <Label id="DlPnl1Lbl006"  text="Mode :"></Label>
-                    <SegmentedButton id="DlPnl1SgB007" selectedKey="All" selectionChange=".onDealModeChange" >
+                    <SegmentedButton id="DlPnl1SgB007" selectedKey="Truck" selectionChange=".onDealModeChange" >
                         <items>
                             <SegmentedButtonItem id="DlPnl1SBI009" key="Truck" text="Truck" icon="sap-icon://shipping-status" />
                             <SegmentedButtonItem id="DlPnl1SBI008" key="Train" text="Rail"  icon="sap-icon://cargo-train" />  
@@ -106,6 +106,12 @@
                     <Text id="DlPnl2Txt053" text="Deal ID" />
                 </header>
             </Column>
+  <Column id="DlPnl2Col066">
+                <header>
+                    <Text id="DlPnl2Txt067" text="Trade Date" />
+                </header>
+            </Column>
+
             <Column id="DlPnl2Col074">
                 <header>
                     <Text id="DlPnl2Txt075" text="Schedule Date" />
@@ -146,11 +152,7 @@
                     <Text id="DlPnl2Txt065" text="Contract Number" />
                 </header>
             </Column>
-            <Column id="DlPnl2Col066">
-                <header>
-                    <Text id="DlPnl2Txt067" text="Trade Date" />
-                </header>
-            </Column>
+          
             <Column id="DlPnl2Col068">
                 <header>
                     <Text id="DlPnl2Txt069" text="Valid From" />
@@ -210,6 +212,14 @@
             <cells>
                 <Text id="DlPnl2Txt097" text="{DealDetailData>DealId}" />
 
+                 <Text id="DlPnl2Txt104" text="{
+                path: 'DealDetailData>TradeDate',
+                type: 'sap.ui.model.type.Date', 
+                formatOptions: {
+                      pattern: 'yyyy/MMM/dd' 
+                      }
+                      }" />
+
                 <Text id="DlPnl2Txt108"  text="{
                 path: 'DealDetailData>ScheduleDate',
                 type: 'sap.ui.model.type.Date', 
@@ -225,13 +235,7 @@
                 
                 <ObjectStatus id="DlPnl2Obj102" text="{DealDetailData>Status}" state="{= ${DealDetailData>Status} === 'Active' ? 'Success' : 'Warning'}" />
                 <Text id="DlPnl2Txt103" text="{DealDetailData>ContractNumber}"/>
-                <Text id="DlPnl2Txt104" text="{
-                path: 'DealDetailData>TradeDate',
-                type: 'sap.ui.model.type.Date', 
-                formatOptions: {
-                      pattern: 'yyyy/MMM/dd' 
-                      }
-                      }" />
+               
                 
                       <Text id="DlPnl2Txt108E"  text="{
                 path: 'DealDetailData>DeliveryStart',

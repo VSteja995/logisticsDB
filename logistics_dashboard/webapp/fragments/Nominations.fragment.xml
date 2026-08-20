@@ -65,13 +65,11 @@
                 </Select>
             </VBox>
             <VBox id="NomPnl1Vbx039" class="sapUiSmallMarginEnd">
-                <Label id="NomPnl1Lbl040" text="Scheduled Date from:"/>
-                <DatePicker id="NomPnl1Dat041" placeholder="e.g. Dec 31, 2026" width="10rem"/>
-            </VBox>
-
-            <VBox id="NomPnl1Vbx042" class="sapUiSmallMarginEnd">
-                <Label id="NomPnl1Lbl043" text="Scheduled Date To:"/>
-                <DatePicker id="NomPnl1Dat044" placeholder="e.g. Dec 31, 2026" width="10rem"/>
+            <Label id="_IDGenLabel24"  text="DateRange :"></Label>
+                    <DateRangeSelection id="_IDGenDateRangeSelection"
+                        displayFormat="MM/dd/yyyy"
+                        placeholder="MM/DD/YYYY - MM/DD/YYYY"
+                         change=".onNominationDateRangeChange" />
             </VBox>
 
         </HBox>
@@ -124,7 +122,11 @@
 
                 </OverflowToolbar>
         <ScrollContainer id="NomPnl2Scr061" height="240px" horizontal="true" vertical="true" width="100%">
-            <Table id="NomPnl2Tbl062" mode="MultiSelect" fixedLayout="false" noDataText="No data">
+            <Table id="NomPnl2Tbl062"
+             mode="MultiSelect"
+              fixedLayout="false"
+               noDataText="No data"
+               items="{NomDetailsData>/NomDetailsSet}">
                 <columns>
                     <Column id="NomPnl2Col063"      ><header><Text id="NomPnl2Txt064"       text="Deal Number"/></header></Column>
                     <Column id="NomPnl2Col065"          ><header><Text id="NomPnl2Txt066"           text="Nomination Key"/></header></Column>
@@ -152,26 +154,59 @@
                 </columns>
                 <items>
                     <ColumnListItem id="NomPnl2ClL103" type="Inactive">
-                        <cells>
-                            <Text id="NomPnl2Txt104"   text="{DealNumber}"/>
-                            <Text id="NomPnl2Txt105"       text="{NominationKey}"/>
-                            <Text id="NomPnl2Txt106"      text="{NominationItem}"/>
-                            <Text id="NomPnl2Txt107"      text="{Product}"/>
-                            <ObjectStatus id="NomPnl2Obj108" text="{Status}"
-                                state="{= ${Status} === 'Active' ? 'Success' : ${Status} === 'Pending' ? 'Warning' : 'Error'}"/>
-                            <Text id="NomPnl2Txt109" text="{ScheduleDate}"/>
-                            <Text id="NomPnl2Txt110"   text="{LocationId}"/>
-                            <Text id="NomPnl2Txt111"     text="{Location}"/>
-                            <Text id="NomPnl2Txt112" text="{MarketZoneId}"/>
-                            <Text id="NomPnl2Txt113"   text="{MarketZone}"/>
-                            <Text id="NomPnl2Txt114"   text="{PlannedQty}"/>
-                            <Text id="NomPnl2Txt115"          text="{UOM}"/>
-                            <Text id="NomPnl2Txt116"      text="{Carrier}"/>
-                            <Text id="NomPnl2Txt117" text="{Counterparty}"/>
-                            <Text id="NomPnl2Txt118"     text="{DealType}"/>
-                            <ObjectStatus id="NomPnl2Obj119" text="{NomStatus}"
-                                state="{= ${NomStatus} === 'Confirmed' ? 'Success' : ${NomStatus} === 'Pending' ? 'Warning' : 'Error'}"/>
-                        </cells>
+                      <cells>
+
+    <Text id="_IDGenText68" text="{NomDetailsData>DealNumber}"/>
+
+    <Text id="_IDGenText69" text="{NomDetailsData>NominationKey}"/>
+
+    <Text id="_IDGenText110" text="{NomDetailsData>NominationItem}"/>
+
+    <Text id="_IDGenText132" text="{NomDetailsData>CommodityName}"/>
+
+    <ObjectStatus id="_IDGenObjectStatus3"
+        text="{NomDetailsData>StatusDescription}"
+        state="{= ${NomDetailsData>StatusDescription} === 'Confirmed'
+            ? 'Success'
+            : ${NomDetailsData>StatusDescription} === 'Pending'
+            ? 'Warning'
+            : 'None'}"/>
+
+    <Text id="_IDGenText149" text="{NomDetailsData>TicketKey}"/>
+
+    <Text id="_IDGenText150" text="{NomDetailsData>TicketItem}"/>
+
+    <!-- Ticket Version not available -->
+    <Text id="_IDGenText151" text="-"/>
+
+    <!-- Ticket Start Number not available -->
+    <Text id="_IDGenText152" text="-"/>
+
+    <Text id="_IDGenText153" text="{NomDetailsData>ScheduleDate}"/>
+
+    <Text id="_IDGenText154" text="{NomDetailsData>Locationid}"/>
+
+    <Text id="_IDGenText155" text="{NomDetailsData>LocationName}"/>
+
+    <!-- MarketZone ID not available -->
+    <Text id="_IDGenText156" text="-"/>
+
+    <!-- Market Zone not available -->
+    <Text id="_IDGenText157" text="-"/>
+
+    <Text id="_IDGenText158" text="{NomDetailsData>ScheduledQuantity}"/>
+
+    <Text id="_IDGenText159" text="{NomDetailsData>ActualScheduleQuantity}"/>
+
+    <Text id="_IDGenText160" text="{NomDetailsData>ScheduleProduct}"/>
+
+    <Text id="_IDGenText161" text="{NomDetailsData>CarrierName}"/>
+
+    <Text id="_IDGenText162" text="{NomDetailsData>BusinessPartnerName}"/>
+
+    <Text id="_IDGenText163" text="{NomDetailsData>ContractNumber}"/>
+
+</cells>
                     </ColumnListItem>
                 </items>
             </Table>
@@ -224,48 +259,225 @@
                     <Button id="NomPnl3Btn135" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent"/>
         </OverflowToolbar>
         <ScrollContainer id="NomPnl3Scr136" height="240px" horizontal="true" vertical="true" width="100%">
-            <Table id="NomPnl3Tbl137" mode="MultiSelect" fixedLayout="false" noDataText="No data">
-                <columns>
-                    <Column id="NomPnl3Col138"    ><header><Text id="NomPnl3Txt139"        text="Ticket Key"/></header></Column>
-                    <Column id="NomPnl3Col140"    ><header><Text id="NomPnl3Txt141"     text="Nom. Doc Number"/></header></Column>
-                    <Column id="NomPnl3Col142"    ><header><Text id="NomPnl3Txt143"       text="Ticket Item"/></header></Column>
-                    <Column id="NomPnl3Col144"    ><header><Text id="NomPnl3Txt145"       text="Ticket Extension Number"/></header></Column>
-                    <Column id="NomPnl3Col146"    ><header><Text id="NomPnl3Txt147"        text="Nomination Item"/></header></Column>
-                    <Column id="NomPnl3Col148"    ><header><Text id="NomPnl3Txt149"     text="Ticket Status"/></header></Column>
-                    <Column id="NomPnl3Col150"    ><header><Text id="NomPnl3Txt151"      text="Location ID"/></header></Column>
-                    <Column id="NomPnl3Col152"    ><header><Text id="NomPnl3Txt153"        text="Vechile ID"/></header></Column>
-                    <Column id="NomPnl3Col154"  ><header><Text id="NomPnl3Txt155"   text="Ticket Quantity"/></header></Column>
-                    <Column id="NomPnl3Col156"  ><header><Text id="NomPnl3Txt157"   text="Ticket Material"/></header></Column>
-                    <Column id="NomPnl3Col158"       ><header><Text id="NomPnl3Txt159"        text="Ticket Posting Date"/></header></Column>
-                    <Column id="NomPnl3Col160"      ><header><Text id="NomPnl3Txt161"       text="Ticket Start date Time"/></header></Column>
-                    <Column id="NomPnl3Col162"        ><header><Text id="NomPnl3Txt163"         text="Ticket Enddate Time"/></header></Column>
-                    <Column id="NomPnl3Col164"      ><header><Text id="NomPnl3Txt165"       text="Ticket Created by User"/></header></Column>
-                    <Column id="NomPnl3Col166"      ><header><Text id="NomPnl3Txt167"       text="Ticket Change Date "/></header></Column>
-                    
-                </columns>
-                <items>
-                    <ColumnListItem id="NomPnl3ClL168" type="Inactive">
-                        <cells>
-                            <Text id="NomPnl3Txt169"        text="{TicketKey}"/>
-                            <Text id="NomPnl3Txt170"     text="{NomDocNumber}"/>
-                            <Text id="NomPnl3Txt171"       text="{TicketItem}"/>
-                            <Text id="NomPnl3Txt172"        text="{NominationItem}"/>
-                            <ObjectStatus id="NomPnl3Obj173" text="{TicketStatus}"
-                                state="{= ${TicketStatus} === 'Confirmed' ? 'Success' : ${TicketStatus} === 'Pending' ? 'Warning' : 'Error'}"/>
-                            <Text id="NomPnl3Txt174"     text="{TicketSubStatus}"/>
-                            <Text id="NomPnl3Txt175"      text="{LocationId}"/>
-                            <Text id="NomPnl3Txt176"        text="{VehicleId}"/>
-                            <Text id="NomPnl3Txt177"   text="{TicketQuantity}"/>
-                            <Text id="NomPnl3Txt178"        text="{TicketUOM}"/>
-                            <Text id="NomPnl3Txt179"       text="{TicketDate}"/>
-                            <Text id="NomPnl3Txt180"         text="{DriverId}"/>
-                            <Text id="NomPnl3Txt181"       text="{Carrier}"/>
-                            <Text id="NomPnl3Txt182"       text="{Product}"/>
-                            <Text id="NomPnl3Txt183"      text="{NetQuantity}"/>
-                            <Text id="NomPnl3Txt184"    text="{GrossQuantity}"/>
-                        </cells>
-                    </ColumnListItem>
-                </items>
+            <Table id="NomPnl3Tbl137" 
+            mode="MultiSelect"
+             fixedLayout="false"
+              noDataText="No data"
+              items="{TicketDetailsData>/TicketDetailsSet}">
+               <columns>
+
+        <Column id="NomPnl3Col138">
+            <header>
+                <Text
+                    id="NomPnl3Txt139"
+                    text="Ticket Key"/>
+            </header>
+        </Column>
+
+        <Column id="NomPnl3Col140">
+            <header>
+                <Text
+                    id="NomPnl3Txt141"
+                    text="Nom. Doc Number"/>
+            </header>
+        </Column>
+
+        <Column id="NomPnl3Col142">
+            <header>
+                <Text
+                    id="NomPnl3Txt143"
+                    text="Ticket Item"/>
+            </header>
+        </Column>
+
+        <Column id="NomPnl3Col144">
+            <header>
+                <Text
+                    id="NomPnl3Txt145"
+                    text="Ticket Extension Number"/>
+            </header>
+        </Column>
+
+        <Column id="NomPnl3Col146">
+            <header>
+                <Text
+                    id="NomPnl3Txt147"
+                    text="Nomination Item"/>
+            </header>
+        </Column>
+
+        <Column id="NomPnl3Col148">
+            <header>
+                <Text
+                    id="NomPnl3Txt149"
+                    text="Ticket Version"/>
+            </header>
+        </Column>
+
+        <Column id="NomPnl3Col150">
+            <header>
+                <Text
+                    id="NomPnl3Txt151"
+                    text="Location ID"/>
+            </header>
+        </Column>
+
+        <Column id="NomPnl3Col152">
+            <header>
+                <Text
+                    id="NomPnl3Txt153"
+                    text="Vehicle ID"/>
+            </header>
+        </Column>
+
+        <Column id="NomPnl3Col154">
+            <header>
+                <Text
+                    id="NomPnl3Txt155"
+                    text="Ticket Quantity"/>
+            </header>
+        </Column>
+
+        <Column id="NomPnl3Col156">
+            <header>
+                <Text
+                    id="NomPnl3Txt157"
+                    text="Ticket Material"/>
+            </header>
+        </Column>
+
+        <Column id="NomPnl3Col158">
+            <header>
+                <Text
+                    id="NomPnl3Txt159"
+                    text="Ticket Posting Date"/>
+            </header>
+        </Column>
+
+        <Column id="NomPnl3Col160">
+            <header>
+                <Text
+                    id="NomPnl3Txt161"
+                    text="Ticket Start Date Time"/>
+            </header>
+        </Column>
+
+        <Column id="NomPnl3Col162">
+            <header>
+                <Text
+                    id="NomPnl3Txt163"
+                    text="Ticket End Date Time"/>
+            </header>
+        </Column>
+
+        <Column id="NomPnl3Col164">
+            <header>
+                <Text
+                    id="NomPnl3Txt165"
+                    text="Ticket Created By User"/>
+            </header>
+        </Column>
+
+        <Column id="NomPnl3Col166">
+            <header>
+                <Text
+                    id="NomPnl3Txt167"
+                    text="Ticket Change Date"/>
+            </header>
+        </Column>
+
+    </columns>
+
+
+             <items>
+
+        <ColumnListItem
+            id="NomPnl3ClL168"
+            type="Inactive">
+
+            <cells>
+
+                <!-- 1 -->
+                <Text
+                    id="NomPnl3Txt169"
+                    text="{TicketDetailsData>TicketKey}"/>
+
+                <!-- 2 -->
+                <Text
+                    id="NomPnl3Txt170"
+                    text="{TicketDetailsData>NomDocNumber}"/>
+
+                <!-- 3 -->
+                <Text
+                    id="NomPnl3Txt171"
+                    text="{TicketDetailsData>TicketItem}"/>
+
+                <!-- 4 -->
+                <Text
+                    id="NomPnl3Txt172"
+                    text="{TicketDetailsData>TicketExtNumber}"/>
+
+                <!-- 5 -->
+                <Text
+                    id="NomPnl3Txt172a"
+                    text="{TicketDetailsData>NomDocItem}"/>
+
+                <!-- 6 -->
+                <Text
+                    id="NomPnl3Txt173"
+                    text="{TicketDetailsData>TicketVersion}"/>
+
+                <!-- 7 -->
+                <Text
+                    id="NomPnl3Txt174"
+                    text="{TicketDetailsData>LocationId}"/>
+
+                <!-- 8 -->
+                <Text
+                    id="NomPnl3Txt175"
+                    text="{TicketDetailsData>VehicleId}"/>
+
+                <!-- 9 -->
+                <Text
+                    id="NomPnl3Txt176"
+                    text="{TicketDetailsData>TicketQuantity}"/>
+
+                <!-- 10 -->
+                <Text
+                    id="NomPnl3Txt177"
+                    text="{TicketDetailsData>TicketMaterial}"/>
+
+                <!-- 11 -->
+                <Text
+                    id="NomPnl3Txt178"
+                    text="{TicketDetailsData>TicketPostingDate}"/>
+
+                <!-- 12 -->
+                <Text
+                    id="NomPnl3Txt179"
+                    text="{TicketDetailsData>TicketStartDateTime}"/>
+
+                <!-- 13 -->
+                <Text
+                    id="NomPnl3Txt180"
+                    text="{TicketDetailsData>TicketEndDateTime}"/>
+
+                <!-- 14 -->
+                <Text
+                    id="NomPnl3Txt181"
+                    text="{TicketDetailsData>TicketCreatedBy}"/>
+
+                <!-- 15 -->
+                <Text
+                    id="NomPnl3Txt182"
+                    text="{TicketDetailsData>TicketChangedDate}"/>
+
+            </cells>
+
+        </ColumnListItem>
+
+    </items>
+
             </Table>
         </ScrollContainer>
     </Panel>
