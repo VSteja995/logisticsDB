@@ -68,6 +68,40 @@ this.getView().setModel(oNomDetailsModel, "NomDetailsData");
 var oTicketDetailsModel = new JSONModel({  TicketDetailsSet: [] });
 this.getView().setModel( oTicketDetailsModel, "TicketDetailsData" );
 
+// =====================================================
+// Nomination Dropdown Models
+// =====================================================
+
+var oNomCmdtyModel = new JSONModel({
+    UniqNomCmdtySet: []
+});
+this.getView().setModel(
+    oNomCmdtyModel,
+    "UniqNomCmdtyData"
+);
+
+
+var oNomLocModel = new JSONModel({
+    UniqNomLocSet: []
+});
+this.getView().setModel(
+    oNomLocModel,
+    "UniqNomLocData"
+);
+
+
+var oNomStatModel = new JSONModel({
+    UniqNomStatSet: []
+});
+this.getView().setModel(
+    oNomStatModel,
+    "UniqNomStatData"
+);
+
+
+// Keep complete nomination result
+this._aNominationResults = [];
+
 // Nomination filter state
 this._oNomFilterState = {
     fromDate: null,
@@ -78,6 +112,7 @@ this._oNomFilterState = {
     location: "",
     status: ""
 };
+
 
 
             var oPosSmryModel = new JSONModel({ PosSmrySet: [] });
@@ -674,18 +709,20 @@ _initializeDefaultNominationFilters: function () {
     // 6. Wait for OData metadata
     // =====================================================
 
- oModel.metadataLoaded().then(function () {
+oModel.metadataLoaded().then(function () {
 
     console.log(
         "Loading Nomination Details with default filters..."
     );
+
+    // Load dropdown values
+    this._loadNominationDropdownData();
 
     // Load Nomination Details
     this._applyNominationFilters(
         dFromDate,
         dToday
     );
-
 
     // Load Ticket Details
     this._applyTicketFilters(
@@ -694,6 +731,146 @@ _initializeDefaultNominationFilters: function () {
     );
 
 }.bind(this));
+},
+
+_loadNominationDropdownData: function () {
+
+    var oModel = this.getView().getModel();
+
+    if (!oModel) {
+        console.error("OData model not available.");
+        return;
+    }
+
+
+    // =====================================================
+    // 1. Commodity
+    // =====================================================
+
+    oModel.read("/UniqNomCmdty", {
+
+       success: function (oData) {
+
+    var aResults = oData && oData.results
+        ? oData.results
+        : [];
+
+    // Add blank option at the beginning
+    aResults.unshift({
+        Commodity: "",
+        CommodityName: ""
+    });
+
+    var oCmdtyModel = this.getView().getModel(
+        "UniqNomCmdtyData"
+    );
+
+    if (oCmdtyModel) {
+        oCmdtyModel.setProperty(
+            "/UniqNomCmdtySet",
+            aResults
+        );
+    }
+
+}.bind(this),
+
+        error: function (oError) {
+
+            console.error(
+                "Error loading UniqNomCmdty:",
+                oError
+            );
+
+        }.bind(this)
+    });
+
+
+    // =====================================================
+    // 2. Location
+    // =====================================================
+
+    oModel.read("/UniqNomLoc", {
+
+        success: function (oData) {
+
+            var aResults =
+                oData && oData.results
+                    ? oData.results
+                    : [];
+
+            var oLocModel =
+                this.getView().getModel(
+                    "UniqNomLocData"
+                );
+
+            if (oLocModel) {
+
+                oLocModel.setProperty(
+                    "/UniqNomLocSet",
+                    aResults
+                );
+            }
+
+            console.log(
+                "Nomination Location:",
+                aResults
+            );
+
+        }.bind(this),
+
+        error: function (oError) {
+
+            console.error(
+                "Error loading UniqNomLoc:",
+                oError
+            );
+
+        }.bind(this)
+    });
+
+
+    // =====================================================
+    // 3. Status
+    // =====================================================
+
+    oModel.read("/UniqNomStat", {
+
+        success: function (oData) {
+
+            var aResults =
+                oData && oData.results
+                    ? oData.results
+                    : [];
+
+            var oStatModel =
+                this.getView().getModel(
+                    "UniqNomStatData"
+                );
+
+            if (oStatModel) {
+
+                oStatModel.setProperty(
+                    "/UniqNomStatSet",
+                    aResults
+                );
+            }
+
+            console.log(
+                "Nomination Status:",
+                aResults
+            );
+
+        }.bind(this),
+
+        error: function (oError) {
+
+            console.error(
+                "Error loading UniqNomStat:",
+                oError
+            );
+
+        }.bind(this)
+    });
 },
 
 
@@ -825,7 +1002,281 @@ _initializeDefaultNominationFilters: function () {
 
 },
 
+_filterNominationTable: function () {
 
+    var oNomModel =
+        this.getView().getModel(
+            "NomDetailsData"
+        );
+
+    if (!oNomModel) {
+        return;
+    }
+
+
+    var aResults =
+        this._aNominationResults || [];
+
+
+    // =====================================================
+    // Search values
+    // =====================================================
+
+    var sDealId =
+        String(
+            this._oNomFilterState.dealId || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    var sNominationId =
+        String(
+            this._oNomFilterState.nominationId || ""
+        )
+        .trim()
+        .toLowerCase();
+
+
+    // =====================================================
+    // Dropdown values
+    // =====================================================
+
+    var sCommodity =
+        this._oNomFilterState.commodity || "";
+
+
+    var sLocation =
+        this._oNomFilterState.location || "";
+
+
+    var sStatus =
+        this._oNomFilterState.status || "";
+
+
+    // =====================================================
+    // Filter
+    // =====================================================
+
+    var aFilteredResults =
+        aResults.filter(function (oItem) {
+
+
+            // ---------------------------------------------
+            // Deal ID
+            // ---------------------------------------------
+
+            var sDealNumber =
+                String(
+                    oItem.DealNumber || ""
+                )
+                .toLowerCase();
+
+
+            var bDealMatch =
+                !sDealId ||
+                sDealNumber.indexOf(
+                    sDealId
+                ) !== -1;
+
+
+            // ---------------------------------------------
+            // Nomination ID
+            // ---------------------------------------------
+
+            var sNominationKey =
+                String(
+                    oItem.NominationKey || ""
+                )
+                .toLowerCase();
+
+
+            var bNominationMatch =
+                !sNominationId ||
+                sNominationKey.indexOf(
+                    sNominationId
+                ) !== -1;
+
+
+            // ---------------------------------------------
+            // Commodity
+            // ---------------------------------------------
+
+            var bCommodityMatch =
+                !sCommodity ||
+                oItem.Commodity === sCommodity;
+
+
+            // ---------------------------------------------
+            // Location
+            // ---------------------------------------------
+
+            var bLocationMatch =
+                !sLocation ||
+                oItem.Locationid === sLocation;
+
+
+            // ---------------------------------------------
+            // Status
+            // ---------------------------------------------
+
+            var bStatusMatch =
+                !sStatus ||
+                oItem.Status === sStatus;
+
+
+            // ---------------------------------------------
+            // ALL conditions
+            // ---------------------------------------------
+
+            return (
+                bDealMatch &&
+                bNominationMatch &&
+                bCommodityMatch &&
+                bLocationMatch &&
+                bStatusMatch
+            );
+
+        });
+
+
+    // =====================================================
+    // Update ONLY Nominations Details table
+    // =====================================================
+
+    oNomModel.setProperty(
+        "/NomDetailsSet",
+        aFilteredResults
+    );
+
+
+    console.log(
+        "Filtered Nomination records:",
+        aFilteredResults.length
+    );
+},
+
+
+
+onNominationSearch: function (oEvent) {
+
+    // =====================================================
+    // Get Deal ID
+    // =====================================================
+
+    var oDealInput = this.byId(
+        "MainPnlFra015--NomPnl1Inp005"
+    );
+
+    var sDealId = oDealInput
+        ? oDealInput.getValue().trim()
+        : "";
+
+
+    // =====================================================
+    // Get Nomination ID
+    // =====================================================
+
+    var oNominationInput = this.byId(
+        "MainPnlFra015--NomPnl1Inp008"
+    );
+
+    var sNominationId = oNominationInput
+        ? oNominationInput.getValue().trim()
+        : "";
+
+
+    // =====================================================
+    // Store values in filter state
+    // =====================================================
+
+    this._oNomFilterState.dealId =
+        sDealId;
+
+    this._oNomFilterState.nominationId =
+        sNominationId;
+
+
+    // =====================================================
+    // Apply ALL nomination filters
+    // =====================================================
+
+    this._filterNominationTable();
+
+
+    console.log(
+        "Nomination Search:",
+        "Deal ID =", sDealId,
+        "Nomination ID =", sNominationId
+    );
+},
+
+onNominationDropdownChange: function (oEvent) {
+
+    var oSelect = oEvent.getSource();
+
+    var sSelectedKey =
+        oSelect.getSelectedKey();
+
+
+    // =====================================================
+    // Commodity
+    // =====================================================
+
+    if (
+        oSelect.getId().indexOf(
+            "NomPnl1Sel018"
+        ) !== -1
+    ) {
+
+        this._oNomFilterState.commodity =
+            sSelectedKey;
+    }
+
+
+    // =====================================================
+    // Location
+    // =====================================================
+
+    else if (
+        oSelect.getId().indexOf(
+            "NomPnl1Sel025"
+        ) !== -1
+    ) {
+
+        this._oNomFilterState.location =
+            sSelectedKey;
+    }
+
+
+    // =====================================================
+    // Status
+    // =====================================================
+
+    else if (
+        oSelect.getId().indexOf(
+            "NomPnl1Sel033"
+        ) !== -1
+    ) {
+
+        this._oNomFilterState.status =
+            sSelectedKey;
+    }
+
+
+    // =====================================================
+    // Apply ALL nomination filters
+    // =====================================================
+
+    this._filterNominationTable();
+
+
+    console.log(
+        "Nomination Dropdown Changed:",
+        sSelectedKey,
+        this._oNomFilterState
+    );
+},
     
 
 _readAllODataPages: function (sPath) {
@@ -1339,18 +1790,18 @@ _applyNominationFilters: function (dFrom, dTo) {
             // Set JSONModel data
             // =================================================
 
-            var oNomModel =
-                oView.getModel("NomDetailsData");
+         var oNomModel =
+    oView.getModel("NomDetailsData");
 
+if (oNomModel) {
 
-            if (oNomModel) {
+    // Store complete nomination data
+    this._aNominationResults =
+        aResults.slice();
 
-                oNomModel.setProperty(
-                    "/NomDetailsSet",
-                    aResults
-                );
-
-            }
+    // Apply current filters
+    this._filterNominationTable();
+}
 
 
             oView.setBusy(false);

@@ -15,12 +15,12 @@
 
             <VBox id="NomPnl1Vbx003" class="sapUiSmallMarginEnd">
                 <Label id="NomPnl1Lbl004" text="Deal ID :" class="sapUiTinyMarginBottom"/>
-                <Input id="NomPnl1Inp005" placeholder="Search Deal Id" width="8rem"/>
+                <Input id="NomPnl1Inp005" placeholder="Search Deal Id" width="8rem" liveChange="onNominationSearch"/>
             </VBox>
 
             <VBox id="NomPnl1Vbx006" class="sapUiSmallMarginEnd">
                 <Label id="NomPnl1Lbl007" text="Nomination ID :"/>
-                <Input id="NomPnl1Inp008" placeholder="Search Nominations Id" width="9rem"/>
+                <Input id="NomPnl1Inp008" placeholder="Search Nominations Id" width="9rem" liveChange="onNominationSearch"/>
             </VBox>
 
             <!-- <VBox id="NomPnl1Vbx009" class="sapUiSmallMarginEnd">
@@ -35,34 +35,53 @@
 
             <VBox id="NomPnl1Vbx016" class="sapUiSmallMarginEnd">
                 <Label id="NomPnl1Lbl017" text="Commodity"/>
-                <Select id="NomPnl1Sel018" width="8rem">
-                    <core:Item id="NomPnl1Ite019" key="" text=""/>
-                    <core:Item id="NomPnl1Ite020" key="GAS87" text="GAS87"/>
-                    <core:Item id="NomPnl1Ite021" key="GAS88" text="GAS88"/>
-                    <core:Item id="NomPnl1Ite022" key="Diesel" text="Diesel"/>
-                </Select>
+             <Select
+    id="NomPnl1Sel018"
+    width="8rem"
+    selectedKey=""
+    change=".onNominationDropdownChange"
+    items="{UniqNomCmdtyData>/UniqNomCmdtySet}">
+
+    <core:Item
+        id="NomPnl1Ite019"
+        key="{UniqNomCmdtyData>Commodity}"
+        text="{UniqNomCmdtyData>CommodityName}" />
+
+</Select>
             </VBox>
 
             <VBox id="NomPnl1Vbx023" class="sapUiSmallMarginEnd">
                 <Label id="NomPnl1Lbl024" text="Location"/>
-                <Select id="NomPnl1Sel025" width="8rem">
-                    <core:Item id="NomPnl1Ite026" key="" text=""/>
-                    <core:Item id="NomPnl1Ite027" key="North" text="North"/>
-                    <core:Item id="NomPnl1Ite028" key="South" text="South"/>
-                    <core:Item id="NomPnl1Ite029" key="East" text="East"/>
-                    <core:Item id="NomPnl1Ite030" key="West" text="West"/>
-                </Select>
+              <Select
+    id="NomPnl1Sel025"
+    width="8rem"
+    selectedKey=""
+    change=".onNominationDropdownChange"
+    items="{UniqNomLocData>/UniqNomLocSet}">
+
+    <core:Item
+        id="NomPnl1Ite026"
+        key="{UniqNomLocData>LocationId}"
+        text="{UniqNomLocData>LocationName}" />
+
+</Select>
             </VBox>
 
             <VBox id="NomPnl1Vbx031" class="sapUiSmallMarginEnd">
                 <Label id="NomPnl1Lbl032" text="Status"/>
-                <Select id="NomPnl1Sel033" width="8rem">
-                    <core:Item id="NomPnl1Ite034" key="" text=""/>
-                    <core:Item id="NomPnl1Ite035" key="Active" text="Active"/>
-                    <core:Item id="NomPnl1Ite036" key="Pending" text="Pending"/>
-                    <core:Item id="NomPnl1Ite037" key="Cancelled" text="Cancelled"/>
-                    <core:Item id="NomPnl1Ite038" key="Completed" text="Completed"/>
-                </Select>
+            <Select
+    id="NomPnl1Sel033"
+    width="8rem"
+    selectedKey=""
+    change=".onNominationDropdownChange"
+    items="{UniqNomStatData>/UniqNomStatSet}">
+
+    <core:Item
+        id="NomPnl1Ite034"
+        key="{UniqNomStatData>Status}"
+        text="{UniqNomStatData>StatusDescription}" />
+
+</Select>
             </VBox>
             <VBox id="NomPnl1Vbx039" class="sapUiSmallMarginEnd">
             <Label id="_IDGenLabel24"  text="DateRange :"></Label>
