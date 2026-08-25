@@ -1796,7 +1796,10 @@ _applyTicketFilters: function (dFrom, dTo) {
         },
 
         navToCreateTicket: function () {
-            this._navigateToIntent("Ticket", "create");
+            this._navigateToIntent("ProcessOrchestrationTicket", "display");
+        },
+        navToUploadTicket: function () {
+            this._navigateToIntent("ProcessOrchestrationTicket", "upload");
         },
         _navigateToIntent: function (sSemanticObject, sAction) {
             var oCrossNav = this._oCrossNav;
@@ -1838,60 +1841,131 @@ _applyTicketFilters: function (dFrom, dTo) {
                 });
         },
 
-        // ── GIT ayout helpers ───────────────────────────────────────────────────────
+        // ── Full Screen Layout Helpers ─────────────────────────────────────────────
         onFullScreenToggle: function (oEvent) {
             LayoutHelper.toggleFullScreen(oEvent);
         },
-        onDealToggleFullScreen: function (oEvent) {
+
+        _toggleGenericTableFullScreen: function (oEvent, mConfig) {
             var oViewModel = this.getView().getModel("view");
-            var bFullScreen = true;
-            if (oViewModel) {
-                bFullScreen = !oViewModel.getProperty("/isTableFullScreen");
-                oViewModel.setProperty("/isTableFullScreen", bFullScreen);
+            if (!oViewModel) {
+                oViewModel = new sap.ui.model.json.JSONModel({});
+                this.getView().setModel(oViewModel, "view");
+            }
+            var bFullScreen = !oViewModel.getProperty(mConfig.flag);
+            oViewModel.setProperty(mConfig.flag, bFullScreen);
+
+            var oBtn = oEvent && typeof oEvent.getSource === "function" ? oEvent.getSource() : null;
+            var sPrefix = oBtn ? oBtn.getId().split("--")[0] + "--" : "";
+
+            // 1. Resolve target Panel
+            var oPanel = this.byId(sPrefix + mConfig.panelId) || this.byId(mConfig.panelId);
+            if (!oPanel && oBtn) {
+                var oCurr = oBtn;
+                while (oCurr && typeof oCurr.getParent === "function") {
+                    oCurr = oCurr.getParent();
+                    if (oCurr && oCurr.isA && oCurr.isA("sap.m.Panel")) {
+                        oPanel = oCurr;
+                        break;
+                    }
+                }
             }
 
-            var sPrefix = "MainPnlFra011--";
-            var oPanel = this.byId(sPrefix + "DlPnl2Pnl034") || this.byId("DlPnl2Pnl034");
-            if (!oPanel && oEvent && typeof oEvent.getSource === "function") {
-                var oBtn = oEvent.getSource();
-                var oParent1 = oBtn ? oBtn.getParent() : null;
-                var oParent2 = oParent1 ? oParent1.getParent() : null;
-                oPanel = oParent2 ? oParent2.getParent() : null;
+            // 2. Resolve ScrollContainer
+            var oScrollContainer = this.byId(sPrefix + mConfig.scrollContainerId) || this.byId(mConfig.scrollContainerId);
+
+            // 3. Resolve Sibling Panels to hide/show
+            var aSiblingPanels = [];
+            if (mConfig.siblingPanelIds && Array.isArray(mConfig.siblingPanelIds)) {
+                mConfig.siblingPanelIds.forEach(function (sId) {
+                    var oSib = this.byId(sPrefix + sId) || this.byId(sId);
+                    if (oSib) {
+                        aSiblingPanels.push(oSib);
+                    }
+                }.bind(this));
             }
 
-            var oScrollContainer = this.byId(sPrefix + "DlPnl2Scr050") || this.byId("DlPnl2Scr050");
-            var oSchedulePanel = this.byId(sPrefix + "DlPnl1Pnl001") || this.byId("DlPnl1Pnl001");
-            var oKpiPanel = this.byId(sPrefix + "_IDGenPanel") || this.byId("_IDGenPanel");
-
+            // 4. Apply / Remove Full Screen styling and visibility
             if (bFullScreen) {
                 if (oPanel) {
                     oPanel.addStyleClass("dealsTableFullScreen");
                 }
-                if (oScrollContainer) {
+                if (oScrollContainer && typeof oScrollContainer.setHeight === "function") {
                     oScrollContainer.setHeight("100%");
                 }
-                if (oSchedulePanel) {
-                    oSchedulePanel.setVisible(false);
-                }
-                if (oKpiPanel) {
-                    oKpiPanel.setVisible(false);
-                }
+                aSiblingPanels.forEach(function (oSib) {
+                    if (oSib && typeof oSib.setVisible === "function") {
+                        oSib.setVisible(false);
+                    }
+                });
                 document.body.classList.add("fullScreenLock");
+                if (oBtn && typeof oBtn.setIcon === "function") {
+                    oBtn.setIcon("sap-icon://exit-full-screen");
+                    oBtn.setTooltip("Exit Full Screen");
+                }
             } else {
                 if (oPanel) {
                     oPanel.removeStyleClass("dealsTableFullScreen");
                 }
-                if (oScrollContainer) {
+                if (oScrollContainer && typeof oScrollContainer.setHeight === "function") {
                     oScrollContainer.setHeight("280px");
                 }
-                if (oSchedulePanel) {
-                    oSchedulePanel.setVisible(true);
-                }
-                if (oKpiPanel) {
-                    oKpiPanel.setVisible(true);
-                }
+                aSiblingPanels.forEach(function (oSib) {
+                    if (oSib && typeof oSib.setVisible === "function") {
+                        oSib.setVisible(true);
+                    }
+                });
                 document.body.classList.remove("fullScreenLock");
+                if (oBtn && typeof oBtn.setIcon === "function") {
+                    oBtn.setIcon("sap-icon://full-screen");
+                    oBtn.setTooltip("Full Screen");
+                }
             }
+        },
+
+        onDealToggleFullScreen: function (oEvent) {
+            this._toggleGenericTableFullScreen(oEvent, {
+                flag: "/isTableFullScreen",
+                panelId: "DlPnl2Pnl034",
+                scrollContainerId: "DlPnl2Scr050",
+                siblingPanelIds: ["DlPnl1Pnl001", "_IDGenPanel"]
+            });
+        },
+
+        onMonthTableToggleFullScreen: function (oEvent) {
+            this._toggleGenericTableFullScreen(oEvent, {
+                flag: "/isMonthTableFullScreen",
+                panelId: "monthPanel",
+                scrollContainerId: "monthScr",
+                siblingPanelIds: ["_IDGenPanel1", "sumPanel", "uomPanel", "planPanel", "matchPanel"]
+            });
+        },
+
+        onNominationTableToggleFullScreen: function (oEvent) {
+            this._toggleGenericTableFullScreen(oEvent, {
+                flag: "/isNomDetailsFullScreen",
+                panelId: "NomPnl2Pnl045",
+                scrollContainerId: "NomPnl2Scr061",
+                siblingPanelIds: ["NomPnl1Pnl001", "NomPnl3Pnl120", "NomPnl4Pnl185"]
+            });
+        },
+
+        onTicketTableToggleFullScreen: function (oEvent) {
+            this._toggleGenericTableFullScreen(oEvent, {
+                flag: "/isTicketDetailsFullScreen",
+                panelId: "NomPnl3Pnl120",
+                scrollContainerId: "NomPnl3Scr136",
+                siblingPanelIds: ["NomPnl1Pnl001", "NomPnl2Pnl045", "NomPnl4Pnl185"]
+            });
+        },
+
+        onMatchTableToggleFullScreen: function (oEvent) {
+            this._toggleGenericTableFullScreen(oEvent, {
+                flag: "/isMatchTableFullScreen",
+                panelId: "matchPanel",
+                scrollContainerId: "scmd",
+                siblingPanelIds: ["_IDGenPanel1", "sumPanel", "uomPanel", "planPanel", "monthPanel"]
+            });
         }
         
     });

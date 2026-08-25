@@ -150,7 +150,7 @@
                         
                        > -->
                     
-                    <Table id="entTbl" fixedLayout="false" items="{EntDetailData>/EntDetailSet}" mode="MultiSelect" sticky="ColumnHeaders,HeaderToolbar" selectionChange="onSelectionChangeENT" >
+                    <Table id="entTbl" fixedLayout="false" items="{EntDetailData>/EntDetailSet}" mode="MultiSelect" selectionChange="onSelectionChangeENT" >
                         <columns>
                             <Column id="_IDGenColumn1"><header><Text id="_IDGenText" text="Deal ID"/></header></Column>
                             <Column id="_IDGenColumn2"><header><Text id="_IDGenText1" text="Commodity"/></header></Column>
@@ -240,7 +240,7 @@
                         showFullScreenButton="false"
                        > -->
                 <ScrollContainer id="oblScroll" horizontal="true" vertical="true" width="100%" height="100%" >    
-                        <Table id="oblTbl" fixedLayout="false" items="{OblDetailData>/OblDetailSet}" mode="MultiSelect" sticky="ColumnHeaders,HeaderToolbar" selectionChange="onSelectionChangeOBL" >
+                        <Table id="oblTbl" fixedLayout="false" items="{OblDetailData>/OblDetailSet}" mode="MultiSelect" selectionChange="onSelectionChangeOBL" >
                         <columns>
                             <Column id="_IDGenColumn22"><header><Text id="_IDGenText21" text="Deal ID"/></header></Column>
                             <Column id="_IDGenColumn23"><header><Text id="_IDGenText22" text="Commodity"/></header></Column>
@@ -322,7 +322,7 @@
                     
                 </Toolbar>
                 <ScrollContainer id="invScroll" horizontal="true" vertical="true" width="100%" height="100%" >
-                    <Table id="invTbl"  mode="MultiSelect" fixedLayout="false" items="{/InvDetails}" sticky="ColumnHeaders,HeaderToolbar">
+                    <Table id="invTbl"  mode="MultiSelect" fixedLayout="false" items="{/InvDetails}">
                         <columns>
                             <Column id="_IDGenColumn43"><header><Text id="_IDGenText42" text="Commodity"/></header></Column>
                             <Column id="_IDGenColumn44"><header><Text id="_IDGenText43" text=" Plant"/></header></Column>
@@ -554,16 +554,18 @@
         </layout:Splitter>
      </layout:Splitter>
     </Panel>
-<Panel id="monthPanel" class="sapUiTinyMargin" headerText="Monthly Planning Summary" expandable="true" expanded="true">
+<Panel id="monthPanel" class="sapUiTinyMargin planclass" headerText="Monthly Planning Summary" expandable="true" expanded="true">
     <headerToolbar>
         <Toolbar id="monthBar" >
            <Title id="idmpt1" text="Monthly Planning Summary">  </Title>  
             <DateRangeSelection id="monthDrs" width="15rem" placeholder="MM/DD/YYYY - MM/DD/YYYY"></DateRangeSelection>
             <ToolbarSpacer id="monthSpc" ></ToolbarSpacer>
             <Button  id="monthRefreshBtn"  text="Refresh" icon="sap-icon://refresh" type="Ghost"></Button>
+            <!-- <Button id="monthFullBtn" icon="{= ${view>/isMonthTableFullScreen} ? 'sap-icon://exit-full-screen' : 'sap-icon://full-screen'}" tooltip="{= ${view>/isMonthTableFullScreen} ? 'Exit Full Screen' : 'Full Screen'}" type="Transparent" press=".onMonthTableToggleFullScreen"/> -->
        </Toolbar> 
     </headerToolbar>
        
+        <ScrollContainer id="monthScr"  class="dealsTableWrapper" horizontal="true" vertical="true" width="100%">
         <Table id="monthTbl" fixedLayout="false" items="{PosSmryData>/PosSmrySet}" sticky="ColumnHeaders,HeaderToolbar">
             <columns>
                 <Column id="_IDGenColumn71"><header><Text id="_IDGenText70" text="Month" /></header></Column>
@@ -586,30 +588,22 @@
                 </ColumnListItem>
             </items>
         </Table>
+        </ScrollContainer>
 </Panel>
 
-<Panel id="matchPanel" headerText="Matched Details" class="sapUiTinyMargin"  expandable="true" expanded="true">
-<headerToolbar >
+<Panel id="matchPanel" class="sapUiTinyMargin planclass" expandable="true" expanded="true">
+    <VBox id="matchVbx" class="dealsFlexBody">
+        <OverflowToolbar id="idtbmb">
+            <Title id="tmd2m" text="Matched Positions" />
+            <ToolbarSpacer id="mdspacer" />
+            <Button id="nomBtn" text="Create Nominations" icon="sap-icon://add" type="Emphasized" press="navToCreateNomination" />
+            <Button id="nomdelBtn" text="DeleteSelected" icon="sap-icon://delete" type="Reject"/>
+            <Button id="nomref" text="Refresh" icon="sap-icon://refresh" type="Ghost"/>
+            <Button id="matchFullBtn" icon="{= ${view>/isMatchTableFullScreen} ? 'sap-icon://exit-full-screen' : 'sap-icon://full-screen'}" tooltip="{= ${view>/isMatchTableFullScreen} ? 'Exit Full Screen' : 'Full Screen'}" type="Transparent" press=".onMatchTableToggleFullScreen"/>
+        </OverflowToolbar>
 
-    <Toolbar id="matchBar" >
-     <Title id="hdmdid"     text="Matched Positions"></Title>
-    <ToolbarSpacer id="matchSpc" ></ToolbarSpacer>
-    <Button id="nomBtn" text="Create Nominations" icon="sap-icon://add" type="Emphasized" press="navToCreateNomination" ></Button>
-    <Button id="nomdelBtn" text="DeleteSelected" icon="sap-icon://delete" type="Reject"></Button>
-    <Button id="nomref" text="Refresh" icon="sap-icon://refresh" type="Ghost"></Button>
-    </Toolbar>
-</headerToolbar>
-    <Toolbar id="idtbmb">
-    
-        <Title id="tmd2m" text="Matched Positions ( )" > </Title>
-        <ToolbarSpacer id="mdspacer" ></ToolbarSpacer>
-                       
-                    <Button id="entFullBtnImd" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent"/>
-
-    </Toolbar>
-
-    <ScrollContainer id="scmd" >
-            <Table id="matchTbl" fixedLayout="false" >
+        <ScrollContainer id="scmd" height="280px" class="dealsTableWrapper" horizontal="true" vertical="true" width="100%">
+            <Table id="matchTbl" fixedLayout="false" sticky="ColumnHeaders,HeaderToolbar" >
                 <columns>
                     <Column id="srcCol"><header><Text id="_IDGenText76" text="Match Source" /></header></Column>
                     <Column id="matchMonthCol"><header><Text id="_IDGenText77" text="Match Scheduled Month" /></header></Column>
@@ -655,5 +649,6 @@
             </items>
         </Table>
         </ScrollContainer>
+    </VBox>
     </Panel>
 </core:FragmentDefinition>

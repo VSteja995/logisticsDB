@@ -248,11 +248,16 @@
 }
 
 /* ============================================================
-   DEALS TABLE — ScrollContainer fixed height for vertical scroll
+   TABLES (Deals, Nominations, Tickets) — Sticky Headers & Alignment
    ============================================================ */
 
-/* Sticky column header for Deals table */
-#DlPnl2Tbl051 .sapMListTblHeaderCell {
+/* Sticky column headers across all tables inside scroll containers */
+.sapUiScrollCnt thead th,
+.sapUiScrollCnt .sapMListTblHeaderCell,
+.sapUiScrollCnt .sapMListTblSelCol,
+#DlPnl2Tbl051 .sapMListTblHeaderCell,
+#NomPnl2Tbl062 .sapMListTblHeaderCell,
+#NomPnl3Tbl137 .sapMListTblHeaderCell {
     position: sticky !important;
     top: 0 !important;
     z-index: 3 !important;
@@ -260,19 +265,25 @@
 }
 
 /* Align cell text consistently */
-#DlPnl2Tbl051 .sapMListTblCell {
+#DlPnl2Tbl051 .sapMListTblCell,
+#NomPnl2Tbl062 .sapMListTblCell,
+#NomPnl3Tbl137 .sapMListTblCell {
     vertical-align: middle !important;
     padding: 0.35rem 0.5rem !important;
     text-align: left !important;
 }
 
-#DlPnl2Tbl051 .sapMListTblHeaderCell {
+#DlPnl2Tbl051 .sapMListTblHeaderCell,
+#NomPnl2Tbl062 .sapMListTblHeaderCell,
+#NomPnl3Tbl137 .sapMListTblHeaderCell {
     padding: 0.35rem 0.5rem !important;
     text-align: left !important;
 }
 
 /* Ensure text doesn't overflow column width */
-#DlPnl2Tbl051 .sapMText {
+#DlPnl2Tbl051 .sapMText,
+#NomPnl2Tbl062 .sapMText,
+#NomPnl3Tbl137 .sapMText {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -549,6 +560,9 @@
    TABLES — Brand Styled Headers & Row Hover
    ============================================================ */
 .sapMListTblHeaderCell {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 3 !important;
     background-color: var(--gl-navy) !important;
     color: var(--gl-white) !important;
     font-weight: 600 !important;
@@ -693,7 +707,7 @@
 /* ============================================================
    FULL SCREEN CLASS
    ============================================================ */
-   .fullScreenSection {
+.fullScreenSection {
     /* Fixed positioning to overlay entire viewport */
     position: fixed !important;
     top: 0 !important;
@@ -706,7 +720,7 @@
     height: 100vh !important;
     
     /* Ensure it sits on top of everything */
-    z-index: 999999 !important;
+    z-index: 2147483647 !important;
     
     /* Background color to hide content underneath */
     background-color: #ffffff !important;
@@ -714,32 +728,80 @@
     /* Flexbox layout: Toolbar at top, Table fills rest */
     display: flex !important;
     flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
     
-    /* Remove any margins/padding that might cause gaps */
+    /* Flush layout with no surrounding blank gap */
     margin: 0 !important;
-    padding: 0.5rem 1rem 1rem 1rem !important;
+    padding: 0 !important;
     box-sizing: border-box !important;
     
     /* Prevent overflow to show content behind */
     overflow: hidden !important;
+    animation: none !important;
+    transform: none !important;
+}
+
+/* Ensure enclosing panel is elevated and does not trap or isolate stacking context */
+.sapMPanel:has(.fullScreenSection),
+.parentPanelFullScreen {
+    position: relative !important;
+    z-index: 2147483647 !important;
+    animation: none !important;
+    transform: none !important;
 }
 
 /* Keep the toolbar (header with title + close button) fixed at top */
 .fullScreenSection > .sapMTB,
-.fullScreenSection > .sapMBar {
+.fullScreenSection > .sapMBar,
+.fullScreenSection > header {
     flex: 0 0 auto !important;
+    width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
 }
 
-/* Let the scrollable table/content fill remaining vertical space */
-.fullScreenSection > .sapUiScrollCnt,
-.fullScreenSection > .sapMTable,
-.fullScreenSection > .sapMList,
-.fullScreenSection > div:not(.sapMTB):not(.sapMBar) {
+/* Let the ScrollContainer fill all remaining vertical space */
+.fullScreenSection > .sapUiScrollCnt {
     flex: 1 1 auto !important;
-    min-height: 0 !important;  /* Critical: allows flex child to actually shrink below content size */
+    min-height: 0 !important;
+    height: 0 !important;       /* flex will stretch it to fill */
+    margin: 0 !important;
+    padding: 0 !important;
     overflow: auto !important;
+}
+
+/* Fallback for any other direct non-toolbar child (e.g. sap.m.Table without ScrollContainer) */
+.fullScreenSection > .sapMTable,
+.fullScreenSection > .sapMList {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    overflow: auto !important;
+}
+
+/* Receiver div inside the ScrollContainer must fill parent */
+.fullScreenSection .sapUiScrollCntRcv {
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Suppress ALL UI5 sticky-offset transforms — the blank gap culprit */
+.fullScreenSection .sapMListTblHeader,
+.fullScreenSection .sapMListTblHeaderCell,
+.fullScreenSection .sapMTableStickyHeader,
+.fullScreenSection thead,
+.fullScreenSection .sapUiTableColHdr,
+.splitterSection .sapMListTblHeader,
+.splitterSection .sapMListTblHeaderCell,
+.splitterSection .sapMTableStickyHeader,
+.splitterSection thead,
+.splitterSection .sapUiTableColHdr {
+    top: 0 !important;
+    transform: none !important;
+    position: sticky !important;
 }
 
 .dealsTableFullScreen {
@@ -750,7 +812,7 @@
     bottom: 0 !important;
     width: 100vw !important;
     height: 100vh !important;
-    z-index: 999999 !important;
+    z-index: 2147483647 !important;
     background-color: #ffffff !important;
     display: flex !important;
     flex-direction: column !important;
@@ -796,7 +858,8 @@
 }
 
 /* The ScrollContainer itself */
-.dealsTableFullScreen .dealsTableWrapper {
+.dealsTableFullScreen .dealsTableWrapper,
+.dealsTableFullScreen > .sapMPanelContent > .dealsTableWrapper {
     flex: 1 1 auto !important;
     height: 100% !important;
     min-height: 0 !important;
@@ -811,20 +874,18 @@ body.fullScreenLock {
    ANIMATIONS & MICRO-INTERACTIONS
    ============================================================ */
 
-/* Fade-in for panels */
-.sapMPanel {
-    animation: glFadeInUp 0.4s ease-out;
+/* Fade-in for panels (without trapping fixed children) */
+.sapMPanel:not(.parentPanelFullScreen):not(.dealsTableFullScreen):not(:has(.fullScreenSection)) {
+    animation: glFadeInUp 0.3s ease-out;
 }
 
 @keyframes glFadeInUp {
     from {
         opacity: 0;
-        transform: translateY(12px);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0);
     }
 }
 
