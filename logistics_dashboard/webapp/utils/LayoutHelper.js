@@ -25,12 +25,38 @@ sap.ui.define([], function () {
             var oButton = oEvent.getSource();
             var bIsFullScreen = oButton.data("isFullScreen");
             
-            // Go up to the section wrapper (Toolbar -> VBox)
-            var oSection = oButton.getParent().getParent();
+            // Find section wrapper (VBox / Splitter section / Panel)
+            var oToolbar = oButton.getParent();
+            var oSection = null;
+            var oParentPanel = null;
+            
+            var oCurr = oToolbar ? oToolbar.getParent() : null;
+            while (oCurr && typeof oCurr.getParent === "function") {
+                if (!oSection && (oCurr.isA("sap.m.VBox") || oCurr.hasStyleClass("splitterSection") || oCurr.isA("sap.m.Panel"))) {
+                    oSection = oCurr;
+                }
+                if (oCurr.isA("sap.m.Panel")) {
+                    oParentPanel = oCurr;
+                    break;
+                }
+                oCurr = oCurr.getParent();
+            }
+            
+            // Fallback if not found via loop
+            if (!oSection) {
+                oSection = oToolbar ? oToolbar.getParent() : null;
+            }
+            
+            if (!oSection) {
+                return;
+            }
             
             if (!bIsFullScreen) {
                 // ENTERING FULL SCREEN MODE
                 oSection.addStyleClass("fullScreenSection");
+                if (oParentPanel) {
+                    oParentPanel.addStyleClass("parentPanelFullScreen");
+                }
                 
                 // Lock body scroll to prevent background scrolling
                 document.body.classList.add("fullScreenLock");
@@ -45,6 +71,9 @@ sap.ui.define([], function () {
             } else {
                 // EXITING FULL SCREEN MODE
                 oSection.removeStyleClass("fullScreenSection");
+                if (oParentPanel) {
+                    oParentPanel.removeStyleClass("parentPanelFullScreen");
+                }
                 
                 // Unlock body scroll to restore normal scrolling
                 document.body.classList.remove("fullScreenLock");
