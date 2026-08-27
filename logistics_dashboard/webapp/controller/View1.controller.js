@@ -6,8 +6,10 @@ sap.ui.define([
     "sap/m/MessageBox",
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
-     "sap/ui/core/Fragment"
-], (Controller, JSONModel, LayoutHelper, MessageToast, Filter, FilterOperator,Fragment) => {
+    "sap/ui/core/Fragment",
+    "sap/m/Dialog",
+    "sap/ui/unified/FileUploader"
+], (Controller, JSONModel, LayoutHelper, MessageToast, Filter, FilterOperator,Fragment,Dialog, FileUploader) => {
     "use strict";
 
     return Controller.extend("genslogiques.logisticsdashboard.controller.View1", {
@@ -27,7 +29,7 @@ sap.ui.define([
     fromDate: null,
     toDate: null,
     commodityKeys: [],
-    motKey: null
+    motKey: "01"
 };
             this._oPosFilterState = {
                 fromDate:      null,
@@ -49,6 +51,9 @@ sap.ui.define([
             this._aAllDealResults = [];
             this._aDealBuffer = [];
             this._onDealDetailLoadedCallback = null;
+
+            // Track latest Deals request
+             this._iDealsRequestId = 0;
 
             var oTotalSummaryModel = new JSONModel({ TotalSummarySet: [] });
             this.getView().setModel(oTotalSummaryModel, "TotalSummaryData");
@@ -874,6 +879,8 @@ _loadNominationDropdownData: function () {
 },
 
 
+
+
         // ══════════════════════════════════════════════════════════════════════
         //  DEALS OVERVIEW TAB — Filter Handlers
         // ══════════════════════════════════════════════════════════════════════
@@ -897,25 +904,58 @@ _loadNominationDropdownData: function () {
             }
         },
 
-        onDealModeChange: function (oEvent) {
-            var sKey = oEvent.getParameter("key");
-            if (sKey === "Train") {
-                this._oDealFilterState.motKey = "02";
-            } else if (sKey === "Truck") {
-                this._oDealFilterState.motKey = "01";
-            }
-            else
-            {
-                this._oDealFilterState.motKey = " ";
-            }
+      onDealModeChange: function (oEvent) {
 
-            var dFrom = this._oDealFilterState.fromDate;
-            var dTo   = this._oDealFilterState.toDate;
-            if (dFrom && dTo) {
-                this._applyDealsFilters(dFrom, dTo);
-            }
-        },
+    // Get selected key from SegmentedButton
+   var sKey = oEvent.getSource().getSelectedKey();
 
+    console.log("Selected Deal Mode:", sKey);
+
+    // =====================================================
+    // Set MoT based on selected toggle
+    // =====================================================
+
+    if (sKey === "Truck") {
+
+        // Truck = Road
+        this._oDealFilterState.motKey = "01";
+
+    } else if (sKey === "Rail") {
+
+        // Rail = Rail
+        this._oDealFilterState.motKey = "02";
+
+    } else {
+
+        this._oDealFilterState.motKey = "";
+    }
+
+    console.log(
+        "Selected MoT Key:",
+        this._oDealFilterState.motKey
+    );
+
+    // =====================================================
+    // Get current date range
+    // =====================================================
+
+    var dFrom = this._oDealFilterState.fromDate;
+    var dTo   = this._oDealFilterState.toDate;
+
+    // =====================================================
+    // Reload Deal Details
+    // =====================================================
+
+    if (dFrom && dTo) {
+
+        this._applyDealsFilters(
+            dFrom,
+            dTo
+        );
+
+    }
+
+},
         onDealCommoditySelectionFinish: function (oEvent) {
             var aSelectedKeys = oEvent.getSource().getSelectedKeys();
             this._oDealFilterState.commodityKeys = aSelectedKeys;
@@ -926,6 +966,418 @@ _loadNominationDropdownData: function () {
                 this._applyDealsFilters(dFrom, dTo);
             }
         },
+
+onNominationRefresh: function () {
+
+    console.log("===== NOMINATION REFRESH STARTED =====");
+
+    // =====================================================
+    // 1. Calculate the ORIGINAL default date range
+    //    Same logic as app initial load
+    // =====================================================
+
+    var dToday = new Date();
+
+    var dFromDate = new Date(dToday);
+
+    dFromDate.setMonth(
+        dFromDate.getMonth() - 1
+    );
+
+
+    // =====================================================
+    // 2. RESET NOMINATION FILTER STATE
+    // =====================================================
+
+    this._oNomFilterState = {
+        fromDate: dFromDate,
+        toDate: dToday,
+        dealId: "",
+        nominationId: "",
+        commodity: "",
+        location: "",
+        status: ""
+    };
+
+
+    // =====================================================
+    // 3. RESET DATE RANGE IN UI
+    // =====================================================
+
+    var oDateRange = this.byId(
+        "MainPnlFra015--_IDGenDateRangeSelection"
+    );
+
+    if (oDateRange) {
+
+        oDateRange.setDateValue(dFromDate);
+        oDateRange.setSecondDateValue(dToday);
+        oDateRange.setValueState("None");
+
+    }
+
+
+    // =====================================================
+    // 4. RESET DEAL NUMBER INPUT
+    // =====================================================
+
+    var oDealInput = this.byId(
+        "MainPnlFra015--NomPnl1Inp005"
+    );
+
+    if (oDealInput) {
+        oDealInput.setValue("");
+    }
+
+
+    // =====================================================
+    // 5. RESET NOMINATION ID INPUT
+    // =====================================================
+
+    var oNominationInput = this.byId(
+        "MainPnlFra015--NomPnl1Inp008"
+    );
+
+    if (oNominationInput) {
+        oNominationInput.setValue("");
+    }
+
+
+    // =====================================================
+    // 6. RESET COMMODITY DROPDOWN
+    // =====================================================
+
+    var oCommoditySelect = this.byId(
+        "MainPnlFra015--NomPnl1Sel018"
+    );
+
+    if (oCommoditySelect) {
+        oCommoditySelect.setSelectedKey("");
+    }
+
+
+    // =====================================================
+    // 7. RESET LOCATION DROPDOWN
+    // =====================================================
+
+    var oLocationSelect = this.byId(
+        "MainPnlFra015--NomPnl1Sel025"
+    );
+
+    if (oLocationSelect) {
+        oLocationSelect.setSelectedKey("");
+    }
+
+
+    // =====================================================
+    // 8. RESET STATUS DROPDOWN
+    // =====================================================
+
+    var oStatusSelect = this.byId(
+        "MainPnlFra015--NomPnl1Sel033"
+    );
+
+    if (oStatusSelect) {
+        oStatusSelect.setSelectedKey("");
+    }
+
+
+    // =====================================================
+    // 9. CLEAR CURRENT NOMINATION DATA
+    // =====================================================
+
+    this._aNominationResults = [];
+
+    var oNomModel = this.getView().getModel(
+        "NomDetailsData"
+    );
+
+    if (oNomModel) {
+
+        oNomModel.setProperty(
+            "/NomDetailsSet",
+            []
+        );
+
+    }
+
+
+    // =====================================================
+    // 10. LOAD NOMINATION DATA WITH DEFAULT DATE RANGE
+    // =====================================================
+
+    this._applyNominationFilters(
+        dFromDate,
+        dToday
+    );
+
+
+    // =====================================================
+    // 11. LOAD TICKET DATA WITH DEFAULT DATE RANGE
+    // =====================================================
+
+    this._applyTicketFilters(
+        dFromDate,
+        dToday
+    );
+
+
+    console.log(
+        "Nomination filters reset to default:",
+        dFromDate,
+        dToday
+    );
+
+    console.log(
+        "===== NOMINATION REFRESH COMPLETED ====="
+    );
+},
+
+onTicketRefresh: function () {
+
+    console.log("===== TICKET REFRESH STARTED =====");
+
+    // =====================================================
+    // 1. Calculate INITIAL / DEFAULT date range
+    //    From = Today - 1 month
+    //    To   = Today
+    // =====================================================
+
+    var dToday = new Date();
+
+    var dFromDate = new Date(dToday);
+
+    dFromDate.setMonth(
+        dFromDate.getMonth() - 1
+    );
+
+
+    // =====================================================
+    // 2. Reset date range in UI
+    // =====================================================
+
+    var oDateRange = this.byId(
+        "MainPnlFra015--_IDGenDateRangeSelection"
+    );
+
+    if (oDateRange) {
+
+        oDateRange.setDateValue(dFromDate);
+        oDateRange.setSecondDateValue(dToday);
+
+    }
+
+
+    // =====================================================
+    // 3. Update filter state
+    // =====================================================
+
+    this._oNomFilterState.fromDate = dFromDate;
+    this._oNomFilterState.toDate = dToday;
+
+
+    // =====================================================
+    // 4. Clear existing Ticket Details data
+    // =====================================================
+
+    var oTicketModel = this.getView().getModel(
+        "TicketDetailsData"
+    );
+
+    if (oTicketModel) {
+
+        oTicketModel.setProperty(
+            "/TicketDetailsSet",
+            []
+        );
+
+    }
+
+
+    // =====================================================
+    // 5. Reload Ticket Details using DEFAULT dates
+    // =====================================================
+
+    this._applyTicketFilters(
+        dFromDate,
+        dToday
+    );
+
+
+    console.log(
+        "Ticket Details refreshed with default date range:",
+        dFromDate,
+        dToday
+    );
+
+    console.log("===== TICKET REFRESH COMPLETED =====");
+},
+
+
+onDealsRefresh: function () {
+
+    console.log("===== DEALS REFRESH STARTED =====");
+
+    // =====================================================
+    // 1. Calculate INITIAL / DEFAULT date range
+    //    From = Today - 1 month
+    //    To   = Today
+    // =====================================================
+
+    var dToday = new Date();
+
+    var dFromDate = new Date(dToday);
+
+    dFromDate.setMonth(
+        dFromDate.getMonth() - 1
+    );
+
+
+    // =====================================================
+    // 2. RESET DEAL FILTER STATE
+    // =====================================================
+
+    this._oDealFilterState.fromDate = dFromDate;
+    this._oDealFilterState.toDate = dToday;
+
+    // Default Mode = Truck
+    this._oDealFilterState.motKey = "01";
+
+    // Remove commodity filter
+    this._oDealFilterState.commodityKeys = [];
+
+
+    // =====================================================
+    // 3. RESET DATE RANGE IN UI
+    // =====================================================
+
+    var oDateRange = this.byId(
+        "MainPnlFra011--DlPnl1DRS005"
+    );
+
+    if (oDateRange) {
+
+        oDateRange.setDateValue(dFromDate);
+        oDateRange.setSecondDateValue(dToday);
+        oDateRange.setValueState("None");
+
+    }
+
+
+    // =====================================================
+    // 4. RESET MODE TO TRUCK
+    // =====================================================
+
+    var oMode = this.byId(
+        "MainPnlFra011--DlPnl1SgB007"
+    );
+
+    if (oMode) {
+        oMode.setSelectedKey("Truck");
+    }
+
+
+    // =====================================================
+    // 5. RESET COMMODITY SELECTION
+    // =====================================================
+
+    // IMPORTANT:
+    // Replace this ID with your actual Deals commodity
+    // MultiComboBox / Select ID if different.
+
+    var oCommodity = this.byId(
+        "MainPnlFra011--DlPnl1Mcb009"
+    );
+
+    if (oCommodity) {
+
+        if (oCommodity.removeAllSelectedItems) {
+            oCommodity.removeAllSelectedItems();
+        }
+
+        if (oCommodity.setSelectedKey) {
+            oCommodity.setSelectedKey("");
+        }
+
+    }
+
+
+    // =====================================================
+    // 6. CLEAR EXISTING DEAL DATA
+    // =====================================================
+
+    var oMonthModel = this.getView().getModel(
+        "MonthData"
+    );
+
+    if (oMonthModel) {
+        oMonthModel.setProperty(
+            "/MonthSet",
+            []
+        );
+    }
+
+
+    var oDealQtyModel = this.getView().getModel(
+        "dealQtyMotData"
+    );
+
+    if (oDealQtyModel) {
+        oDealQtyModel.setProperty(
+            "/DealQtyMotSet",
+            []
+        );
+    }
+
+
+    var oDealDetailModel = this.getView().getModel(
+        "DealDetailData"
+    );
+
+    if (oDealDetailModel) {
+
+        oDealDetailModel.setProperty(
+            "/DealDetailSet",
+            []
+        );
+
+        oDealDetailModel.setProperty(
+            "/hasMore",
+            false
+        );
+    }
+
+
+    // Reset pagination state
+    this._sNextDealUrl = null;
+    this._aAllDealResults = [];
+    this._aDealBuffer = [];
+
+
+    // =====================================================
+    // 7. LOAD DEALS WITH DEFAULT DATE RANGE
+    // =====================================================
+
+    this._applyDealsFilters(
+        dFromDate,
+        dToday
+    );
+
+
+    console.log(
+        "Deals refreshed with default filters:",
+        {
+            fromDate: dFromDate,
+            toDate: dToday,
+            mode: "Truck",
+            commodity: []
+        }
+    );
+
+    console.log("===== DEALS REFRESH COMPLETED =====");
+},
+
+
 
         onNominationDateRangeChange: function (oEvent) {
 
@@ -1279,6 +1731,10 @@ onNominationDropdownChange: function (oEvent) {
 },
     
 
+
+
+
+
 _readAllODataPages: function (sPath) {
 
     var oModel = this.getView().getModel();
@@ -1426,6 +1882,7 @@ _readAllODataPages: function (sPath) {
         // ── Deals Overview: OData reads (UniqDealCmdty, DealQtyMot, DealDetail) ─
         _applyDealsFilters: function (dFrom, dTo) {
             var sMotKey        = this._oDealFilterState.motKey;
+            var iRequestId     = ++this._iDealsRequestId;
             var aCommodityKeys = this._oDealFilterState.commodityKeys || [];
             var oModel         = this.getView().getModel();
             var oView          = this.getView();
@@ -1494,31 +1951,107 @@ var ddKeyPath = oModel.createKey("/DealDetail", {
 
 this._readAllODataPages(ddKeyPath)
 
-    .then(function (aResults) {
+   .then(function (aResults) {
+
+    console.log(
+        "Total DealDetail records received:",
+        aResults.length
+    );
+
+
+    // =====================================================
+    // 1. Apply Commodity filter
+    // =====================================================
+
+    if (aCommodityKeys.length > 0) {
+
+        aResults = aResults.filter(function (oItem) {
+
+            return aCommodityKeys.indexOf(
+                oItem.Commodity
+            ) !== -1;
+
+        });
+
+    }
+
+
+   // =====================================================
+// 2. Apply MoT filter
+// =====================================================
+
+console.log("Selected MoT Key for this request:", sMotKey);
+
+if (sMotKey === "01") {
+
+    // Truck = Road
+
+    aResults = aResults.filter(function (oItem) {
+
+        return String(oItem.MOT || "")
+            .trim()
+            .toLowerCase() === "road";
+
+    });
+
+} else if (sMotKey === "02") {
+
+    // Rail = Rail
+
+    aResults = aResults.filter(function (oItem) {
+
+        return String(oItem.MOT || "")
+            .trim()
+            .toLowerCase() === "rail";
+
+    });
+}
+
+console.log(
+    "DealDetail records after MoT filter:",
+    aResults.length
+);
+
+
+    // =====================================================
+    // 3. Update Deal Details table
+    // =====================================================
+   if (iRequestId !== this._iDealsRequestId) {
 
         console.log(
-            "Total DealDetail records received:",
-            aResults.length
+            "Ignoring old Deals response. Request:",
+            iRequestId,
+            "Latest:",
+            this._iDealsRequestId
         );
 
-        // Apply commodity filter AFTER all pages are loaded
-        if (aCommodityKeys.length > 0) {
-            aResults = aResults.filter(function (oItem) {
-                return aCommodityKeys.indexOf(oItem.Commodity) !== -1;
-            });
-        }
+        return;
+    }
 
-        var oJM = oView.getModel("DealDetailData");
+       // =====================================================
+    // 4. Update Deal Details table
+    // =====================================================
 
-        if (oJM) {
-            oJM.setProperty(
-                "/DealDetailSet",
-                aResults
-            );
-        }
 
-        checkDone();
-    })
+    var oJM =
+        oView.getModel("DealDetailData");
+
+
+    if (oJM) {
+
+        oJM.setProperty(
+            "/DealDetailSet",
+            aResults
+        );
+
+        oJM.refresh(true);
+
+    }
+
+
+    checkDone();
+
+}.bind(this))
 
     .catch(function (oError) {
 
@@ -2246,12 +2779,125 @@ _applyTicketFilters: function (dFrom, dTo) {
             this._navigateToIntent("Nomination", "create");
         },
 
-        navToCreateTicket: function () {
-            this._navigateToIntent("ProcessOrchestrationTicket", "display");
-        },
-        navToUploadTicket: function () {
-            this._navigateToIntent("ProcessOrchestrationTicket", "upload");
-        },
+navToCreateTicket: function () {
+    this._navigateToIntent(
+        "Ticket",
+        "create"
+    );
+},
+
+navToUploadTicket: function () {
+
+    if (!this._oTicketUploadDialog) {
+
+        var oFileUploader = new FileUploader({
+            width: "100%",
+            placeholder: "Choose an Excel or CSV file...",
+            buttonText: "Browse",
+            fileType: ["xlsx", "xls", "csv"],
+            change: this.onTicketFileChange.bind(this)
+        });
+
+        this._oTicketUploadDialog = new Dialog({
+            title: "Upload Ticket File",
+            contentWidth: "500px",
+
+            content: [
+                new sap.m.VBox({
+                    class: "sapUiMediumMargin",
+                    items: [
+
+                        new sap.m.Label({
+                            text: "Select Ticket File"
+                        }),
+
+                        oFileUploader
+
+                    ]
+                })
+            ],
+
+            beginButton: new sap.m.Button({
+                text: "Upload",
+                type: "Emphasized",
+                press: this.onTicketUploadConfirm.bind(this)
+            }),
+
+            endButton: new sap.m.Button({
+                text: "Cancel",
+                press: function () {
+
+                    this._oTicketUploadDialog.close();
+
+                }.bind(this)
+            })
+        });
+
+        this.getView().addDependent(
+            this._oTicketUploadDialog
+        );
+    }
+
+    this._oTicketUploadDialog.open();
+},
+
+onTicketFileChange: function (oEvent) {
+
+    var aFiles = oEvent.getParameter("files");
+
+    if (aFiles && aFiles.length > 0) {
+
+        this._oSelectedTicketFile = aFiles[0];
+
+        console.log(
+            "Selected Ticket File:",
+            this._oSelectedTicketFile.name
+        );
+
+        MessageToast.show(
+            "File selected: " +
+            this._oSelectedTicketFile.name
+        );
+    }
+},
+
+onTicketUploadConfirm: function () {
+
+    if (!this._oSelectedTicketFile) {
+
+        MessageToast.show(
+            "Please select a file first."
+        );
+
+        return;
+    }
+
+    var oFile = this._oSelectedTicketFile;
+
+    console.log(
+        "Uploading Ticket File:",
+        oFile.name
+    );
+
+    /*
+     * FILE PROCESSING WILL COME HERE
+     *
+     * For example:
+     * Excel -> read rows
+     * -> validate data
+     * -> send data to OData
+     */
+
+    MessageToast.show(
+        "File selected: " + oFile.name
+    );
+
+    this._oTicketUploadDialog.close();
+
+    this._oSelectedTicketFile = null;
+},
+
+
         _navigateToIntent: function (sSemanticObject, sAction) {
             var oCrossNav = this._oCrossNav;
             if (!oCrossNav) {

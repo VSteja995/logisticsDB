@@ -117,7 +117,8 @@
                 <Button id="NomPnl2Btn050"
                         text="Refresh"
                         icon="sap-icon://refresh"
-                        type="Ghost"/>
+                        type="Ghost"
+                        press="onNominationRefresh"/>
             </OverflowToolbar>
         </headerToolbar>
         <VBox id="NomPnl2Vbx051" class="dealsFlexBody">
@@ -188,7 +189,13 @@
     <!-- Ticket Start Number not available -->
     <Text id="_IDGenText152" text="-"/>
 
-    <Text id="_IDGenText153" text="{NomDetailsData>ScheduleDate}"/>
+    <Text id="_IDGenText153"  text="{
+                path: 'NomDetailsData>ScheduleDate',
+                type: 'sap.ui.model.type.Date', 
+                formatOptions: {
+                      pattern: 'yyyy/MMM/dd' 
+                      }
+                      }"/>
 
     <Text id="_IDGenText154" text="{NomDetailsData>Locationid}"/>
 
@@ -245,7 +252,8 @@
                 <Button id="NomPnl3Btn126"
                         text="Refresh"
                         icon="sap-icon://refresh"
-                        type="Ghost"/>
+                        type="Ghost"
+                          press="onTicketRefresh"/>
             </OverflowToolbar>
         </headerToolbar>
         <VBox id="NomPnl3Vbx126" class="dealsFlexBody">
@@ -445,18 +453,23 @@
 
                 <!-- 11 -->
                 <Text
-                    id="NomPnl3Txt178"
-                    text="{TicketDetailsData>TicketPostingDate}"/>
+                    id="NomPnl3Txt178" text="{
+                path: 'TicketDetailsData>TicketPostingDate',
+                type: 'sap.ui.model.type.Date', 
+                formatOptions: {
+                      pattern: 'yyyy/MMM/dd' 
+                      }
+                      }"/>
 
                 <!-- 12 -->
                 <Text
                     id="NomPnl3Txt179"
-                    text="{TicketDetailsData>TicketStartDateTime}"/>
+                     text="{TicketDetailsData>TicketStartDateTime}"/>
 
                 <!-- 13 -->
                 <Text
                     id="NomPnl3Txt180"
-                    text="{TicketDetailsData>TicketEndDateTime}"/>
+                     text="{TicketDetailsData>TicketEndDateTime}"/>
 
                 <!-- 14 -->
                 <Text
@@ -466,7 +479,13 @@
                 <!-- 15 -->
                 <Text
                     id="NomPnl3Txt182"
-                    text="{TicketDetailsData>TicketChangedDate}"/>
+                          text="{
+                path: 'TicketDetailsData>TicketChangedDate',
+                type: 'sap.ui.model.type.Date', 
+                formatOptions: {
+                      pattern: 'yyyy/MMM/dd' 
+                      }
+                      }"/>
 
             </cells>
 

@@ -79,7 +79,7 @@
     <Button id="DlPnl2Btn037" text="Create Deal" icon="sap-icon://add" type="Emphasized" press="navToCreateDeals" />
     <Button id="DlPnl2Btn038" text="Edit Deal" icon="sap-icon://edit" type="Transparent" press="navToEditDeals"/>
     <Button id="DlPnl2Btn039" text="Search Deal" icon="sap-icon://search" type="Transparent" press="navToEditDeals"/>
-    <Button id="DlPnl2Btn040"  icon="sap-icon://refresh" type="Ghost" press=""/>
+    <Button id="DlPnl2Btn040"  icon="sap-icon://refresh" type="Ghost"    press="onDealsRefresh"/>
 </OverflowToolbar>
 <VBox id="DlPnl2Vbx041" class="dealsFlexBody">
     <OverflowToolbar id="DlPnl2Tbr042">
@@ -168,6 +168,12 @@
                     <Text id="DlPnl2Txt071E" text="Schedule Quantity" />
                 </header>
             </Column>
+
+            <Column id="_IDGenColumn38" >
+               <header>
+               <Text id="_IDGenText67" text="UOM"/>
+               </header>
+            </Column>
             
             <Column id="DlPnl2Col076">
                 <header>
@@ -253,6 +259,8 @@
                       }"/>
                      
                 <Text id="DlPnl2Txt109" text="{DealDetailData>ScheduleQty}" />
+
+                <Text id="_IDGenText164"  text="{DealDetailData>UOM}"/>
                 <Text id="DlPnl2Txt110" text="{DealDetailData>CallOffQty}"/> 
                 <Text id="DlPnl2Txt112" text="{DealDetailData>DiffQty}" />
                 <Text id="DlPnl2Txt113" text="{DealDetailData>OriginName}" />
