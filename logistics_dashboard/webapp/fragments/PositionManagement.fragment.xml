@@ -453,8 +453,8 @@
                     <table:template>
                         <FlexBox id="_IDGenFlexBox1" alignItems="Center">
                             <Text id="_IDGenText57" text="{matchedPositionsModel>ModeOfTransportLabel}" wrapping="false" visible="{= ${matchedPositionsModel>RowType} === 'parent'}"/>
-                            <Select id="_IDGenSelect" selectedKey="{matchedPositionsModel>_selectedMoT}" visible="{= ${matchedPositionsModel>RowType} === 'child' &amp;&amp; ${matchedPositionsModel>_motConflict} === true}" change="onMoTSelectionChange" width="8rem" items="{matchedPositionsModel>_motOptions}">
-                                <core:Item id="_IDGenItem" key="{matchedPositionsModel>key}" text="{matchedPositionsModel>text}"/>
+                            <Select id="_IDGenSelect" selectedKey="{matchedPositionsModel>_selectedMoT}" visible="{= ${matchedPositionsModel>RowType} === 'child' &amp;&amp; ${matchedPositionsModel>_motConflict} === true}" change="onMoTSelectionChange" width="8rem" items="{path: 'matchedPositionsModel>_motOptions', templateShareable: false}">
+                                <core:Item id="_IDGenItem1" key="{matchedPositionsModel>key}" text="{matchedPositionsModel>text}"/>
                             </Select>
                             <Text id="_IDGenText58" text="{matchedPositionsModel>ModeOfTransportLabel}" wrapping="false" visible="{= ${matchedPositionsModel>RowType} === 'child' &amp;&amp; ${matchedPositionsModel>_motConflict} !== true}"/>
                         </FlexBox>
@@ -502,8 +502,8 @@
                         <FlexBox id="_IDGenFlexBox2" alignItems="Center">
                             <Text id="_IDGenText64" text="{matchedPositionsModel>DisplayWeekID}" wrapping="false" visible="{= !${matchedPositionsModel>_weekConflict} }"/>
                             <Select id="_IDGenSelect1" selectedKey="{matchedPositionsModel>_selectedWeekID}" visible="{= !!${matchedPositionsModel>_weekConflict} &amp;&amp; ${matchedPositionsModel>RowType} === 'child' }" change="onWeekIDSelectionChange" width="10rem" tooltip="Select delivery week for this planned match">
-                                <core:Item id="_IDGenItem1" key="{matchedPositionsModel>_srcWeekID}" text="{matchedPositionsModel>_srcWeekID}"/>
-                                <core:Item id="_IDGenItem2" key="{matchedPositionsModel>_tgtWeekID}" text="{matchedPositionsModel>_tgtWeekID}"/>
+                                <core:Item id="_IDGenItem2" key="{matchedPositionsModel>_srcWeekID}" text="{matchedPositionsModel>_srcWeekID}"/>
+                                <core:Item id="_IDGenItem3" key="{matchedPositionsModel>_tgtWeekID}" text="{matchedPositionsModel>_tgtWeekID}"/>
                             </Select>
                         </FlexBox>
                     </table:template>
@@ -603,7 +603,7 @@
         </OverflowToolbar>
 
         <ScrollContainer id="scmd" height="280px" class="dealsTableWrapper" horizontal="true" vertical="true" width="100%">
-            <Table id="matchTbl" fixedLayout="false" sticky="ColumnHeaders,HeaderToolbar" >
+            <Table id="matchTbl" fixedLayout="false" sticky="ColumnHeaders,HeaderToolbar" items="{MatchPosData>/MatchPosSet}" >
                 <columns>
                     <Column id="srcCol"><header><Text id="_IDGenText76" text="Match Source" /></header></Column>
                     <Column id="matchMonthCol"><header><Text id="_IDGenText77" text="Match Scheduled Month" /></header></Column>
@@ -642,10 +642,43 @@
             <items>
                 <ColumnListItem id="monthRo">
                     <cells>
-                         <Text id="mpsr" text="{Matchsource}"></Text>
-                       
-                    </cells>
-                </ColumnListItem>
+            
+            <Text id="mpsr" text="{MatchPosData>Matchsource}"/>
+            <Text id="_IDGenText164" text="{MatchPosData>Matchschedmonth}"/>
+            <Text id="_IDGenText165" text="{MatchPosData>WeekID}"/>
+            <Text id="_IDGenText166" text="{MatchPosData>CommodityDesc}"/>
+            <Text id="_IDGenText167" text="{MatchPosData>Matchquantity}"/>
+            <Text id="_IDGenText168" text="{MatchPosData>Purchasedeal}"/>
+            <Text id="_IDGenText169" text="{MatchPosData>Purchasedocument}"/>
+            <Text id="_IDGenText170" text="{MatchPosData>Purchasedocitem}"/>
+            <Text id="_IDGenText171" text="{MatchPosData>Purchquantity}"/>
+            <Text id="_IDGenText172" text="{MatchPosData>Salesdeal}"/>
+            <Text id="_IDGenText173" text="{MatchPosData>Salesdocument}"/>
+            <Text id="_IDGenText174" text="{MatchPosData>Salesdocitem}"/>
+            <Text id="_IDGenText175" text="{MatchPosData>Salesquantity}"/>
+            <Text id="_IDGenText176" text="{MatchPosData>Plant}"/>
+            <Text id="_IDGenText177" text="{MatchPosData>Storagelocation}"/>
+            <Text id="_IDGenText178" text="{MatchPosData>Invquantity}"/>
+            <Text id="_IDGenText179" text="{MatchPosData>Supplier}"/>
+            <Text id="_IDGenText180" text="{MatchPosData>Customer}"/>
+            <Text id="_IDGenText181" text="{MatchPosData>Origin}"/>
+            <Text id="_IDGenText182" text="{MatchPosData>Originname}"/>
+            <Text id="_IDGenText183" text="{MatchPosData>Destination}"/>
+            <Text id="_IDGenText184" text="{MatchPosData>DestinationName}"/>
+            <Text id="_IDGenText185" text="{MatchPosData>ModeOfTransport}"/>
+            <Text id="_IDGenText186" text="{MatchPosData>ModeOfTransportText}"/>
+            <Text id="_IDGenText187" text="{MatchPosData>Matchstatus}"/>
+            <Text id="_IDGenText188" text="{MatchPosData>Purchscheddate}"/>
+            <Text id="_IDGenText189" text="{MatchPosData>PIncoTerms}"/>
+            <Text id="_IDGenText190" text="{MatchPosData>PTransactionType}"/>
+            <Text id="_IDGenText191" text="{MatchPosData>Salescheddate}"/>
+            <Text id="_IDGenText192" text="{MatchPosData>SIncoTerms}"/>
+            <Text id="_IDGenText193" text="{MatchPosData>STransactionType}"/>
+            <Text id="_IDGenText194" text="{MatchPosData>CreatedAt}"/>
+            <Text id="_IDGenText195" text="{MatchPosData>CreatedBy}"/>
+       
+        </cells>
+ </ColumnListItem>
             </items>
         </Table>
         </ScrollContainer>
