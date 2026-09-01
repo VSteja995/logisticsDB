@@ -13,8 +13,9 @@
                         placeholder="MM/DD/YYYY - MM/DD/YYYY"
                         change=".onDealDateRangeChange" />
                     <Label id="DlPnl1Lbl006"  text="Mode :"></Label>
-                    <SegmentedButton id="DlPnl1SgB007" selectedKey="Truck" selectionChange=".onDealModeChange" >
+                    <SegmentedButton id="DlPnl1SgB007" selectedKey="All" selectionChange=".onDealModeChange" >
                         <items>
+                            <SegmentedButtonItem id="DlPnl1SBI007" key="All" text="All" icon="sap-icon://multiselect-all" />
                             <SegmentedButtonItem id="DlPnl1SBI009" key="Truck" text="Truck" icon="sap-icon://shipping-status" />
                             <SegmentedButtonItem id="DlPnl1SBI008" key="Train" text="Rail"  icon="sap-icon://cargo-train" />  
                         </items>
@@ -50,7 +51,7 @@
                 [ parseInt(${dealQtyMotData>ScheduleMonth}, 10) - 1 ] }" />
                 
                 <ScrollContainer id="DlPnl1Scr022" height="100px" vertical="true" horizontal="false" width="100%">
-<Table id="DlPnl1Tbl023" class="cardTable" fixedLayout="false">
+<Table id="DlPnl1Tbl023" class="cardTable" fixedLayout="false" items="{path: 'dealQtyMotData>Commodities', templateShareable: false}">
     <columns>
         <Column id="DlPnl1Col024" width="40%" ><Text id="DlPnl1Txt025" text="Commodity" /></Column>
         <Column id="DlPnl1Col026" width="30%" ><Text id="DlPnl1Txt027" text="Purch | Planned" wrapping="false" /></Column>
@@ -120,6 +121,11 @@
             <Column id="DlPnl2Col060">
                 <header>
                     <Text id="DlPnl2Txt061" text="Commodity" />
+                </header>
+            </Column>
+            <Column id="DlPnl2Col060E">
+                <header>
+                    <Text id="DlPnl2Txt061E" text="CommodityDescription" />
                 </header>
             </Column>
             <Column id="DlPnl2Col092">
@@ -234,6 +240,8 @@
                       }
                       }"/>
                 <Text id="DlPnl2Txt101" text="{DealDetailData>Commodity}" />
+                 <Text id="DlPnl2Txt101E" text="{DealDetailData>CommodityDescription}" />
+
                 <Text id="DlPnl2Txt117" text="{DealDetailData>ModeOfTransportText}" />
                 <Text id="DlPnl2Txt098" text="{DealDetailData>CounterParty}" />
                 <Text id="DlPnl2Txt099" text="{DealDetailData>CounterPartyName}" />
@@ -260,7 +268,7 @@
                      
                 <Text id="DlPnl2Txt109" text="{DealDetailData>ScheduleQty}" />
 
-                <Text id="_IDGenText164"  text="{DealDetailData>UOM}"/>
+                <Text id="IDGenText164"  text="{DealDetailData>UOM}"/>
                 <Text id="DlPnl2Txt110" text="{DealDetailData>CallOffQty}"/> 
                 <Text id="DlPnl2Txt112" text="{DealDetailData>DiffQty}" />
                 <Text id="DlPnl2Txt113" text="{DealDetailData>OriginName}" />
