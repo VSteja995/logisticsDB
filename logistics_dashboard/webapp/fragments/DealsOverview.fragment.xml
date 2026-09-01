@@ -28,13 +28,22 @@
                             
                             </items>
                     </MultiComboBox>
-                     <Label id="DlPnl1Lbl014"  text="Market   Zone :"></Label>
-                    <MultiComboBox id="DlPnl1Cbo015" placeholder="All Zones" width="100%" >
-                        <items>
-                            
-                            </items>
-                    </MultiComboBox>
-                    
+            <Label 
+    id="DlPnl1Lbl014" 
+    text="Market Zone :" />
+
+<MultiComboBox
+    id="DlPnl1Cbo015"
+    placeholder="All Zones"
+    width="100%"
+    items="{/MKZone}">
+
+    <core:Item
+        id="_IDGenItem3"
+        key="{MarketZone}"
+        text="{MarketZone}" />
+
+</MultiComboBox>
             </HBox>
            
     
