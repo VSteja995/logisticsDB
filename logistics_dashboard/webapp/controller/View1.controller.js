@@ -9,8 +9,89 @@ sap.ui.define([
     "sap/ui/core/Fragment",
     "sap/m/Dialog",
     "sap/ui/unified/FileUploader"
-], (Controller, JSONModel, LayoutHelper, MessageToast,MessageBox, Filter, FilterOperator,Fragment,Dialog, FileUploader) => {
+], function (Controller, JSONModel, LayoutHelper, MessageToast, MessageBox, Filter, FilterOperator, Fragment, Dialog, FileUploader) {
     "use strict";
+
+    // ── Pure Date & Type Utility Helpers ─────────────────────────────────────
+    function _parseDate(vDate) {
+        if (!vDate) {
+            return null;
+        }
+        if (vDate instanceof Date) {
+            return isNaN(vDate.getTime()) ? null : vDate;
+        }
+        if (typeof vDate === "string") {
+            var mOData = /\/Date\((\d+)\)\//.exec(vDate);
+            if (mOData) {
+                return new Date(parseInt(mOData[1], 10));
+            }
+            var d = new Date(vDate);
+            if (!isNaN(d.getTime())) {
+                return d;
+            }
+        }
+        return null;
+    }
+
+    function _toODataDate(vDate) {
+        var d = _parseDate(vDate);
+        return d || null;
+    }
+
+    function _toODataMonth(vDate, sFallbackMonth) {
+        if (sFallbackMonth && typeof sFallbackMonth === "string" && sFallbackMonth.trim()) {
+            var sClean = sFallbackMonth.trim();
+            if (sClean.length === 1) {
+                return "0" + sClean;
+            }
+            if (sClean.length === 2 && !isNaN(parseInt(sClean, 10))) {
+                return sClean;
+            }
+        }
+        var d = _parseDate(vDate);
+        if (d) {
+            return String(d.getMonth() + 1).padStart(2, "0");
+        }
+        return sFallbackMonth || "";
+    }
+
+    // Dynamic MOT description map - populated from actual data
+    var _motDescMap = {};
+
+    function _motLabel(sCode) {
+        if (!sCode) { return ""; }
+        return _motDescMap[sCode] || sCode;
+    }
+
+    function _motDisplay(sCode) {
+        if (!sCode) { return ""; }
+        var sDesc = _motDescMap[sCode] || "";
+        return sDesc ? (sCode + " \u2014 " + sDesc) : sCode;
+    }
+
+    function _fmtDate(vDate) {
+        var d = _parseDate(vDate);
+        if (!d) { return ""; }
+        return (d.getUTCMonth() + 1) + "/" + d.getUTCDate() + "/" + d.getUTCFullYear();
+    }
+
+    function _fmtMonth(vDate) {
+        var d = _parseDate(vDate);
+        if (!d) { return ""; }
+        return String(d.getUTCMonth() + 1).padStart(2, "0");
+    }
+
+    function _fmtQty(n, sUOM) {
+        return parseFloat(n || 0).toLocaleString("en-US") + (sUOM ? " " + sUOM : "");
+    }
+
+    function _toODataTimestamp(sDateString) {
+        if (!sDateString) return null;
+        var oDate = new Date(sDateString);
+        if (isNaN(oDate.getTime())) return null;
+        var nTimestamp = oDate.getTime();
+        return "/Date(" + nTimestamp + ")/";
+    }
 
     return Controller.extend("genslogiques.logisticsdashboard.controller.View1", {
 
@@ -25,16 +106,17 @@ sap.ui.define([
             
                 
             // ── Separate filter state per tab ─────────────────────────────────
-          this._oDealFilterState = {
-    fromDate: null,
-    toDate: null,
-    commodityKeys: [],
-    motKey: "01"
-};
+            this._oDealFilterState = {
+                fromDate: null,
+                toDate: null,
+                commodityKeys: [],
+                motKey: " "
+            };
             this._oPosFilterState = {
                 fromDate:      null,
                 toDate:        null,
-                commodityKeys: []
+                commodityKeys: [],
+                motKey:        " "
             };
 
             // Initialise JSON models for both controls
@@ -126,12 +208,15 @@ this._oNomFilterState = {
             var oMatchPosModel = new JSONModel({ MatchPosSet: [] });
             this.getView().setModel(oMatchPosModel, "MatchPosData");
 
-            
+            // Nomination Dialog & Value Help models
+            this.getView().setModel(new JSONModel({ options: [] }), "nomMOTModel");
+            this.getView().setModel(new JSONModel({ results: [] }), "CarrierVHDModel");
+            this.getView().setModel(new JSONModel({ results: [] }), "ShipperVHDModel");
+            this.getView().setModel(new JSONModel({ results: [] }), "VehicleVHDModel");
 
-            
-                // Local UI state for view-level toggles (e.g. Deals table full screen)
-                var oViewModel = new JSONModel({ isTableFullScreen: false });
-                this.getView().setModel(oViewModel, "view");
+            // Local UI state for view-level toggles (e.g. Deals table full screen)
+            var oViewModel = new JSONModel({ isTableFullScreen: false });
+            this.getView().setModel(oViewModel, "view");
 
         },
 
@@ -181,8 +266,8 @@ this._oNomFilterState = {
             this._oDealFilterState.fromDate = dFromDate;
             this._oDealFilterState.toDate = dToday;
          
-            // Truck
-            this._oDealFilterState.motKey = "01";
+            // Mode: All
+            this._oDealFilterState.motKey = " ";
          
             // No commodity filter
             this._oDealFilterState.commodityKeys = [];
@@ -225,15 +310,15 @@ this._oNomFilterState = {
             }
       
             // =====================================================
-            // 5. Set Mode = Truck
+            // 5. Set Mode = All
             // =====================================================
          
             if (oMode) {
          
-                oMode.setSelectedKey("Truck");
+                oMode.setSelectedKey("All");
          
                 console.log(
-                    "Default Mode set: Truck"
+                    "Default Mode set: All"
                 );
          
             } else {
@@ -553,27 +638,32 @@ _initializeDefaultPlanningFilters: function () {
 
 
     // =====================================================
-    // 2. Store default date range in filter state
+    // 2. Store default date range and mode in filter state
     // =====================================================
 
     this._oPosFilterState.fromDate = dFromDate;
     this._oPosFilterState.toDate = dToday;
+    this._oPosFilterState.motKey = " ";
 
     // No commodity selected initially
     this._oPosFilterState.commodityKeys = [];
 
 
     // =====================================================
-    // 3. Get Logistics Planning DateRangeSelection
+    // 3. Get Logistics Planning controls
     // =====================================================
 
     var oDateRange = this.byId(
         "MainPnlFra013--dateDrs"
     );
 
+    var oMode = this.byId(
+        "MainPnlFra013--modeSeg"
+    );
+
 
     // =====================================================
-    // 4. Set default date range in UI
+    // 4. Set default date range & mode in UI
     // =====================================================
 
     if (oDateRange) {
@@ -595,6 +685,11 @@ _initializeDefaultPlanningFilters: function () {
         );
 
         return;
+    }
+
+    if (oMode) {
+        oMode.setSelectedKey("All");
+        console.log("Default Logistics Mode set: All");
     }
 
 
@@ -904,60 +999,26 @@ _loadNominationDropdownData: function () {
             }
         },
 
-      onDealModeChange: function (oEvent) {
+        onDealModeChange: function (oEvent) {
+            var sKey = oEvent.getParameter("key") || (oEvent.getParameter("item") && oEvent.getParameter("item").getKey()) || oEvent.getSource().getSelectedKey();
+            if (sKey === "Train" || sKey === "Rail" || sKey === "02") {
+                this._oDealFilterState.motKey = "02";
+            } else if (sKey === "Truck" || sKey === "01") {
+                this._oDealFilterState.motKey = "01";
+            } else {
+                // "All" mode: pass empty / blank so both Rail and Truck are included
+                this._oDealFilterState.motKey = " ";
+            }
 
-    // Get selected key from SegmentedButton
-   var sKey = oEvent.getSource().getSelectedKey();
+            var dFrom = this._oDealFilterState.fromDate;
+            var dTo   = this._oDealFilterState.toDate;
+            if (dFrom && dTo) {
+                this._applyDealsFilters(dFrom, dTo);
+            }
+        },
 
-    console.log("Selected Deal Mode:", sKey);
-
-    // =====================================================
-    // Set MoT based on selected toggle
-    // =====================================================
-
-    if (sKey === "Truck") {
-
-        // Truck = Road
-        this._oDealFilterState.motKey = "01";
-
-    } else if (sKey === "Rail") {
-
-        // Rail = Rail
-        this._oDealFilterState.motKey = "02";
-
-    } else {
-
-        this._oDealFilterState.motKey = "";
-    }
-
-    console.log(
-        "Selected MoT Key:",
-        this._oDealFilterState.motKey
-    );
-
-    // =====================================================
-    // Get current date range
-    // =====================================================
-
-    var dFrom = this._oDealFilterState.fromDate;
-    var dTo   = this._oDealFilterState.toDate;
-
-    // =====================================================
-    // Reload Deal Details
-    // =====================================================
-
-    if (dFrom && dTo) {
-
-        this._applyDealsFilters(
-            dFrom,
-            dTo
-        );
-
-    }
-
-},
         onDealCommoditySelectionFinish: function (oEvent) {
-            var aSelectedKeys = oEvent.getSource().getSelectedKeys();
+            var aSelectedKeys = oEvent.getSource().getSelectedKeys ? oEvent.getSource().getSelectedKeys() : [];
             this._oDealFilterState.commodityKeys = aSelectedKeys;
 
             var dFrom = this._oDealFilterState.fromDate;
@@ -1907,6 +1968,10 @@ _readAllODataPages: function (sPath) {
 
             oModel.read(UcmKeyPath, {
                 success: function (oData) {
+                    if (iRequestId !== this._iDealsRequestId) {
+                        checkDone();
+                        return;
+                    }
                     var aResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
                     if (aCommodityKeys.length > 0) {
                         aResults = aResults.filter(function (oItem) {
@@ -1916,7 +1981,7 @@ _readAllODataPages: function (sPath) {
                     var oJM = oView.getModel("UniqDealCmdtyData");
                     if (oJM) { oJM.setProperty("/UniqDealCmdtySet", aResults); }
                     checkDone();
-                },
+                }.bind(this),
                 error: function () { checkDone(); MessageToast.show("Error loading UniqDealCmdty."); }
             });
 
@@ -1924,21 +1989,62 @@ _readAllODataPages: function (sPath) {
             var dqKeyPath = oModel.createKey("/DealQtyMot", {
                 p_FromDate: sFormattedFrom,
                 p_ToDate:   sFormattedTo,
-                p_MoT:      sMotKey
+                p_MoT:      (sMotKey && sMotKey.trim()) ? sMotKey.trim() : " "
             }) + "/Set";
 
             oModel.read(dqKeyPath, {
                 success: function (oData) {
+                    if (iRequestId !== this._iDealsRequestId) {
+                        checkDone();
+                        return;
+                    }
                     var aResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
                     if (aCommodityKeys.length > 0) {
                         aResults = aResults.filter(function (oItem) {
                             return aCommodityKeys.indexOf(oItem.Commodity) !== -1;
                         });
                     }
+                    if (sMotKey === "01") {
+                        // Truck = Road / 01
+                        aResults = aResults.filter(function (oItem) {
+                            var sMotField = oItem.MOT || oItem.ModeOfTransport || oItem.MoT || oItem.Mode;
+                            if (sMotField === undefined) { return true; }
+                            var sVal = String(sMotField).trim().toLowerCase();
+                            return sVal === "road" || sVal === "truck" || sVal === "01";
+                        });
+                    } else if (sMotKey === "02") {
+                        // Rail = Rail / 02
+                        aResults = aResults.filter(function (oItem) {
+                            var sMotField = oItem.MOT || oItem.ModeOfTransport || oItem.MoT || oItem.Mode;
+                            if (sMotField === undefined) { return true; }
+                            var sVal = String(sMotField).trim().toLowerCase();
+                            return sVal === "rail" || sVal === "train" || sVal === "02";
+                        });
+                    }
+
+                    // Group results by ScheduleMonth
+                    var mMonthGroups = {};
+                    aResults.forEach(function (oItem) {
+                        var sMonth = String(oItem.ScheduleMonth || "");
+                        if (!mMonthGroups[sMonth]) {
+                            mMonthGroups[sMonth] = {
+                                ScheduleMonth: sMonth,
+                                Commodities: []
+                            };
+                        }
+                        mMonthGroups[sMonth].Commodities.push(oItem);
+                    });
+
+                    var aGroupedResults = Object.keys(mMonthGroups).map(function (sKey) {
+                        return mMonthGroups[sKey];
+                    }).sort(function (a, b) {
+                        return parseInt(a.ScheduleMonth, 10) - parseInt(b.ScheduleMonth, 10);
+                    });
+
                     var oJM = oView.getModel("dealQtyMotData");
-                    if (oJM) { oJM.setProperty("/DealQtyMotSet", aResults); }
+                    if (oJM) { oJM.setProperty("/DealQtyMotSet", aGroupedResults); }
                     checkDone();
-                },
+                }.bind(this),
                 error: function () { checkDone(); MessageToast.show("Error loading DealQtyMot."); }
             });
 
@@ -1946,7 +2052,7 @@ _readAllODataPages: function (sPath) {
 var ddKeyPath = oModel.createKey("/DealDetail", {
     p_FromDate: sFormattedFrom,
     p_ToDate:   sFormattedTo,
-    p_MoT:      sMotKey
+    p_MoT:      (sMotKey && sMotKey.trim()) ? sMotKey.trim() : " "
 }) + "/Set";
 
 this._readAllODataPages(ddKeyPath)
@@ -1983,27 +2089,16 @@ this._readAllODataPages(ddKeyPath)
 console.log("Selected MoT Key for this request:", sMotKey);
 
 if (sMotKey === "01") {
-
-    // Truck = Road
-
+    // Truck = Road / Truck / 01
     aResults = aResults.filter(function (oItem) {
-
-        return String(oItem.MOT || "")
-            .trim()
-            .toLowerCase() === "road";
-
+        var sVal = String(oItem.MOT || oItem.ModeOfTransport || oItem.MoT || oItem.Mode || "").trim().toLowerCase();
+        return sVal === "road" || sVal === "truck" || sVal === "01" || sVal.indexOf("road") !== -1 || sVal.indexOf("truck") !== -1;
     });
-
 } else if (sMotKey === "02") {
-
-    // Rail = Rail
-
+    // Rail = Rail / Train / 02
     aResults = aResults.filter(function (oItem) {
-
-        return String(oItem.MOT || "")
-            .trim()
-            .toLowerCase() === "rail";
-
+        var sVal = String(oItem.MOT || oItem.ModeOfTransport || oItem.MoT || oItem.Mode || "").trim().toLowerCase();
+        return sVal === "rail" || sVal === "train" || sVal === "02" || sVal.indexOf("rail") !== -1 || sVal.indexOf("train") !== -1;
     });
 }
 
@@ -2095,11 +2190,14 @@ console.log(
         },
 
         onPosModeChange: function (oEvent) {
-            var sKey = oEvent.getParameter("key");
-            if (sKey === "Train") {
+            var sKey = oEvent.getParameter("key") || (oEvent.getParameter("item") && oEvent.getParameter("item").getKey()) || oEvent.getSource().getSelectedKey();
+            if (sKey === "Train" || sKey === "Rail" || sKey === "02") {
                 this._oPosFilterState.motKey = "02";
-            } else if (sKey === "Truck") {
+            } else if (sKey === "Truck" || sKey === "01") {
                 this._oPosFilterState.motKey = "01";
+            } else {
+                // "All" mode
+                this._oPosFilterState.motKey = " ";
             }
 
             var dFrom = this._oPosFilterState.fromDate;
@@ -2110,7 +2208,7 @@ console.log(
         },
 
         onPosCommoditySelectionFinish: function (oEvent) {
-            var aSelectedKeys = oEvent.getSource().getSelectedKeys();
+            var aSelectedKeys = oEvent.getSource().getSelectedKeys ? oEvent.getSource().getSelectedKeys() : [];
             this._oPosFilterState.commodityKeys = aSelectedKeys;
 
             var dFrom = this._oPosFilterState.fromDate;
@@ -2120,9 +2218,17 @@ console.log(
             }
         },
 
-        // ── Logistics Planning: OData reads (EntDetails, OblDetails, TotalSummary)
+        // ── Logistics Planning: OData reads (EntDetails, OblDetails, TotalSummary, PositionsSummary, MatchPosSet)
         _applyPositionFilters: function (dFrom, dTo) {
-            var sMotKey        = this._oPosFilterState.motKey || "11";
+            if (!dFrom || !dTo) {
+                dFrom = this._oPosFilterState.fromDate;
+                dTo   = this._oPosFilterState.toDate;
+            }
+            if (!dFrom || !dTo) {
+                return;
+            }
+
+            var sMotKey        = this._oPosFilterState.motKey || " ";
             var aCommodityKeys = this._oPosFilterState.commodityKeys || [];
             var sCommodity     = aCommodityKeys.join(",");
             var oModel         = this.getView().getModel();
@@ -2134,10 +2240,38 @@ console.log(
             var sFormattedTo   = this._formatODataDate(dTo);
 
             var iCompleted = 0;
-            var iTotal     = 3;
+            var iTotal     = 5;
             var checkDone  = function () {
                 iCompleted++;
                 if (iCompleted === iTotal) { oView.setBusy(false); }
+            };
+
+            // Helper to filter results by commodity and MoT
+            var filterByCmdtyAndMot = function (aItems) {
+                var aRes = (aItems && aItems.results) ? aItems.results : (Array.isArray(aItems) ? aItems : [aItems]);
+                if (aCommodityKeys.length > 0) {
+                    aRes = aRes.filter(function (oItem) {
+                        return aCommodityKeys.indexOf(oItem.Commodity) !== -1;
+                    });
+                }
+                if (sMotKey === "01") {
+                    // Truck = Road / Truck / 01
+                    aRes = aRes.filter(function (oItem) {
+                        var sMotField = oItem.ModeOfTransport || oItem.ModeOfTransportText || oItem.MOT || oItem.MoT || oItem.Mode;
+                        if (sMotField === undefined) { return true; }
+                        var sVal = String(sMotField).trim().toLowerCase();
+                        return sVal === "road" || sVal === "truck" || sVal === "01" || sVal.indexOf("road") !== -1 || sVal.indexOf("truck") !== -1;
+                    });
+                } else if (sMotKey === "02") {
+                    // Rail = Rail / Train / 02
+                    aRes = aRes.filter(function (oItem) {
+                        var sMotField = oItem.ModeOfTransport || oItem.ModeOfTransportText || oItem.MOT || oItem.MoT || oItem.Mode;
+                        if (sMotField === undefined) { return true; }
+                        var sVal = String(sMotField).trim().toLowerCase();
+                        return sVal === "rail" || sVal === "train" || sVal === "02" || sVal.indexOf("rail") !== -1 || sVal.indexOf("train") !== -1;
+                    });
+                }
+                return aRes;
             };
 
             // 1. EntDetails
@@ -2148,12 +2282,7 @@ console.log(
 
             oModel.read(EntKeyPath, {
                 success: function (oData) {
-                    var aResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
-                    if (aCommodityKeys.length > 0) {
-                        aResults = aResults.filter(function (oItem) {
-                            return aCommodityKeys.indexOf(oItem.Commodity) !== -1;
-                        });
-                    }
+                    var aResults = filterByCmdtyAndMot(oData);
                     var oJM = oView.getModel("EntDetailData");
                     if (oJM) { oJM.setProperty("/EntDetailSet", aResults); }
                     checkDone();
@@ -2168,12 +2297,7 @@ console.log(
 
             oModel.read(OblKeyPath, {
                 success: function (oData) {
-                    var aResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
-                    if (aCommodityKeys.length > 0) {
-                        aResults = aResults.filter(function (oItem) {
-                            return aCommodityKeys.indexOf(oItem.Commodity) !== -1;
-                        });
-                    }
+                    var aResults = filterByCmdtyAndMot(oData);
                     var oJM = oView.getModel("OblDetailData");
                     if (oJM) { oJM.setProperty("/OblDetailSet", aResults); }
                     checkDone();
@@ -2190,57 +2314,37 @@ console.log(
 
             oModel.read(TSKeyPath, {
                 success: function (oData) {
-                    var aResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
-                    if (aCommodityKeys.length > 0) {
-                        aResults = aResults.filter(function (oItem) {
-                            return aCommodityKeys.indexOf(oItem.Commodity) !== -1;
-                        });
-                    }
+                    var aResults = filterByCmdtyAndMot(oData);
                     var oJM = oView.getModel("TotalSummaryData");
                     if (oJM) { oJM.setProperty("/TotalSummarySet", aResults); }
                     checkDone();
                 },
                 error: function () { checkDone(); MessageToast.show("Error loading TotalSummary."); }
             });
-            //4. positionSummary
-            var TSKeyPath = oModel.createKey("/PositionsSummary", {
+            // 4. positionSummary
+            var PosSmryKeyPath = oModel.createKey("/PositionsSummary", {
                 p_FromDate:  sFormattedFrom,
                 p_ToDate:    sFormattedTo,
             }) + "/Set";
 
-            oModel.read(TSKeyPath, {
+            oModel.read(PosSmryKeyPath, {
                 success: function (oData) {
-                    var aResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
-                    if (aCommodityKeys.length > 0) {
-                        aResults = aResults.filter(function (oItem) {
-                            return aCommodityKeys.indexOf(oItem.Commodity) !== -1;
-                        });
-                    }
+                    var aResults = filterByCmdtyAndMot(oData);
                     var oJM = oView.getModel("MonthPosSmryData");
                     if (oJM) { oJM.setProperty("/MonthPosSmrySet", aResults); }
                     checkDone();
                 },
                 error: function () { checkDone(); MessageToast.show("Error loading PositionsSummary."); }
             });
-            //MATCHPOS
-            var TSKeyPath = oModel.createKey("/PositionsSummary", {
-                p_FromDate:  sFormattedFrom,
-                p_ToDate:    sFormattedTo,
-            }) + "/Set";
-
-            oModel.read(TSKeyPath, {
+            // 5. MatchPos
+            oModel.read("/MatchPosSet", {
                 success: function (oData) {
-                    var aResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
-                    if (aCommodityKeys.length > 0) {
-                        aResults = aResults.filter(function (oItem) {
-                            return aCommodityKeys.indexOf(oItem.Commodity) !== -1;
-                        });
-                    }
-                    var oJM = oView.getModel("PosSmryData");
-                    if (oJM) { oJM.setProperty("/PosSmrySet", aResults); }
+                    var aResults = filterByCmdtyAndMot(oData);
+                    var oJM = oView.getModel("MatchPosData");
+                    if (oJM) { oJM.setProperty("/MatchPosSet", aResults); }
                     checkDone();
                 },
-                error: function () { checkDone(); MessageToast.show("Error loading PositionsSummary."); }
+                error: function () { checkDone(); MessageToast.show("Error loading MatchPosData."); }
             });
         },
 
@@ -2533,7 +2637,7 @@ _applyTicketFilters: function (dFrom, dTo) {
                      return acc;
                  }, []);
              },
-     
+
              onCreateMatch: function () {
                  var aEntRows = this._getSelectedRowData("entTbl");
                  var aOblRows = this._getSelectedRowData("oblTbl");
@@ -2541,13 +2645,12 @@ _applyTicketFilters: function (dFrom, dTo) {
                  
                  var nTotalSel = aEntRows.length + aOblRows.length + aInvRows.length;
                  if (nTotalSel < 2) {
-                    MessageBox.warning("Please select rows from at least 2 tables to create a match.\n You can select from Supply (Entitlements), Demand (Obligations), and/or Inventory.", { 
-                        title: "Create Match — Selection Required" 
-                    });
-                    return;
-                }
-                 
-     
+                     MessageBox.warning("Please select rows from at least 2 tables to create a match.\n You can select from Supply (Entitlements), Demand (Obligations), and/or Inventory.", { 
+                         title: "Create Match — Selection Required" 
+                     });
+                     return;
+                 }
+
                  var aSourceRows, aTargetGroups;
                  if (aEntRows.length > 0) {
                      aSourceRows = aEntRows.map(function (r) { return { row: r, type: "purchase" }; });
@@ -2563,14 +2666,14 @@ _applyTicketFilters: function (dFrom, dTo) {
                      });
                      return;
                  }
-     
+
                  if (!aTargetGroups || aTargetGroups.length === 0) {
                      MessageBox.warning("Please select at least one Obligation or Inventory row as a match target.", { 
                          title: "Create Match — Target Required" 
                      });
                      return;
                  }
-     
+
                  // Staging new parent nodes into the matched model
                  var aNewParentNodes = aSourceRows.map(function(oSrc) {
                      var nSrcQty = parseFloat(oSrc.row.Quantity) || 0;
@@ -2583,7 +2686,7 @@ _applyTicketFilters: function (dFrom, dTo) {
                          DisplayQty: nSrcQty,
                          MatchedQtyFormatted: nSrcQty.toLocaleString(),
                          DisplayUOM: oSrc.row.UOM || oSrc.row.PurchaseUOM || "LB",
-                         TransactionType: "P",
+                         TransactionType: oSrc.row.TransactionType || (oSrc.type === "purchase" ? "P" : ""),
                          Incoterms: oSrc.row.IncoTerms || "",
                          ScheduleType: oSrc.row.ScheduleType || "",
                          RefDocType: oSrc.row.RefDocType || "",
@@ -2596,13 +2699,36 @@ _applyTicketFilters: function (dFrom, dTo) {
                          Destination: oSrc.row.Destination || "",
                          DestinationName: oSrc.row.DestinationName || "",
                          DisplayWeekID: oSrc.row.WeekID || "",
-                         MatchSrc: "Supply",
+                         MatchSrc: oSrc.type === "purchase" ? "Supply" : "Inventory",
                          Status: "Draft",
                          RowType: "parent",
                          _checked: true,
+                         _sourceRaw: oSrc.row,
+                         _srcType: oSrc.type,
                          children: aTargetGroups.map(function(oTgt) {
                              var nTgtQty = parseFloat(oTgt.row.Quantity) || 0;
                              var nMatchQty = Math.min(nSrcQty, nTgtQty);
+
+                             var sSrcWeek = oSrc.row.WeekID || "";
+                             var sTgtWeek = oTgt.row.WeekID || "";
+                             var bWeekConflict = !!(sSrcWeek && sTgtWeek && sSrcWeek !== sTgtWeek);
+                             var sSelectedWeekID = sSrcWeek || sTgtWeek || "";
+
+                             var sSrcMoT = oSrc.row.ModeOfTransport || oSrc.row.MOT || "";
+                             var sTgtMoT = oTgt.row.ModeOfTransport || oTgt.row.MOT || "";
+                             var sSrcMoTText = oSrc.row.ModeOfTransportText || sSrcMoT;
+                             var sTgtMoTText = oTgt.row.ModeOfTransportText || sTgtMoT;
+                             var bMoTConflict = !!(sSrcMoT && sTgtMoT && sSrcMoT !== sTgtMoT);
+                             var sSelectedMoT = sSrcMoT || sTgtMoT || "";
+
+                             var aMoTOptions = [];
+                             if (bMoTConflict) {
+                                 aMoTOptions = [
+                                     { key: sSrcMoT, text: sSrcMoTText || sSrcMoT },
+                                     { key: sTgtMoT, text: sTgtMoTText || sTgtMoT }
+                                 ];
+                             }
+
                              return {
                                  NodeLabel: "Target: " + oTgt.row.DealNumber,
                                  DealNumber: oTgt.row.DealNumber,
@@ -2612,7 +2738,7 @@ _applyTicketFilters: function (dFrom, dTo) {
                                  MatchedQty: nMatchQty,
                                  MatchedQtyFormatted: nMatchQty.toLocaleString(),
                                  MatchedUOM: oTgt.row.UOM || oTgt.row.SalesUOM || "LB",
-                                 TransactionType: "S",
+                                 TransactionType: oTgt.row.TransactionType || (oTgt.type === "sales" ? "S" : ""),
                                  Incoterms: oTgt.row.IncoTerms || "",
                                  ScheduleType: oTgt.row.ScheduleType || "",
                                  RefDocType: oTgt.row.RefDocType || "",
@@ -2624,29 +2750,40 @@ _applyTicketFilters: function (dFrom, dTo) {
                                  OriginName: oTgt.row.OriginName || "",
                                  Destination: oTgt.row.Destination || "",
                                  DestinationName: oTgt.row.DestinationName || "",
-                                 DisplayWeekID: oTgt.row.WeekID || "",
-                                 MatchSrc: "Demand",
+                                 DisplayWeekID: sSelectedWeekID,
+                                 MatchSrc: oTgt.type === "sales" ? "Demand" : "Inventory",
                                  Status: "Pending",
                                  RowType: "child",
-                                 _checked: true
+                                 _checked: true,
+                                 _weekConflict: bWeekConflict,
+                                 _srcWeekID: sSrcWeek,
+                                 _tgtWeekID: sTgtWeek,
+                                 _selectedWeekID: sSelectedWeekID,
+                                 _motConflict: bMoTConflict,
+                                 _srcMoT: sSrcMoT,
+                                 _tgtMoT: sTgtMoT,
+                                 _selectedMoT: sSelectedMoT,
+                                 _motOptions: aMoTOptions,
+                                 _targetRaw: oTgt.row,
+                                 _tgtType: oTgt.type
                              };
                          })
                      };
                  });
-     
-                 var oMM = this.getView().getModel("matchedPositionsModel");
-                  if (!oMM) {
-                      oMM = new JSONModel({ results: [] });
-                      this.getView().setModel(oMM, "matchedPositionsModel");
-                  }
-                  
-                  var aExisting = (oMM.getProperty("/results") || []).concat(aNewParentNodes);
-                  oMM.setProperty("/results", aExisting);
 
-                  this._clearAllTableSelections();
-                  MessageToast.show(aNewParentNodes.length + " match pair(s) staged successfully.");
-              },
-     
+                 var oMM = this.getView().getModel("matchedPositionsModel");
+                 if (!oMM) {
+                     oMM = new JSONModel({ results: [] });
+                     this.getView().setModel(oMM, "matchedPositionsModel");
+                 }
+                 
+                 var aExisting = (oMM.getProperty("/results") || []).concat(aNewParentNodes);
+                 oMM.setProperty("/results", aExisting);
+
+                 this._clearAllTableSelections();
+                 MessageToast.show(aNewParentNodes.length + " match pair(s) staged successfully.");
+             },
+
              _clearAllTableSelections: function () {
                  var aTableIds = ["entTbl", "oblTbl", "invTbl"];
                  aTableIds.forEach(function (sId) {
@@ -2660,7 +2797,7 @@ _applyTicketFilters: function (dFrom, dTo) {
                      }
                  }, this);
              },
-     
+
              onClearAllSelections: function () {
                  this._clearAllTableSelections();
                  MessageToast.show("Selections cleared.");
@@ -2677,30 +2814,358 @@ _applyTicketFilters: function (dFrom, dTo) {
              onConfirmMatch: function () {
                  var oMM = this.getView().getModel("matchedPositionsModel");
                  if (!oMM) {
-                     MessageToast.show("No matches to confirm.");
+                     MessageBox.warning("No valid match pairs are selected.", {
+                         title: "Selection Required"
+                     });
                      return;
                  }
                  var aResults = oMM.getProperty("/results") || [];
                  if (aResults.length === 0) {
-                     MessageToast.show("No matches to confirm.");
+                     MessageBox.warning("No valid match pairs are selected.", {
+                         title: "Selection Required"
+                     });
                      return;
                  }
-                 var nConfirmed = 0;
+
+                 var bHasWeekConflict = false;
+                 var bHasMoTConflict = false;
+                 var aCheckedChildren = [];
+
                  aResults.forEach(function (oParent) {
-                     if (oParent._checked) {
-                         oParent.Status = "Confirmed";
-                         nConfirmed++;
-                     }
-                     if (oParent.children) {
+                     if (oParent.children && Array.isArray(oParent.children)) {
                          oParent.children.forEach(function (oChild) {
-                             if (oChild._checked) {
-                                 oChild.Status = "Confirmed";
+                             if (oChild._checked && oChild.Status !== "Blocked") {
+                                 if (oChild._weekConflict && !oChild._selectedWeekID) {
+                                     bHasWeekConflict = true;
+                                 }
+                                 if (oChild._motConflict && !oChild._selectedMoT) {
+                                     bHasMoTConflict = true;
+                                 }
+                                 aCheckedChildren.push({ parent: oParent, child: oChild });
                              }
                          });
                      }
                  });
-                 oMM.refresh(true);
-                 MessageToast.show(nConfirmed + " match(es) confirmed.");
+
+                 if (bHasWeekConflict) {
+                     MessageBox.warning("Please resolve all Week conflicts for checked rows before confirming matches.", {
+                         title: "Conflict Resolution Required"
+                     });
+                     return;
+                 }
+
+                 if (bHasMoTConflict) {
+                     MessageBox.warning("Please resolve all Mode of Transport conflicts for checked rows before confirming matches.", {
+                         title: "Conflict Resolution Required"
+                     });
+                     return;
+                 }
+
+                 if (aCheckedChildren.length === 0) {
+                     MessageBox.warning("No valid match pairs are selected.", {
+                         title: "Selection Required"
+                     });
+                     return;
+                 }
+
+                 var aPayloads = this._flattenTreeToPayloads(aResults);
+                 if (!aPayloads || aPayloads.length === 0) {
+                     MessageBox.warning("No valid match pairs are selected.", {
+                         title: "Selection Required"
+                     });
+                     return;
+                 }
+
+                 MessageBox.confirm("Send " + aPayloads.length + " checked match pair(s) to the backend?", {
+                     title: "Confirm Matches",
+                     onClose: function (sAction) {
+                         if (sAction === MessageBox.Action.OK || sAction === "OK") {
+                             this._saveMatches(aPayloads);
+                         }
+                     }.bind(this)
+                 });
+             },
+
+             _flattenTreeToPayloads: function (aResults) {
+                 var aPayloads = [];
+                 if (!Array.isArray(aResults)) {
+                     return aPayloads;
+                 }
+
+                 aResults.forEach(function (oParent) {
+                     var oSrc = oParent._sourceRaw || {};
+                     var sSrcType = oParent._srcType || "purchase";
+
+                     if (oParent.children && Array.isArray(oParent.children)) {
+                         oParent.children.forEach(function (oChild) {
+                             if (!oChild._checked || oChild.Status === "Blocked") {
+                                 return;
+                             }
+
+                             var oTgt = oChild._targetRaw || {};
+                             var sTgtType = oChild._tgtType || "sales";
+
+                             var oPayload = {
+                                 Commodity: oParent.Commodity || oChild.Commodity || oSrc.Commodity || oTgt.Commodity || "",
+                                 Purchasedeal: "",
+                                 Purchasedocument: "",
+                                 Purchasedocitem: "",
+                                 Purchscheddate: null,
+                                 Purchschedmonth: "",
+                                 Purchquantity: "0",
+                                 Purchuom: "",
+                                 Supplier: "",
+                                 Supplierid: "",
+                                 WeekID: oChild._selectedWeekID || oChild.DisplayWeekID || oSrc.WeekID || oTgt.WeekID || "",
+                                 Origin: "",
+                                 Originname: "",
+                                 PTransactionType: "",
+                                 PIncoTerms: "",
+                                 Plant: "",
+                                 Storagelocation: "",
+                                 Invquantity: "0",
+                                 Invuom: "",
+                                 Salesdeal: "",
+                                 Salesdocument: "",
+                                 Salesdocitem: "",
+                                 Salescheddate: null,
+                                 Saleschedmonth: "",
+                                 Salesquantity: "0",
+                                 Salesuom: "",
+                                 Customer: "",
+                                 Customerid: "",
+                                 Destination: "",
+                                 DestinationName: "",
+                                 STransactionType: "",
+                                 SIncoTerms: "",
+                                 Matchquantity: String(parseFloat(oChild.MatchedQty) || 0),
+                                 Matchuom: oChild.MatchedUOM || oTgt.UOM || oSrc.UOM || "LB",
+                                 Matchstatus: "Confirmed",
+                                 Matchsource: (sSrcType === "inventory" || sTgtType === "inventory") ? "Inventory" : (oParent.MatchSrc || "Supply"),
+                                 ModeOfTransport: oChild._selectedMoT || oChild.ModeOfTransport || oSrc.ModeOfTransport || oTgt.ModeOfTransport || ""
+                             };
+
+                             // Source mapping
+                             if (sSrcType === "purchase") {
+                                 oPayload.Purchasedeal = oSrc.DealNumber || oSrc.DocumentNumber || oParent.DealNumber || "";
+                                 oPayload.Purchasedocument = oSrc.DocumentNumber || "";
+                                 oPayload.Purchasedocitem = oSrc.DocumentItem || oSrc.PurchaseItem || oParent.DocumentItem || "";
+                                 oPayload.Purchscheddate = _toODataDate(oSrc.DeliveryDate || oSrc.ScheduleDate || oParent.DisplayDate);
+                                 oPayload.Purchschedmonth = _toODataMonth(oSrc.DeliveryDate || oSrc.ScheduleDate || oParent.DisplayDate, oSrc.ScheduleMonth || oParent.DisplayMonth);
+                                 oPayload.Purchquantity = String(parseFloat(oSrc.PurchaseQuantity || oSrc.Quantity || oParent.DisplayQty) || 0);
+                                 oPayload.Purchuom = oSrc.PurchaseUOM || oSrc.UOM || oParent.DisplayUOM || "";
+                                 oPayload.Supplier = oSrc.Supplier || oSrc.SupplierName || oParent.DisplayParty || "";
+                                 oPayload.Supplierid = oSrc.SupplierID || oSrc.SupplierId || "";
+                                 oPayload.Origin = oSrc.Origin || oParent.Origin || "";
+                                 oPayload.Originname = oSrc.OriginName || oParent.OriginName || "";
+                                 oPayload.PTransactionType = oSrc.TransactionType || oParent.TransactionType || "P";
+                                 oPayload.PIncoTerms = oSrc.IncoTerms || oParent.Incoterms || "";
+                                 if (!oPayload.Matchsource) {
+                                     oPayload.Matchsource = "Supply";
+                                 }
+                             } else if (sSrcType === "inventory") {
+                                 oPayload.Plant = oSrc.Plant || "";
+                                 oPayload.Storagelocation = oSrc.StorageLocation || "";
+                                 oPayload.Invquantity = String(parseFloat(oSrc.OnHandInventory || oSrc.InventoryQty || oSrc.Quantity) || 0);
+                                 oPayload.Invuom = oSrc.UOM || oSrc.InventoryUOM || oParent.DisplayUOM || "";
+                                 oPayload.Matchsource = "Inventory";
+                             }
+
+                             // Target mapping
+                             if (sTgtType === "sales") {
+                                 oPayload.Salesdeal = oTgt.DealNumber || oTgt.DocumentNumber || oChild.DealNumber || "";
+                                 oPayload.Salesdocument = oTgt.DocumentNumber || "";
+                                 oPayload.Salesdocitem = oTgt.DocumentItem || oTgt.SalesItem || oChild.DocumentItem || "";
+                                 oPayload.Salescheddate = _toODataDate(oTgt.DueDate || oTgt.DeliveryDate || oTgt.ScheduleDate || oChild.DisplayDate);
+                                 oPayload.Saleschedmonth = _toODataMonth(oTgt.DueDate || oTgt.DeliveryDate || oTgt.ScheduleDate || oChild.DisplayDate, oTgt.ScheduleMonth || oChild.DisplayMonth);
+                                 oPayload.Salesquantity = String(parseFloat(oTgt.SalesQuantity || oTgt.Quantity) || 0);
+                                 oPayload.Salesuom = oTgt.SalesUOM || oTgt.UOM || oChild.MatchedUOM || "";
+                                 oPayload.Customer = oTgt.Customer || oTgt.CustomerName || oChild.DisplayParty || "";
+                                 oPayload.Customerid = oTgt.CustomerID || oTgt.CustomerId || "";
+                                 oPayload.Destination = oTgt.Destination || oChild.Destination || "";
+                                 oPayload.DestinationName = oTgt.DestinationName || oChild.DestinationName || "";
+                                 oPayload.STransactionType = oTgt.TransactionType || oChild.TransactionType || "S";
+                                 oPayload.SIncoTerms = oTgt.IncoTerms || oChild.Incoterms || "";
+                             } else if (sTgtType === "inventory") {
+                                 oPayload.Plant = oTgt.Plant || "";
+                                 oPayload.Storagelocation = oTgt.StorageLocation || "";
+                                 oPayload.Invquantity = String(parseFloat(oTgt.OnHandInventory || oTgt.InventoryQty || oTgt.Quantity) || 0);
+                                 oPayload.Invuom = oTgt.UOM || oTgt.InventoryUOM || oChild.MatchedUOM || "";
+                                 oPayload.Matchsource = "Inventory";
+                             }
+
+                             aPayloads.push(oPayload);
+                         });
+                     }
+                 });
+
+                 return aPayloads;
+             },
+
+             _saveMatches: function (aPayloads) {
+                 var oModel = this.getView().getModel();
+                 var oView = this.getView();
+
+                 if (!oModel) {
+                     MessageBox.error("OData Model is not available.", {
+                         title: "Model Error"
+                     });
+                     return;
+                 }
+
+                 oView.setBusy(true);
+
+                 if (aPayloads.length === 1) {
+                     oModel.create("/MatchPos", aPayloads[0], {
+                         success: function (oData) {
+                             oView.setBusy(false);
+                             MessageBox.success("Match confirmed successfully.", {
+                                 title: "Match Confirmed",
+                                 onClose: function () {
+                                     this._onMatchSaveSuccess();
+                                 }.bind(this)
+                             });
+                         }.bind(this),
+                         error: function (oError) {
+                             oView.setBusy(false);
+                             var sMsg = this._extractODataError(oError);
+                             MessageBox.error("Failed to confirm match:\n" + sMsg, {
+                                 title: "Save Error"
+                             });
+                         }.bind(this)
+                     });
+                 } else {
+                     var sGroupId = "matchBatchGroup_" + Date.now();
+                     var aCurrentDeferred = oModel.getDeferredGroups() || [];
+                     if (aCurrentDeferred.indexOf(sGroupId) === -1) {
+                         oModel.setDeferredGroups(aCurrentDeferred.concat([sGroupId]));
+                     }
+
+                     aPayloads.forEach(function (oPayload, idx) {
+                         var sChangeSetId = "cs_match_" + idx;
+                         oModel.create("/MatchConfirm", oPayload, {
+                             groupId: sGroupId,
+                             changeSetId: sChangeSetId
+                         });
+                     });
+
+                     oModel.submitChanges({
+                         groupId: sGroupId,
+                         success: function (oData) {
+                             oView.setBusy(false);
+                             var aErrors = this._parseBatchErrors(oData);
+                             if (aErrors.length === 0) {
+                                 MessageBox.success(aPayloads.length + " match(es) confirmed successfully.", {
+                                     title: "Match Confirmed",
+                                     onClose: function () {
+                                         this._onMatchSaveSuccess();
+                                     }.bind(this)
+                                 });
+                             } else {
+                                 oModel.resetChanges();
+                                 var sErrorSummary = aErrors.join("\n• ");
+                                 if (aErrors.length < aPayloads.length) {
+                                     MessageBox.warning("Some matches were saved, but " + aErrors.length + " error(s) occurred:\n• " + sErrorSummary, {
+                                         title: "Partial Success"
+                                     });
+                                     this._onMatchSaveSuccess();
+                                 } else {
+                                     MessageBox.error("Failed to confirm matches:\n• " + sErrorSummary, {
+                                         title: "Batch Save Error"
+                                     });
+                                 }
+                             }
+                         }.bind(this),
+                         error: function (oError) {
+                             oView.setBusy(false);
+                             oModel.resetChanges();
+                             var sMsg = this._extractODataError(oError);
+                             MessageBox.error("Batch request failed:\n" + sMsg, {
+                                 title: "Error"
+                             });
+                         }.bind(this)
+                     });
+                 }
+             },
+
+             _extractODataError: function (oError) {
+                 if (!oError) {
+                     return "Unknown error occurred.";
+                 }
+                 try {
+                     if (oError.responseText) {
+                         var oParsed = JSON.parse(oError.responseText);
+                         if (oParsed.error && oParsed.error.message && oParsed.error.message.value) {
+                             return oParsed.error.message.value;
+                         }
+                         if (oParsed.error && oParsed.error.innererror && Array.isArray(oParsed.error.innererror.errordetails) && oParsed.error.innererror.errordetails.length > 0) {
+                             return oParsed.error.innererror.errordetails.map(function (d) { return d.message; }).join("; ");
+                         }
+                     }
+                 } catch (e) {
+                     // Not JSON, check for XML or raw response
+                     if (typeof oError.responseText === "string") {
+                         var mXml = /<message[^>]*>([^<]+)<\/message>/i.exec(oError.responseText);
+                         if (mXml && mXml[1]) {
+                             return mXml[1];
+                         }
+                     }
+                 }
+                 if (oError.message) {
+                     return oError.message;
+                 }
+                 if (oError.statusText) {
+                     return oError.statusText;
+                 }
+                 return "An unknown error occurred while communicating with the backend.";
+             },
+
+             _parseBatchErrors: function (oData) {
+                 var aErrors = [];
+                 if (!oData || !oData.__batchResponses) {
+                     return aErrors;
+                 }
+
+                 oData.__batchResponses.forEach(function (oResp) {
+                     if (oResp.response && oResp.response.statusCode && parseInt(oResp.response.statusCode, 10) >= 400) {
+                         aErrors.push(this._extractODataError(oResp.response));
+                     } else if (oResp.statusCode && parseInt(oResp.statusCode, 10) >= 400) {
+                         aErrors.push(this._extractODataError(oResp));
+                     } else if (oResp.__changeResponses && Array.isArray(oResp.__changeResponses)) {
+                         oResp.__changeResponses.forEach(function (oChange) {
+                             if (oChange.statusCode && parseInt(oChange.statusCode, 10) >= 400) {
+                                 aErrors.push(this._extractODataError(oChange));
+                             } else if (oChange.response && oChange.response.statusCode && parseInt(oChange.response.statusCode, 10) >= 400) {
+                                 aErrors.push(this._extractODataError(oChange.response));
+                             }
+                         }, this);
+                     }
+                 }, this);
+
+                 return aErrors;
+             },
+
+             _onMatchSaveSuccess: function () {
+                 var oMM = this.getView().getModel("matchedPositionsModel");
+                 if (oMM) {
+                     oMM.setProperty("/results", []);
+                 }
+
+                 if (this._oPosFilterState && this._oPosFilterState.fromDate && this._oPosFilterState.toDate) {
+                     this._applyPositionFilters(this._oPosFilterState.fromDate, this._oPosFilterState.toDate);
+                 }
+
+                 var oInvTable = this.byId("MainPnlFra013--" + "invTbl") || this.byId("invTbl");
+                 if (oInvTable) {
+                     try {
+                         var oBinding = oInvTable.getBinding("items");
+                         if (oBinding && typeof oBinding.refresh === "function") {
+                             oBinding.refresh(true);
+                         }
+                     } catch (e) {
+                         console.warn("Could not refresh invTbl binding:", e);
+                     }
+                 }
              },
 
              onMatchCheckChange: function (oEvent) {
@@ -2718,12 +3183,26 @@ _applyTicketFilters: function (dFrom, dTo) {
                  if (oMM) { oMM.refresh(true); }
              },
 
-             onMoTSelectionChange: function () {
-                 // Mode of Transport selection changed
+             onMoTSelectionChange: function (oEvent) {
+                 var oSource = oEvent.getSource();
+                 var oCtx = oSource.getBindingContext("matchedPositionsModel");
+                 if (!oCtx) { return; }
+                 var oChild = oCtx.getObject();
+                 var oSelectedItem = oEvent.getParameter("selectedItem");
+                 oChild._selectedMoT = oSelectedItem ? oSelectedItem.getKey() : oSource.getSelectedKey();
+                 var oMM = this.getView().getModel("matchedPositionsModel");
+                 if (oMM) { oMM.refresh(true); }
              },
 
-             onWeekIDSelectionChange: function () {
-                 // Week ID selection changed
+             onWeekIDSelectionChange: function (oEvent) {
+                 var oSource = oEvent.getSource();
+                 var oCtx = oSource.getBindingContext("matchedPositionsModel");
+                 if (!oCtx) { return; }
+                 var oChild = oCtx.getObject();
+                 var oSelectedItem = oEvent.getParameter("selectedItem");
+                 oChild._selectedWeekID = oSelectedItem ? oSelectedItem.getKey() : oSource.getSelectedKey();
+                 var oMM = this.getView().getModel("matchedPositionsModel");
+                 if (oMM) { oMM.refresh(true); }
              },
 
              onMatchedQtyChange: function (oEvent) {
@@ -2756,7 +3235,7 @@ _applyTicketFilters: function (dFrom, dTo) {
                      if (aResults[iParentIdx] && aResults[iParentIdx].children) {
                          aResults[iParentIdx].children.splice(iChildIdx, 1);
                          if (aResults[iParentIdx].children.length === 0) {
-                             aResults.splice(iParentIdx, 1);
+aResults.splice(iParentIdx, 1);
                          }
                      }
                  }
@@ -2764,7 +3243,1258 @@ _applyTicketFilters: function (dFrom, dTo) {
                  oMM.refresh(true);
                  MessageToast.show("Matched row removed.");
              },
-        
+
+        // ══════════════════════════════════════════════════════════════════════
+        //  CREATE NOMINATIONS DIALOG SUBSYSTEM (from Matched Positions)
+        // ══════════════════════════════════════════════════════════════════════
+
+        // ==================== F4 VALUE HELP — CARRIER (TSW001) ====================
+        onCarrierValueHelp: function (oEvent) {
+            var oInput = oEvent.getSource();
+            this._oActiveCarrierInput = oInput;
+            var oCtx = oInput.getBindingContext("nomDialogModel");
+            this._oActiveCarrierCtxPath = oCtx ? oCtx.getPath() : null;
+
+            var that = this;
+            var oODataModel = (this.getOwnerComponent() && this.getOwnerComponent().getModel()) || this.getView().getModel();
+            oODataModel.read("/PartnerInfo(p_role='',p_roletype='TSW001')/Set", {
+                success: function (oData) {
+                    var aResults = oData.results || [];
+                    that.getView().getModel("CarrierVHDModel").setProperty("/results", aResults);
+
+                    if (!that._oCarrierVHD) {
+                        that._oCarrierVHD = new sap.m.SelectDialog({
+                            title: "Select Carrier",
+                            noDataText: "No carriers found",
+                            search: that._onCarrierVHDSearch.bind(that),
+                            confirm: that._onCarrierVHDConfirm.bind(that),
+                            cancel: function () { }
+                        });
+                        that.getView().addDependent(that._oCarrierVHD);
+                    }
+                    that._oCarrierVHD.bindAggregation("items", {
+                        path: "CarrierVHDModel>/results",
+                        template: new sap.m.StandardListItem({
+                            title: "{CarrierVHDModel>PartnerName}",
+                            description: "{CarrierVHDModel>Supplier}"
+                        }),
+                        templateShareable: true
+                    });
+                    that._oCarrierVHD.open();
+                },
+                error: function () {
+                    MessageToast.show("Failed to load carrier data.");
+                }
+            });
+        },
+
+        _onCarrierVHDSearch: function (oEvent) {
+            var sVal = oEvent.getParameter("value") || "";
+            oEvent.getParameter("itemsBinding").filter(
+                sVal ? [new Filter({
+                    filters: [
+                        new Filter("PartnerName", FilterOperator.Contains, sVal),
+                        new Filter("Supplier", FilterOperator.Contains, sVal)
+                    ], and: false
+                })] : []
+            );
+        },
+
+        _onCarrierVHDConfirm: function (oEvent) {
+            var oItem = oEvent.getParameter("selectedItem");
+            if (!oItem) { return; }
+            var sName = oItem.getTitle();        // PartnerName
+            var sCode = oItem.getDescription();  // Supplier (ID) — the highlighted value
+
+            var oModel = this.getView().getModel("nomDialogModel");
+            var sPath = this._oActiveCarrierCtxPath;
+
+            if (sPath) {
+                oModel.setProperty(sPath + "/CarrierName", sName);
+                oModel.setProperty(sPath + "/CarrierCode", sCode);
+                // Display ONLY the code in the input so only the ID is ever shown/passed
+                if (this._oActiveCarrierInput) { this._oActiveCarrierInput.setValue(sCode); }
+            }
+            MessageToast.show("Carrier selected: " + sCode + (sName ? " (" + sName + ")" : ""));
+        },
+
+        // ==================== F4 VALUE HELP — Supplier (TSW002) ====================
+        onShipperValueHelp: function (oEvent) {
+            var oInput = oEvent.getSource();
+            this._oActiveShipperInput = oInput;
+            var oCtx = oInput.getBindingContext("nomDialogModel");
+            this._oActiveShipperCtxPath = oCtx ? oCtx.getPath() : null;
+
+            var that = this;
+            var oODataModel = (this.getOwnerComponent() && this.getOwnerComponent().getModel()) || this.getView().getModel();
+            oODataModel.read("/PartnerInfo(p_role='0001014749',p_roletype='TSW003')/Set", {
+                success: function (oData) {
+                    var aResults = oData.results || [];
+                    that.getView().getModel("ShipperVHDModel").setProperty("/results", aResults);
+
+                    if (!that._oShipperVHD) {
+                        that._oShipperVHD = new sap.m.SelectDialog({
+                            title: "Select Shipper",
+                            noDataText: "No Shippers found",
+                            search: that._onShipperVHDSearch.bind(that),
+                            confirm: that._onShipperVHDConfirm.bind(that),
+                            cancel: function () { }
+                        });
+                        that.getView().addDependent(that._oShipperVHD);
+                    }
+                    that._oShipperVHD.bindAggregation("items", {
+                        path: "ShipperVHDModel>/results",
+                        template: new sap.m.StandardListItem({
+                            title: "{ShipperVHDModel>PartnerName}",
+                            description: "{ShipperVHDModel>Supplier}"
+                        }),
+                        templateShareable: true
+                    });
+                    that._oShipperVHD.open();
+                },
+                error: function () {
+                    MessageToast.show("Failed to load Shipper data.");
+                }
+            });
+        },
+
+        _onShipperVHDSearch: function (oEvent) {
+            var sVal = oEvent.getParameter("value") || "";
+            oEvent.getParameter("itemsBinding").filter(
+                sVal ? [new Filter({
+                    filters: [
+                        new Filter("PartnerName", FilterOperator.Contains, sVal),
+                        new Filter("Supplier", FilterOperator.Contains, sVal)
+                    ], and: false
+                })] : []
+            );
+        },
+
+        _onShipperVHDConfirm: function (oEvent) {
+            var oItem = oEvent.getParameter("selectedItem");
+            if (!oItem) { return; }
+            var sName = oItem.getTitle();        // PartnerName
+            var sCode = oItem.getDescription();  // Supplier (ID) — the highlighted value
+
+            var oModel = this.getView().getModel("nomDialogModel");
+            var sPath = this._oActiveShipperCtxPath;
+
+            if (sPath) {
+                oModel.setProperty(sPath + "/ShipperName", sName);
+                oModel.setProperty(sPath + "/ShipperCode", sCode);
+                // Display ONLY the code in the input so only the ID is ever shown/passed
+                if (this._oActiveShipperInput) { this._oActiveShipperInput.setValue(sCode); }
+            }
+            MessageToast.show("Shipper selected: " + sCode + (sName ? " (" + sName + ")" : ""));
+        },
+
+        // ==================== F4 VALUE HELP — VEHICLE ====================
+        onVehicleValueHelp: function (oEvent) {
+            var oInput = oEvent.getSource();
+            this._oActiveVehicleInput = oInput;
+            var oCtx = oInput.getBindingContext("nomDialogModel");
+            this._oActiveVehicleCtxPath = oCtx ? oCtx.getPath() : null;
+
+            var that = this;
+            var oODataModel = (this.getOwnerComponent() && this.getOwnerComponent().getModel()) || this.getView().getModel();
+            oODataModel.read("/VehicleInfo", {
+                success: function (oData) {
+                    var aResults = oData.results || [];
+                    that.getView().getModel("VehicleVHDModel").setProperty("/results", aResults);
+
+                    if (!that._oVehicleVHD) {
+                        that._oVehicleVHD = new sap.m.SelectDialog({
+                            title: "Select Vehicle",
+                            noDataText: "No vehicles found",
+                            search: that._onVehicleVHDSearch.bind(that),
+                            confirm: that._onVehicleVHDConfirm.bind(that),
+                            cancel: function () { }
+                        });
+                        that.getView().addDependent(that._oVehicleVHD);
+                    }
+                    that._oVehicleVHD.bindAggregation("items", {
+                        path: "VehicleVHDModel>/results",
+                        template: new sap.m.StandardListItem({
+                            title: "{VehicleVHDModel>VehicleDesc}",
+                            description: "{VehicleVHDModel>VehicleID}"
+                        }),
+                        templateShareable: true
+                    });
+                    that._oVehicleVHD.open();
+                },
+                error: function () {
+                    MessageToast.show("Failed to load vehicle data.");
+                }
+            });
+        },
+
+        _onVehicleVHDSearch: function (oEvent) {
+            var sVal = oEvent.getParameter("value") || "";
+            oEvent.getParameter("itemsBinding").filter(
+                sVal ? [new Filter({
+                    filters: [
+                        new Filter("VehicleDesc", FilterOperator.Contains, sVal),
+                        new Filter("VehicleID", FilterOperator.Contains, sVal)
+                    ], and: false
+                })] : []
+            );
+        },
+
+        _onVehicleVHDConfirm: function (oEvent) {
+            var oItem = oEvent.getParameter("selectedItem");
+            if (!oItem) { return; }
+            var sDesc = oItem.getTitle();        // VehicleDesc
+            var sId = oItem.getDescription();    // VehicleID — the highlighted value
+
+            var oModel = this.getView().getModel("nomDialogModel");
+            var sPath = this._oActiveVehicleCtxPath;
+
+            if (sPath) {
+                oModel.setProperty(sPath + "/VehicleId", sId);
+                oModel.setProperty(sPath + "/VehicleDesc", sDesc);
+                // Display ONLY the ID in the input so only the ID is ever shown/passed
+                if (this._oActiveVehicleInput) { this._oActiveVehicleInput.setValue(sId); }
+            }
+            MessageToast.show("Vehicle selected: " + sId + (sDesc ? " \u2014 " + sDesc : ""));
+        },
+
+        // ==================== CORE NOMINATION DIALOG OPEN & BUILD ====================
+        onCreateNominationsFromMatches: function (oEvent) {
+            var oTable = this.byId("MainPnlFra013--matchTbl") || this.byId("matchTbl");
+            if (!oTable && oEvent && typeof oEvent.getSource === "function") {
+                var oBtn = oEvent.getSource();
+                var sPrefix = oBtn.getId().split("--")[0] + "--";
+                oTable = this.byId(sPrefix + "matchTbl") || (sap.ui.getCore && sap.ui.getCore().byId(sPrefix + "matchTbl"));
+            }
+            if (!oTable) {
+                var aControls = this.getView().findAggregatedObjects(true, function (oControl) {
+                    return oControl.getId && (oControl.getId().indexOf("matchTbl") !== -1);
+                });
+                if (aControls && aControls.length > 0) {
+                    oTable = aControls[0];
+                }
+            }
+
+            if (!oTable) {
+                MessageBox.error("Could not find the Matched Positions table.", { title: "Error" });
+                return;
+            }
+
+            var oData = null;
+            if (typeof oTable.getSelectedItems === "function") {
+                var aSelectedItems = oTable.getSelectedItems();
+                if (!aSelectedItems || !aSelectedItems.length) {
+                    MessageBox.warning(
+                        "Please select exactly one confirmed matched position to create nominations from.",
+                        { title: "Create Nominations" }
+                    );
+                    return;
+                }
+                if (aSelectedItems.length > 1) {
+                    MessageBox.warning(
+                        "Only one matched position can be selected at a time to create nominations.\n\nPlease select a single row and try again.",
+                        { title: "Create Nominations \u2014 Single Selection Required" }
+                    );
+                    return;
+                }
+                var oCtx = aSelectedItems[0].getBindingContext("MatchPosData") || aSelectedItems[0].getBindingContext();
+                oData = oCtx ? oCtx.getObject() : null;
+            } else if (typeof oTable.getSelectedIndices === "function") {
+                var aIndices = oTable.getSelectedIndices();
+                if (!aIndices.length) {
+                    MessageBox.warning(
+                        "Please select exactly one confirmed matched position to create nominations from.",
+                        { title: "Create Nominations" }
+                    );
+                    return;
+                }
+                if (aIndices.length > 1) {
+                    MessageBox.warning(
+                        "Only one matched position can be selected at a time to create nominations.\n\nPlease select a single row and try again.",
+                        { title: "Create Nominations \u2014 Single Selection Required" }
+                    );
+                    return;
+                }
+                var oCtx2 = oTable.getContextByIndex(aIndices[0]);
+                oData = oCtx2 ? oCtx2.getObject() : null;
+            }
+
+            if (!oData) {
+                MessageToast.show("Could not retrieve data for the selected row.");
+                return;
+            }
+
+            this._openCreateNominationsDialog(oData);
+        },
+
+        _getDistinctMOTsFromMatch: function (oMatchRow) {
+            // Seed _motDescMap from every description field the backend may return
+            var _seedDesc = function (sCode, sDesc) {
+                if (sCode && sDesc && !_motDescMap[sCode]) { _motDescMap[sCode] = sDesc; }
+            };
+            _seedDesc(oMatchRow.ModeOfTransport, oMatchRow.ModeOfTransportDesc || oMatchRow.ModeOfTransportText || "");
+            _seedDesc(oMatchRow.PModeOfTransport, oMatchRow.PModeOfTransportDesc || oMatchRow.PModeOfTransportText || "");
+            _seedDesc(oMatchRow.SModeOfTransport, oMatchRow.SModeOfTransportDesc || oMatchRow.SModeOfTransportText || "");
+
+            var aMOTs = [];
+            var _addMoT = function (sCode) {
+                if (sCode && aMOTs.indexOf(sCode) === -1) { aMOTs.push(sCode); }
+            };
+            _addMoT(oMatchRow.ModeOfTransport);
+            _addMoT(oMatchRow.PModeOfTransport);
+            _addMoT(oMatchRow.SModeOfTransport);
+            if (oMatchRow.Purchase && oMatchRow.Purchase.ModeOfTransport) {
+                _seedDesc(oMatchRow.Purchase.ModeOfTransport, oMatchRow.Purchase.ModeOfTransportDesc || "");
+                _addMoT(oMatchRow.Purchase.ModeOfTransport);
+            }
+            if (oMatchRow.Sales && oMatchRow.Sales.ModeOfTransport) {
+                _seedDesc(oMatchRow.Sales.ModeOfTransport, oMatchRow.Sales.ModeOfTransportDesc || "");
+                _addMoT(oMatchRow.Sales.ModeOfTransport);
+            }
+            if (aMOTs.length === 0) { aMOTs.push(""); }
+
+            return aMOTs.map(function (sCode) {
+                return { key: sCode, text: _motDisplay(sCode) || sCode };
+            });
+        },
+
+        _openCreateNominationsDialog: function (oMatchData) {
+            var oView = this.getView();
+            var that = this;
+
+            this._buildNomDialogModel(oMatchData);
+
+            var aMOToptions = this._getDistinctMOTsFromMatch(oMatchData);
+            var oNomMOTModel = this.getView().getModel("nomMOTModel");
+            if (!oNomMOTModel) {
+                oNomMOTModel = new JSONModel({ options: [] });
+                this.getView().setModel(oNomMOTModel, "nomMOTModel");
+            }
+            oNomMOTModel.setProperty("/options", aMOToptions);
+
+            if (!this._pNomDialog) {
+                this._pNomDialog = Fragment.load({
+                    id: oView.getId(),
+                    name: "genslogiques.logisticsdashboard.fragments.CreateNominationsDialog",
+                    controller: this
+                }).then(function (oDialog) {
+                    oView.addDependent(oDialog);
+                    that._oNomDialog = oDialog;
+                    return oDialog;
+                }).catch(function (oErr) {
+                    console.error("Error loading CreateNominationsDialog fragment:", oErr);
+                    MessageBox.error("Failed to load Nomination dialog: " + (oErr && oErr.message ? oErr.message : oErr));
+                    that._pNomDialog = null;
+                });
+            }
+
+            this._pNomDialog.then(function (oDialog) {
+                if (oDialog) {
+                    oDialog.open();
+                }
+            });
+        },
+
+        // Helper — Monday of ISO WeekID (YYYYWW)
+        _getMondayFromWeekID: function (sWeekID) {
+            if (!sWeekID || String(sWeekID).length < 6) { return null; }
+            var sW = String(sWeekID).trim();
+            var nYear = parseInt(sW.substring(0, 4), 10);
+            var nWeek = parseInt(sW.substring(4), 10);
+            if (isNaN(nYear) || isNaN(nWeek) || nWeek < 1 || nWeek > 53) { return null; }
+            // ISO 8601: 4 January is always in week 1
+            var oJan4 = new Date(Date.UTC(nYear, 0, 4));
+            var nDow = oJan4.getUTCDay() || 7;           // Mon=1 … Sun=7
+            var oMonday = new Date(oJan4);
+            oMonday.setUTCDate(oJan4.getUTCDate() - (nDow - 1) + (nWeek - 1) * 7);
+            oMonday.setUTCHours(0, 0, 0, 0);
+            return oMonday;
+        },
+
+        _buildNomDialogModel: function (oRow) {
+            var sPurchDateVal = oRow.Purchscheddate || oRow.PurchSchedDate || oRow.DeliveryDate || oRow.ScheduleDate || "";
+            var sSalesDateVal = oRow.Salescheddate || oRow.SalesSchedDate || oRow.DueDate || oRow.ScheduleDate || "";
+
+            var oPurchDate = _parseDate(sPurchDateVal) || new Date();
+            var nMatchQty = parseFloat(oRow.Matchquantity || oRow.MatchQuantity) || 0;
+            var nPurchQty = parseFloat(oRow.Purchquantity || oRow.PurchaseQuantity) || 0;
+            var sUOM = oRow.Matchuom || oRow.MatchUOM || oRow.Purchuom || oRow.UOM || "";
+            var nDefaultRows = 1;
+
+            var sCommodity = (oRow.Commodity || "").trim();
+            var sWeekID = (oRow.WeekID || oRow.Purchschedmonth || "").trim();
+            var sPurchDealNumber = (oRow.Purchasedeal || oRow.PurchDealNumber || "").trim();
+            var sSalesDealNumber = (oRow.Salesdeal || oRow.SalesDealNumber || "").trim();
+            var sMatchQtyLabel = _fmtQty(nMatchQty, sUOM);
+
+            var sMatchSource = (oRow.Matchsource || oRow.MatchSource || oRow.Matchsrc || "").trim();
+            var sPlantVal = (oRow.Plant || "").trim();
+            var sStorageLocVal = (oRow.Storagelocation || oRow.StorageLocation || "").trim();
+
+            var sMoT = oRow.ModeOfTransport || "";
+            var sMoTDesc = oRow.ModeOfTransportDesc || oRow.ModeOfTransportText || oRow.MOTDescription || "";
+            if (sMoT && sMoTDesc) { _motDescMap[sMoT] = sMoTDesc; }
+
+            var oWeekMonday = this._getMondayFromWeekID(sWeekID);
+            var oStartDate = oWeekMonday || oPurchDate;
+            var sMoTLabel = _motDisplay(sMoT) || sMoT;
+
+            var sDialogTitle = "Create Nomination" +
+                (sCommodity ? " \u2014 " + sCommodity : "") +
+                (sWeekID ? " \u2014 " + sWeekID : "") +
+                (sMatchQtyLabel ? " \u2014 " + sMatchQtyLabel : "");
+
+            var sPurchDoc = oRow.Purchasedocument || oRow.PurchaseDocument || "";
+            var sPurchItem = oRow.Purchasedocitem || oRow.PurchaseDocItem || "";
+            var sSalesDoc = oRow.Salesdocument || oRow.SalesDocument || "";
+            var sSalesItem = oRow.Salesdocitem || oRow.SalesDocItem || "";
+
+            var sOrigin = oRow.Origin || "";
+            var sOriginName = oRow.OriginName || oRow.Originname || oRow.Origin || "";
+            var sOriginDisplay = (sOrigin && sOriginName && sOrigin !== sOriginName)
+                ? sOrigin + " \u2014 " + sOriginName
+                : (sOrigin || sOriginName);
+
+            var sDest = oRow.Destination || "";
+            var sDestName = oRow.DestinationName || oRow.Destination || "";
+            var sDestDisplay = (sDest && sDestName && sDest !== sDestName)
+                ? sDest + " \u2014 " + sDestName
+                : (sDest || sDestName);
+
+            var sSupplierID = oRow.Supplierid || oRow.SupplierId || oRow.SupplierID || oRow.SUPPLIERID || "";
+            var sSupplierName = oRow.Supplier || oRow.SupplierName || sSupplierID;
+            if (sSupplierName && !sSupplierID && /^\d+$/.test(sSupplierName)) {
+                sSupplierID = sSupplierName; sSupplierName = "";
+            }
+            var sSupplierDisplay = (sSupplierID && sSupplierName && sSupplierID !== sSupplierName)
+                ? sSupplierID + " \u2014 " + sSupplierName
+                : (sSupplierID || sSupplierName);
+
+            var sCustomerID = oRow.Customerid || oRow.CustomerId || oRow.CustomerID || oRow.CUSTOMERID || "";
+            var sCustomerName = oRow.Customer || oRow.CustomerName || sCustomerID;
+            if (sCustomerName && !sCustomerID && /^\d+$/.test(sCustomerName)) {
+                sCustomerID = sCustomerName; sCustomerName = "";
+            }
+            var sCustomerDisplay = (sCustomerID && sCustomerName && sCustomerID !== sCustomerName)
+                ? sCustomerID + " \u2014 " + sCustomerName
+                : (sCustomerID || sCustomerName);
+
+            var sPTxType = oRow.PTransactionType || "";
+            var sSTxType = oRow.STransactionType || "";
+            var sPInco = oRow.PIncoTerms || "";
+            var sSInco = oRow.SIncoTerms || "";
+
+            var sPurchUOM = oRow.Purchuom || oRow.UOM || sUOM;
+            var sSalesUOM = oRow.Salesuom || oRow.UOM || sUOM;
+            var nSalesQty = parseFloat(oRow.Salesquantity || oRow.SalesQuantity) || 0;
+
+            var bIsE2I = (sMatchSource === "E2I");
+            var bIsI2O = (sMatchSource === "I2O");
+
+            var bIsE2I_DAP = (sMatchSource === "E2I" && sPInco === "DAP");
+            var bIsI2O_FOB = (sMatchSource === "I2O" && sSInco === "FOB");
+
+            var bShowOriginPanel = true;
+            var bShowDestinationPanel = true;
+
+            var sLocationLeftLabel = "";
+            var sLocationLeftValue = "";
+            var sLocationRightLabel = "";
+            var sLocationRightValue = "";
+
+            var sOriginDealNumber = sPurchDealNumber;
+            var sOriginLocation = sOriginDisplay;
+            var sOriginQty = _fmtQty(nPurchQty, sPurchUOM);
+            var sOriginPartner = sSupplierDisplay;
+
+            var sDestinationDealNumber = sSalesDealNumber;
+            var sDestinationLocation = sDestDisplay;
+            var sDestinationQty = _fmtQty(nSalesQty, sSalesUOM);
+            var sDestinationPartner = sCustomerDisplay;
+
+            if (bIsE2I_DAP) {
+                // Destination should show Entitlement data
+                sDestinationDealNumber = sPurchDealNumber;
+                sDestinationLocation = sOriginDisplay;
+                sDestinationQty = _fmtQty(nPurchQty, sPurchUOM);
+                sDestinationPartner = sSupplierDisplay;
+                sLocationRightLabel = "Entitlement Location";
+                sLocationRightValue = sOriginDisplay || sOrigin || "";
+                bShowOriginPanel = false;
+                bShowDestinationPanel = true;
+            } else if (bIsI2O_FOB) {
+                // Origin should show Obligation data
+                sOriginDealNumber = sSalesDealNumber;
+                sOriginLocation = sDestDisplay;
+                sOriginQty = _fmtQty(nSalesQty, sSalesUOM);
+                sOriginPartner = sCustomerDisplay;
+                sLocationLeftLabel = "Obligation Location";
+                sLocationLeftValue = sDestDisplay || sDest || "";
+                bShowOriginPanel = true;
+                bShowDestinationPanel = false;
+            } else if (bIsE2I) {
+                sLocationLeftLabel = "Entitlement Location";
+                sLocationLeftValue = sOriginDisplay || sOrigin || "";
+                sLocationRightLabel = "Inventory Location";
+                sLocationRightValue = sDestDisplay || sDest || "";
+            } else if (bIsI2O) {
+                sLocationLeftLabel = "Inventory Location";
+                sLocationLeftValue = sOriginDisplay || sOrigin || "";
+                sLocationRightLabel = "Obligation Location";
+                sLocationRightValue = sDestDisplay || sDest || "";
+            }
+
+            var oDialogData = {
+                DialogTitle: sDialogTitle,
+                Commodity: sCommodity,
+                WeekID: sWeekID,
+                PurchDealNumber: sPurchDealNumber,
+                SalesDealNumber: sSalesDealNumber,
+                MatchQtyFormatted: sMatchQtyLabel,
+                EditMatchQty: String(nMatchQty),
+                NoOfRows: nDefaultRows,
+                _uom: sUOM,
+                _purchQty: nPurchQty,
+                _matchQty: nMatchQty,
+
+                MatchSource: sMatchSource,
+                Plant: sPlantVal,
+                StorageLocation: sStorageLocVal,
+
+                ShowLocationBoxes: (bIsE2I || bIsI2O || bIsE2I_DAP || bIsI2O_FOB),
+                LocationLeftLabel: sLocationLeftLabel,
+                LocationLeftValue: sLocationLeftValue,
+                LocationRightLabel: sLocationRightLabel,
+                LocationRightValue: sLocationRightValue,
+
+                ShowOriginPanel: bShowOriginPanel,
+                ShowDestinationPanel: bShowDestinationPanel,
+
+                OriginDealNumber: sOriginDealNumber,
+                OriginLocation: sOriginLocation,
+                OriginQty: sOriginQty,
+                OriginPartner: sOriginPartner,
+
+                DestinationDealNumber: sDestinationDealNumber,
+                DestinationLocation: sDestinationLocation,
+                DestinationQty: sDestinationQty,
+                DestinationPartner: sDestinationPartner,
+
+                PurchaseDocument: sPurchDoc,
+                PurchaseDocItem: sPurchItem,
+                Origin: sOrigin,
+                OriginName: sOriginName,
+                OriginDisplay: sOriginDisplay,
+                PurchScheduleQtyFormatted: _fmtQty(nPurchQty, sPurchUOM),
+                PurchSchedDateDisplay: _fmtDate(sPurchDateVal),
+                _purchDateVal: sPurchDateVal,
+                Supplier: sSupplierName,
+                SupplierID: sSupplierID,
+                SupplierDisplay: sSupplierDisplay,
+                PTransactionType: sPTxType,
+                PIncoTerms: sPInco,
+                SalesDocument: sSalesDoc,
+                SalesDocItem: sSalesItem,
+                Destination: sDest,
+                DestinationName: sDestName,
+                DestinationDisplay: sDestDisplay,
+                SalesScheduleQtyFormatted: _fmtQty(nSalesQty, sSalesUOM),
+                SalesSchedDateDisplay: _fmtDate(sSalesDateVal),
+                _salesDateVal: sSalesDateVal,
+                Customer: sCustomerName,
+                CustomerID: sCustomerID,
+                CustomerDisplay: sCustomerDisplay,
+                STransactionType: sSTxType,
+                SIncoTerms: sSInco,
+                ModeOfTransport: sMoT,
+                ModeOfTransportLabel: sMoTLabel,
+                _purchStartDate: oStartDate,
+                scheduleRows: []
+            };
+
+            oDialogData.scheduleRows = this._buildScheduleRows(oStartDate, nDefaultRows, nMatchQty, sUOM, nPurchQty);
+
+            var oExisting = this.getView().getModel("nomDialogModel");
+            if (oExisting) { oExisting.setData(oDialogData); }
+            else { this.getView().setModel(new JSONModel(oDialogData), "nomDialogModel"); }
+        },
+
+        _buildScheduleRows: function (oStart, nCount, nTotalMatchQty, sUOM, nTotalPurchQty) {
+            var nEffPurchQty = (nTotalPurchQty && nTotalPurchQty > 0) ? nTotalPurchQty : nTotalMatchQty;
+
+            var nMatchPer = nCount > 0 ? parseFloat((nTotalMatchQty / nCount).toFixed(3)) : 0;
+            var nPurchPer = nCount > 0 ? parseFloat((nEffPurchQty / nCount).toFixed(3)) : 0;
+
+            var aDates = [];
+            var oCur = new Date(oStart);
+            oCur.setUTCHours(0, 0, 0, 0);
+            aDates.push(new Date(oCur));
+            while (aDates.length < nCount) {
+                oCur = this._getNextWorkingDay(oCur);
+                aDates.push(new Date(oCur));
+            }
+
+            return aDates.map(function (oDate) {
+                var sY = oDate.getUTCFullYear();
+                var sMo = String(oDate.getUTCMonth() + 1).padStart(2, "0");
+                var sD = String(oDate.getUTCDate()).padStart(2, "0");
+                return {
+                    ScheduleDate: sY + "-" + sMo + "-" + sD,
+                    ScheduleQty: String(nMatchPer),
+                    PurchScheduleQty: String(nPurchPer),
+                    NoOfNominations: 1,
+                    TotalScheduleQty: nMatchPer,
+                    TotalScheduleQtyFormatted: nMatchPer > 0
+                        ? nMatchPer.toLocaleString("en-US") + (sUOM ? " " + sUOM : "") : "",
+                    MoT: "", CarrierName: "", CarrierCode: "",
+                    ShipperName: "", ShipperCode: "", VehicleId: "", VehicleDesc: ""
+                };
+            });
+        },
+
+        _generateWorkingDays: function (oStartDate, nCount) {
+            var aDays = [], oCur = new Date(oStartDate);
+            oCur.setUTCHours(0, 0, 0, 0);
+            while (aDays.length < nCount) {
+                var nDow = oCur.getUTCDay();
+                if (nDow !== 0 && nDow !== 6) { aDays.push(new Date(oCur)); }
+                oCur.setUTCDate(oCur.getUTCDate() + 1);
+            }
+            return aDays;
+        },
+
+        _getNextWorkingDay: function (oDate) {
+            var oNext = new Date(oDate);
+            oNext.setUTCDate(oNext.getUTCDate() + 1);
+            while (oNext.getUTCDay() === 0 || oNext.getUTCDay() === 6) {
+                oNext.setUTCDate(oNext.getUTCDate() + 1);
+            }
+            return oNext;
+        },
+
+        // ==================== EDITING & ROW HANDLERS ====================
+        onNomNoOfRowsChange: function (oEvent) {
+            var oModel = this.getView().getModel("nomDialogModel");
+            if (!oModel) { return; }
+
+            var nNew = Math.min(50, Math.max(1,
+                parseInt(oEvent.getParameter("value") || oEvent.getSource().getValue(), 10) || 1));
+            oModel.setProperty("/NoOfRows", nNew);
+
+            var oStart = oModel.getProperty("/_purchStartDate") || new Date();
+            var nMatchQty = parseFloat(oModel.getProperty("/EditMatchQty")) || 0;
+            var nPurchQty = parseFloat(oModel.getProperty("/_purchQty")) || 0;
+            var nEffPurchQty = nPurchQty > 0 ? nPurchQty : nMatchQty;
+            var sUOM = oModel.getProperty("/_uom") || "";
+
+            var aCur = oModel.getProperty("/scheduleRows") || [];
+            var nCur = aCur.length;
+            if (nNew === nCur) { return; }
+
+            var nMatchPer = nNew > 0 ? parseFloat((nMatchQty / nNew).toFixed(3)) : 0;
+            var nPurchPer = nNew > 0 ? parseFloat((nEffPurchQty / nNew).toFixed(3)) : 0;
+
+            var aNew;
+            if (nNew > nCur) {
+                aNew = aCur.slice();
+                var oLast = nCur > 0
+                    ? new Date(aCur[nCur - 1].ScheduleDate + "T00:00:00Z")
+                    : oStart;
+                for (var i = 0; i < nNew - nCur; i++) {
+                    oLast = this._getNextWorkingDay(oLast);
+                    var sY = oLast.getUTCFullYear();
+                    var sMo = String(oLast.getUTCMonth() + 1).padStart(2, "0");
+                    var sD = String(oLast.getUTCDate()).padStart(2, "0");
+                    aNew.push({
+                        ScheduleDate: sY + "-" + sMo + "-" + sD,
+                        ScheduleQty: String(nMatchPer),
+                        PurchScheduleQty: String(nPurchPer),
+                        NoOfNominations: 1,
+                        TotalScheduleQty: 0, TotalScheduleQtyFormatted: "",
+                        MoT: "", CarrierName: "", CarrierCode: "",
+                        ShipperName: "", ShipperCode: "", VehicleId: "", VehicleDesc: ""
+                    });
+                }
+            } else {
+                aNew = aCur.slice(0, nNew);
+            }
+
+            // Re-spread quantities evenly across all rows
+            aNew.forEach(function (r) {
+                r.ScheduleQty = String(nMatchPer);
+                r.PurchScheduleQty = String(nPurchPer);
+                r.TotalScheduleQty = nMatchPer;
+                r.TotalScheduleQtyFormatted = nMatchPer > 0
+                    ? nMatchPer.toLocaleString("en-US") + (sUOM ? " " + sUOM : "") : "";
+            });
+
+            oModel.setProperty("/scheduleRows", aNew);
+        },
+
+        onNomMatchQtyChange: function (oEvent) {
+            var oModel = this.getView().getModel("nomDialogModel");
+            if (!oModel) { return; }
+
+            var nNew = parseFloat((oEvent.getParameter("value") || "").replace(/,/g, ""));
+            if (isNaN(nNew) || nNew < 0) {
+                MessageToast.show("Please enter a valid positive number.");
+                return;
+            }
+
+            var sUOM = oModel.getProperty("/_uom") || "";
+            var nPurchQty = parseFloat(oModel.getProperty("/_purchQty")) || 0;
+            var nEffPurchQty = nPurchQty > 0 ? nPurchQty : nNew;
+
+            oModel.setProperty("/EditMatchQty", String(nNew));
+            oModel.setProperty("/MatchQtyFormatted",
+                nNew.toLocaleString("en-US") + (sUOM ? " " + sUOM : ""));
+
+            var sCommodity = oModel.getProperty("/Commodity") || "";
+            var sWeekID = oModel.getProperty("/WeekID") || "";
+            oModel.setProperty("/DialogTitle",
+                "Create Nomination" +
+                (sCommodity ? " \u2014 " + sCommodity : "") +
+                (sWeekID ? " \u2014 " + sWeekID : "") +
+                " \u2014 " + nNew.toLocaleString("en-US") + (sUOM ? " " + sUOM : ""));
+
+            var aRows = oModel.getProperty("/scheduleRows") || [];
+            var nRows = aRows.length || 1;
+            var nMatchPer = parseFloat((nNew / nRows).toFixed(3));
+            var nPurchPer = parseFloat((nEffPurchQty / nRows).toFixed(3));
+
+            aRows.forEach(function (r) {
+                r.ScheduleQty = String(nMatchPer);
+                r.PurchScheduleQty = String(nPurchPer);
+                r.TotalScheduleQty = nMatchPer;
+                r.TotalScheduleQtyFormatted = nMatchPer > 0
+                    ? nMatchPer.toLocaleString("en-US") + (sUOM ? " " + sUOM : "") : "";
+            });
+            oModel.setProperty("/scheduleRows", aRows);
+        },
+
+        onNomRowQtyChange: function (oEvent) {
+            var oCtx = oEvent.getSource().getBindingContext("nomDialogModel");
+            var oModel = this.getView().getModel("nomDialogModel");
+            if (!oCtx || !oModel) { return; }
+            var sPath = oCtx.getPath(), oRow = oModel.getProperty(sPath);
+            var nQty = parseFloat((oEvent.getParameter("value") || "").replace(/,/g, "")) || 0;
+            var nNoms = parseInt(oRow.NoOfNominations, 10) || 1;
+            var sUOM = oModel.getProperty("/_uom") || "";
+            var nTotal = parseFloat((nQty * nNoms).toFixed(3));
+            oModel.setProperty(sPath + "/TotalScheduleQty", nTotal);
+            oModel.setProperty(sPath + "/TotalScheduleQtyFormatted", nTotal > 0 ? nTotal.toLocaleString("en-US") + (sUOM ? " " + sUOM : "") : "");
+        },
+
+        onNomRowNomCountChange: function (oEvent) {
+            var oCtx = oEvent.getSource().getBindingContext("nomDialogModel");
+            var oModel = this.getView().getModel("nomDialogModel");
+            if (!oCtx || !oModel) { return; }
+            var sPath = oCtx.getPath(), oRow = oModel.getProperty(sPath);
+            var nQty = parseFloat(oRow.ScheduleQty) || 0;
+            var nNoms = parseInt(oEvent.getParameter("value") || 1, 10) || 1;
+            var sUOM = oModel.getProperty("/_uom") || "";
+            var nTotal = parseFloat((nQty * nNoms).toFixed(3));
+            oModel.setProperty(sPath + "/TotalScheduleQty", nTotal);
+            oModel.setProperty(sPath + "/TotalScheduleQtyFormatted", nTotal > 0 ? nTotal.toLocaleString("en-US") + (sUOM ? " " + sUOM : "") : "");
+        },
+
+        onAddNominationRow: function () {
+            var oModel = this.getView().getModel("nomDialogModel");
+            if (!oModel) { return; }
+
+            var aRows = oModel.getProperty("/scheduleRows") || [];
+            var oStart = oModel.getProperty("/_purchStartDate") || new Date();
+            var nMatchQty = parseFloat(oModel.getProperty("/EditMatchQty")) || 0;
+            var nPurchQty = parseFloat(oModel.getProperty("/_purchQty")) || 0;
+            var nEffPurchQty = nPurchQty > 0 ? nPurchQty : nMatchQty;
+            var sUOM = oModel.getProperty("/_uom") || "";
+
+            var nCur = aRows.length;
+            var oLast = nCur > 0
+                ? new Date(aRows[nCur - 1].ScheduleDate + "T00:00:00Z")
+                : oStart;
+            var oNext = this._getNextWorkingDay(oLast);
+            var nNew = nCur + 1;
+
+            var nMatchPer = nNew > 0 ? parseFloat((nMatchQty / nNew).toFixed(3)) : 0;
+            var nPurchPer = nNew > 0 ? parseFloat((nEffPurchQty / nNew).toFixed(3)) : 0;
+
+            // Re-spread existing rows
+            aRows.forEach(function (r) {
+                r.ScheduleQty = String(nMatchPer);
+                r.PurchScheduleQty = String(nPurchPer);
+                r.TotalScheduleQty = nMatchPer;
+                r.TotalScheduleQtyFormatted = nMatchPer > 0
+                    ? nMatchPer.toLocaleString("en-US") + (sUOM ? " " + sUOM : "") : "";
+            });
+
+            // Append new row
+            var sY = oNext.getUTCFullYear();
+            var sMo = String(oNext.getUTCMonth() + 1).padStart(2, "0");
+            var sD = String(oNext.getUTCDate()).padStart(2, "0");
+            aRows.push({
+                ScheduleDate: sY + "-" + sMo + "-" + sD,
+                ScheduleQty: String(nMatchPer),
+                PurchScheduleQty: String(nPurchPer),
+                NoOfNominations: 1,
+                TotalScheduleQty: nMatchPer,
+                TotalScheduleQtyFormatted: nMatchPer > 0
+                    ? nMatchPer.toLocaleString("en-US") + (sUOM ? " " + sUOM : "") : "",
+                MoT: "", CarrierName: "", CarrierCode: "",
+                ShipperName: "", ShipperCode: "", VehicleId: "", VehicleDesc: ""
+            });
+
+            oModel.setProperty("/NoOfRows", nNew);
+            oModel.setProperty("/scheduleRows", aRows);
+            MessageToast.show("New row added. Total rows: " + nNew);
+        },
+
+        onRemoveNominationRow: function (oEvent) {
+            var oCtx = oEvent.getSource().getBindingContext("nomDialogModel");
+            if (!oCtx) { return; }
+
+            var oModel = this.getView().getModel("nomDialogModel");
+            var aParts = oCtx.getPath().split("/");
+            var nIdx = parseInt(aParts[aParts.length - 1], 10);
+            var aRows = oModel.getProperty("/scheduleRows") || [];
+
+            if (aRows.length <= 1) { MessageToast.show("Cannot remove the last row."); return; }
+
+            aRows.splice(nIdx, 1);
+
+            var nMatchQty = parseFloat(oModel.getProperty("/EditMatchQty")) || 0;
+            var nPurchQty = parseFloat(oModel.getProperty("/_purchQty")) || 0;
+            var nEffPurchQty = nPurchQty > 0 ? nPurchQty : nMatchQty;
+            var sUOM = oModel.getProperty("/_uom") || "";
+            var nRows = aRows.length;
+
+            var nMatchPer = nRows > 0 ? parseFloat((nMatchQty / nRows).toFixed(3)) : 0;
+            var nPurchPer = nRows > 0 ? parseFloat((nEffPurchQty / nRows).toFixed(3)) : 0;
+
+            aRows.forEach(function (r) {
+                r.ScheduleQty = String(nMatchPer);
+                r.PurchScheduleQty = String(nPurchPer);
+                r.TotalScheduleQty = nMatchPer;
+                r.TotalScheduleQtyFormatted = nMatchPer > 0
+                    ? nMatchPer.toLocaleString("en-US") + (sUOM ? " " + sUOM : "") : "";
+            });
+
+            oModel.setProperty("/NoOfRows", nRows);
+            oModel.setProperty("/scheduleRows", aRows);
+            MessageToast.show("Row removed. Total rows: " + nRows);
+        },
+
+        onNomDialogCancel: function () {
+            if (this._oNomDialog) {
+                this._oNomDialog.close();
+            }
+        },
+
+        onNomRowMoTChange: function (oEvent) {
+            var oSelect = oEvent.getSource();
+            var sKey = oSelect.getSelectedKey();
+            var oCtx = oSelect.getBindingContext("nomDialogModel");
+            var oModel = this.getView().getModel("nomDialogModel");
+            if (!oCtx || !oModel) { return; }
+            var sPath = oCtx.getPath();
+            oModel.setProperty(sPath + "/MoT", sKey);
+        },
+
+        // ==================== SUBMIT HANDLER & PAYLOAD BUILDER ====================
+        onNomDialogSubmit: function () {
+            var oView = this.getView();
+            var oModel = oView.getModel("nomDialogModel");
+            if (!oModel) { return; }
+
+            var aRows = oModel.getProperty("/scheduleRows") || [];
+            var sMissing = [];
+
+            aRows.forEach(function (r, idx) {
+                if (!r.ScheduleDate) {
+                    sMissing.push("Row " + (idx + 1) + ": Schedule Date is required.");
+                }
+                if (!r.ScheduleQty || parseFloat(r.ScheduleQty) <= 0) {
+                    sMissing.push("Row " + (idx + 1) + ": Schedule Qty must be > 0.");
+                }
+            });
+
+            if (sMissing.length) {
+                MessageBox.error(
+                    "Please fix the following issues before submitting:\n\n" + sMissing.join("\n"),
+                    { title: "Validation Errors" }
+                );
+                return;
+            }
+
+            var aPayloads = this._buildNominationPayload(oModel, aRows);
+            if (!aPayloads || !aPayloads.length) { return; }
+
+            jQuery.sap.log.info(
+                "[NomCreate] " + aPayloads.length + " nomination(s) to submit. First payload preview:\n" +
+                JSON.stringify({
+                    mot: aPayloads[0].mot,
+                    uom: aPayloads[0].uom,
+                    vehicleno: aPayloads[0].vehicleno,
+                    carrier: aPayloads[0].carrier,
+                    shipper: aPayloads[0].shipper,
+                    itemCount: (aPayloads[0].to_items && aPayloads[0].to_items.results) ? aPayloads[0].to_items.results.length : 0
+                }, null, 2)
+            );
+
+            var oODataModel = (this.getOwnerComponent() && this.getOwnerComponent().getModel()) || this.getView().getModel();
+            var that = this;
+
+            if (this._oNomDialog) { this._oNomDialog.setBusy(true); }
+
+            // ── SINGLE nomination ────────────────────────────────────────────────────
+            if (aPayloads.length === 1) {
+                oODataModel.create("/NomCreate", aPayloads[0], {
+                    success: function (oData, oResponse) {
+                        if (that._oNomDialog) {
+                            that._oNomDialog.setBusy(false);
+                        }
+                        var sMessageText = "";
+                        try {
+                            var sSapMessage =
+                                (oResponse && oResponse.headers && (oResponse.headers["sap-message"] || oResponse.headers["SAP-Message"]));
+                            if (sSapMessage) {
+                                var oSapMsg = JSON.parse(sSapMessage);
+                                if (oSapMsg.message) {
+                                    sMessageText += "• " + oSapMsg.message + "\n\n";
+                                }
+                                if (oSapMsg.details && oSapMsg.details.length) {
+                                    var oUniqueMessages = {};
+                                    oSapMsg.details.forEach(function (oDetail) {
+                                        if (
+                                            oDetail.message &&
+                                            !oUniqueMessages[oDetail.message]
+                                        ) {
+                                            oUniqueMessages[oDetail.message] = true;
+                                            sMessageText += "• " + oDetail.message + "\n";
+                                        }
+                                    });
+                                }
+                            }
+                        } catch (e) {
+                            console.error("SAP Message Parse Error", e);
+                            sMessageText = "1 nomination created successfully.";
+                        }
+                        MessageBox.information(
+                            sMessageText || "1 nomination created successfully.",
+                            {
+                                title: "Nomination Messages",
+                                onClose: function () {
+                                    if (that._oNomDialog) {
+                                        that._oNomDialog.close();
+                                    }
+                                    var oMST = that.byId("MainPnlFra013--matchTbl") || that.byId("matchTbl");
+                                    if (oMST) {
+                                        var oBinding = oMST.getBinding("items");
+                                        if (oBinding) { oBinding.refresh(); }
+                                    }
+                                    if (typeof that._applyPositionFilters === "function") {
+                                        that._applyPositionFilters();
+                                    }
+                                }
+                            }
+                        );
+                    },
+                    error: function (oError) {
+                        if (that._oNomDialog) { that._oNomDialog.setBusy(false); }
+                        var sMessageText = that._extractODataError(oError);
+                        MessageBox.error(
+                            sMessageText,
+                            {
+                                title: "Nomination Messages"
+                            }
+                        );
+                    }
+                });
+                return;
+            }
+
+            // ── MULTIPLE nominations — OData V2 batch ────────────────────────────────
+            var sGroupId = "nomCreateBatch";
+            oODataModel.setUseBatch(true);
+            oODataModel.setDeferredGroups([sGroupId]);
+            // Each nomination is its own change set so they succeed/fail independently
+            aPayloads.forEach(function (oPayload, nIdx) {
+                oODataModel.create("/NomCreate", oPayload, {
+                    groupId: sGroupId,
+                    changeSetId: "cs_nom_" + nIdx
+                });
+            });
+
+            oODataModel.submitChanges({
+                groupId: sGroupId,
+                success: function (oData) {
+                    if (that._oNomDialog) { that._oNomDialog.setBusy(false); }
+                    oODataModel.setDeferredGroups([]);
+
+                    var aErrors = that._parseBatchErrors(oData);
+
+                    if (aErrors.length) {
+                        var nFailed = aErrors.length;
+                        var nOk = aPayloads.length - nFailed;
+                        oODataModel.resetChanges();
+
+                        jQuery.sap.log.error("[NomCreate Batch] " + nFailed + " changeset(s) failed:\n\u2022 " + aErrors.join("\n\u2022 "));
+                        MessageBox.error(
+                            nFailed + " of " + aPayloads.length + " nomination(s) failed to save" +
+                            (nOk > 0 ? " (" + nOk + " succeeded)" : "") + ":\n\n\u2022 " +
+                            aErrors.join("\n\u2022 "),
+                            {
+                                title: "Submit Error",
+                                onClose: function () {
+                                    if (nOk > 0) {
+                                        var oMST = that.byId("MainPnlFra013--matchTbl") || that.byId("matchTbl");
+                                        if (oMST) {
+                                            var oBinding = oMST.getBinding("items");
+                                            if (oBinding) { oBinding.refresh(); }
+                                        }
+                                        if (typeof that._applyPositionFilters === "function") {
+                                            that._applyPositionFilters();
+                                        }
+                                    }
+                                }
+                            }
+                        );
+                        return;
+                    }
+
+                    MessageBox.success(
+                        aPayloads.length + " nomination(s) created successfully.",
+                        {
+                            onClose: function () {
+                                if (that._oNomDialog) {
+                                    that._oNomDialog.close();
+                                }
+                                var oMST = that.byId("MainPnlFra013--matchTbl") || that.byId("matchTbl");
+                                if (oMST) {
+                                    var oBinding = oMST.getBinding("items");
+                                    if (oBinding) { oBinding.refresh(); }
+                                }
+                                if (typeof that._applyPositionFilters === "function") {
+                                    that._applyPositionFilters();
+                                }
+                            }
+                        }
+                    );
+                },
+                error: function (oError) {
+                    if (that._oNomDialog) { that._oNomDialog.setBusy(false); }
+                    oODataModel.setDeferredGroups([]);
+                    oODataModel.resetChanges();
+                    var sDetail = that._extractODataError(oError);
+                    jQuery.sap.log.error("[NomCreate Batch] HTTP " + (oError && oError.statusCode ? oError.statusCode : "?") + " — " + sDetail);
+                    MessageBox.error(
+                        "Failed to submit " + aPayloads.length + " nominations.\n\n" + sDetail,
+                        { title: "Submit Error" }
+                    );
+                }
+            });
+        },
+
+        _buildNominationPayload: function (oModel, aRows) {
+            var sMoT = oModel.getProperty("/ModeOfTransport") || "";
+            var sUOM = oModel.getProperty("/_uom") || "";
+            var sCommodity = oModel.getProperty("/Commodity") || "";
+            var sOrigin = oModel.getProperty("/Origin") || "";
+            var sDestination = oModel.getProperty("/Destination") || "";
+            var sPurchDoc = oModel.getProperty("/PurchaseDocument") || "";
+            var sPurchItem = oModel.getProperty("/PurchaseDocItem") || "";
+            var sSalesDoc = oModel.getProperty("/SalesDocument") || "";
+            var sSalesItem = oModel.getProperty("/SalesDocItem") || "";
+            var sPInco = oModel.getProperty("/PIncoTerms") || "";
+            var sSInco = oModel.getProperty("/SIncoTerms") || "";
+
+            var sMatchSource = oModel.getProperty("/MatchSource") || "";
+            var sPlant = oModel.getProperty("/Plant") || "";
+            var sStorageLoc = oModel.getProperty("/StorageLocation") || "";
+            var bIsE2I = (sMatchSource === "E2I");
+            var bIsI2O = (sMatchSource === "I2O");
+            var bIsE2I_DAP = (sMatchSource === "E2I" && sPInco === "DAP");
+            var bIsI2O_FOB = (sMatchSource === "I2O" && sSInco === "FOB");
+
+            var sPurchTxType = "P";
+            var sSalesTxType = "S";
+            var sInvTxType = "I";
+
+            var bHasPurch = !!(sPurchDoc || sPurchItem);
+            var bHasSales = !!(sSalesDoc || sSalesItem);
+            var bHasInv = (bIsE2I || bIsI2O) && !!(sPlant || sStorageLoc);
+
+            if (!bHasPurch && !bHasSales && !bHasInv) {
+                MessageBox.error(
+                    "Cannot create nominations: no Purchase, Sales, or Inventory reference found " +
+                    "in the selected match.\n\nEnsure the matched position has at least one document reference.",
+                    { title: "Create Nominations \u2014 Missing Document Reference" }
+                );
+                return null;
+            }
+
+            var aPayloads = [];
+            var aSkipped = [];
+
+            aRows.forEach(function (r, nIdx) {
+                var sSchedDate = r.ScheduleDate || "";
+                var oSchedDate = null;
+                if (sSchedDate) {
+                    var aParts = sSchedDate.split("-");
+                    if (aParts.length === 3) {
+                        var oUTC = new Date(Date.UTC(
+                            parseInt(aParts[0], 10),
+                            parseInt(aParts[1], 10) - 1,
+                            parseInt(aParts[2], 10)
+                        ));
+                        if (!isNaN(oUTC.getTime())) { oSchedDate = oUTC; }
+                    }
+                }
+                if (!oSchedDate) {
+                    aSkipped.push("Row " + (nIdx + 1) + ": invalid or missing schedule date (" + (sSchedDate || "empty") + ").");
+                    return;
+                }
+
+                var nSchedQtyRow = parseFloat(r.ScheduleQty || 0);
+                if (!nSchedQtyRow || nSchedQtyRow <= 0) {
+                    aSkipped.push("Row " + (nIdx + 1) + ": schedule quantity is zero or missing.");
+                    return;
+                }
+                var sSchedQty = nSchedQtyRow.toFixed(3);
+
+                var sRowMoT = r.MoT || sMoT || "";
+                var sRowVehicle = r.VehicleId || "";
+                var sRowCarrier = r.CarrierCode || "";
+                var sRowShipper = r.ShipperCode || "";
+
+                var aItems = [];
+
+                if (bIsE2I) {
+                    // E2I : Entitlement (P) → Inventory (I)
+                    if (bHasPurch) {
+                        aItems.push({
+                            refdoc: sPurchDoc,
+                            refdocitem: sPurchItem,
+                            scheddate: oSchedDate,
+                            schedqty: sSchedQty,
+                            scheduom: sUOM,
+                            schedtype: "ZO",
+                            refdoctype: "K",
+                            schedmat: sCommodity,
+                            locid: sOrigin,
+                            incoterms: sPInco,
+                            transtype: sPurchTxType
+                        });
+                    }
+                    if (!bIsE2I_DAP && bHasInv) {
+                        aItems.push({
+                            refdoc: "",
+                            refdocitem: "",
+                            scheddate: oSchedDate,
+                            schedqty: sSchedQty,
+                            scheduom: sUOM,
+                            schedtype: "ZD",
+                            refdoctype: "X",
+                            schedmat: sCommodity,
+                            locid: sDestination,
+                            incoterms: "DAP",
+                            transtype: sInvTxType
+                        });
+                    }
+                } else if (bIsI2O) {
+                    // I2O : Inventory (I) → Obligation (S)
+                    if (!bIsI2O_FOB && bHasInv) {
+                        aItems.push({
+                            refdoc: "",
+                            refdocitem: "",
+                            scheddate: oSchedDate,
+                            schedqty: sSchedQty,
+                            scheduom: sUOM,
+                            schedtype: "ZO",
+                            refdoctype: "I",
+                            schedmat: sCommodity,
+                            locid: sOrigin,
+                            incoterms: "FOB",
+                            transtype: sInvTxType
+                        });
+                    }
+                    if (bHasSales) {
+                        aItems.push({
+                            refdoc: sSalesDoc,
+                            refdocitem: sSalesItem,
+                            scheddate: oSchedDate,
+                            schedqty: sSchedQty,
+                            scheduom: sUOM,
+                            schedtype: "ZD",
+                            refdoctype: "G",
+                            schedmat: sCommodity,
+                            locid: sDestination,
+                            incoterms: sSInco,
+                            transtype: sSalesTxType
+                        });
+                    }
+                } else {
+                    // E2O : standard bilateral
+                    if (bHasPurch) {
+                        aItems.push({
+                            refdoc: sPurchDoc,
+                            refdocitem: sPurchItem,
+                            scheddate: oSchedDate,
+                            schedqty: sSchedQty,
+                            scheduom: sUOM,
+                            schedtype: "ZO",
+                            refdoctype: "K",
+                            schedmat: sCommodity,
+                            locid: sOrigin,
+                            incoterms: sPInco,
+                            transtype: sPurchTxType
+                        });
+                    }
+                    if (bHasSales) {
+                        aItems.push({
+                            refdoc: sSalesDoc,
+                            refdocitem: sSalesItem,
+                            scheddate: oSchedDate,
+                            schedqty: sSchedQty,
+                            scheduom: sUOM,
+                            schedtype: "ZD",
+                            refdoctype: "G",
+                            schedmat: sCommodity,
+                            locid: sDestination,
+                            incoterms: sSInco,
+                            transtype: sSalesTxType
+                        });
+                    }
+                }
+
+                aPayloads.push({
+                    mot: sRowMoT,
+                    uom: sUOM,
+                    vehicleno: sRowVehicle,
+                    carrier: sRowCarrier,
+                    shipper: sRowShipper,
+                    to_items: { results: aItems }
+                });
+            });
+
+            if (aSkipped.length) {
+                MessageToast.show(aSkipped.length + " row(s) skipped — check console for details.");
+                aSkipped.forEach(function (s) { jQuery.sap.log.warning("[NomPayload] " + s); });
+            }
+
+            if (!aPayloads.length) {
+                MessageBox.error(
+                    "No valid schedule rows could be included in the payload.\n\n" +
+                    (aSkipped.length
+                        ? "Issues found:\n\u2022 " + aSkipped.join("\n\u2022 ")
+                        : "Check that rows have a valid date and quantity > 0."),
+                    { title: "Create Nominations \u2014 No Valid Rows" }
+                );
+                return null;
+            }
+
+            return aPayloads;
+        },
 
         // ── Cross-App Navigation helpers ─────────────────────────────────────────
         navToCreateDeals: function () {

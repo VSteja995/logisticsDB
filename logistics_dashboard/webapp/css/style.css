@@ -629,6 +629,16 @@
 .splitterSection > .sapUiScrollCnt {
     flex: 1 1 0 !important;
     min-height: 0 !important;
+    height: 100% !important;
+}
+
+.splitterSection .sapUiScrollCntRcv {
+    padding-bottom: 14px !important;
+    box-sizing: border-box !important;
+}
+
+.splitterSection .sapMListTbl {
+    margin-bottom: 10px !important;
 }
 
 /* ============================================================
@@ -909,6 +919,50 @@ body.fullScreenLock {
 
 .sapMObjStatusWarning .sapMObjStatusText {
     color: var(--gl-orange-dark) !important;
+}
+
+/* ============================================================
+   DIALOGS & MESSAGEBOX — Solid Background & Stacking Fix
+   ============================================================ */
+.sapMDialog,
+.sapMDialogSection,
+.sapMDialog .sapMDialogScroll,
+.sapMDialog .sapMDialogScrollCont,
+.sapMDialog > footer,
+.sapMDialog .sapMIBar.sapMFooter-CTX,
+.sapMDialogFooter,
+.sapMMessageBox {
+    background-color: #ffffff !important;
+}
+
+.sapMDialog {
+    border-radius: var(--gl-radius-md, 8px) !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28) !important;
+    overflow: hidden !important;
+}
+
+.sapMDialog > footer,
+.sapMDialog .sapMIBar.sapMFooter-CTX,
+.sapMDialogFooter {
+    border-top: 1px solid var(--gl-border-gray, #e5e7eb) !important;
+}
+
+.sapMDialog-BaseClass {
+    background-color: #ffffff !important;
+}
+
+/* Ensure Dialog buttons are clearly visible and styled */
+.sapMDialog footer .sapMBtnDefault .sapMBtnInner,
+.sapMDialogFooter .sapMBtnDefault .sapMBtnInner {
+    background-color: #f3f4f6 !important;
+    border-color: #d1d5db !important;
+    color: var(--gl-navy) !important;
+}
+
+.sapMDialog footer .sapMBtnDefault .sapMBtnInner:hover,
+.sapMDialogFooter .sapMBtnDefault .sapMBtnInner:hover {
+    background-color: var(--gl-orange-tint) !important;
+    border-color: var(--gl-orange) !important;
 }
 
 /* ============================================================

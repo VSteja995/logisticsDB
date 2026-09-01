@@ -1,0 +1,522 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:l="sap.ui.layout"
+    xmlns:table="sap.ui.table"
+>
+    <Dialog
+        id="dlgCreateNominations"
+        title="{nomDialogModel>/DialogTitle}"
+        contentWidth="1300px"
+        contentHeight="85vh"
+        resizable="true"
+        draggable="true"
+        class="nom-create-dialog"
+        verticalScrolling="true"
+        horizontalScrolling="false"
+    >
+        <content>
+            <FlexBox
+                direction="Column"
+                class="nom-dlg-container"
+                fitContainer="true"
+            >
+                <ScrollContainer
+                    vertical="true"
+                    horizontal="false"
+                    focusable="true"
+                    class="nom-scroll-container"
+                >
+                    <FlexBox
+                        direction="Column"
+                        class="nom-dlg-wrapper"
+                    >
+                        <!-- ── Header strip ── -->
+                        <FlexBox
+                            alignItems="Center"
+                            justifyContent="SpaceBetween"
+                            wrap="NoWrap"
+                            class="nom-dlg-header-strip"
+                        >
+                            <FlexBox
+                                alignItems="Center"
+                                class="nom-dlg-header-field"
+                            >
+                                <Label
+                                    text="Commodity"
+                                    design="Bold"
+                                    class="nom-lbl-bold nom-lbl-fix"
+                                />
+                                <Text
+                                    text="{nomDialogModel>/Commodity}"
+                                    class="nom-plain-text"
+                                />
+                            </FlexBox>
+                            <FlexBox
+                                alignItems="Center"
+                                class="nom-dlg-header-field"
+                            >
+                                <Label
+                                    text="Week ID"
+                                    design="Bold"
+                                    class="nom-lbl-bold nom-lbl-fix"
+                                />
+                                <Text
+                                    text="{nomDialogModel>/WeekID}"
+                                    class="nom-plain-text"
+                                />
+                            </FlexBox>
+                            <FlexBox
+                                alignItems="Center"
+                                class="nom-dlg-header-field"
+                            >
+                                <Label
+                                    text="MoT"
+                                    design="Bold"
+                                    class="nom-lbl-bold nom-lbl-fix"
+                                />
+                                <Text
+                                    text="{nomDialogModel>/ModeOfTransportLabel}"
+                                    class="nom-plain-text"
+                                />
+                            </FlexBox>
+                            <FlexBox
+                                alignItems="Center"
+                                class="nom-dlg-header-field"
+                            >
+                                <Label
+                                    text="Schedule Date"
+                                    design="Bold"
+                                    class="nom-lbl-bold nom-lbl-fix"
+                                />
+                                <Text
+                                    text="{= ${nomDialogModel>/PurchSchedDateDisplay} || ${nomDialogModel>/SalesSchedDateDisplay} }"
+                                    class="nom-plain-text"
+                                />
+                            </FlexBox>
+                            <FlexBox
+                                alignItems="Center"
+                                class="nom-dlg-header-field"
+                            >
+                                <Label
+                                    text="Planned / Match Qty"
+                                    design="Bold"
+                                    class="nom-lbl-bold nom-lbl-fix"
+                                />
+                                <Text
+                                    text="{nomDialogModel>/MatchQtyFormatted}"
+                                    class="nom-plain-text"
+                                />
+                            </FlexBox>
+                        </FlexBox>
+
+                        <!-- ── Two tiles: Origin | Destination ── -->
+                        <FlexBox
+                            justifyContent="Center"
+                            class="nom-tiles-row"
+                        >
+                            <!-- ORIGIN TILE -->
+                            <Panel
+                                headerText="Origin"
+                                visible="{nomDialogModel>/ShowOriginPanel}"
+                                expandable="false"
+                                expanded="true"
+                                class="nom-origin-panel nom-tile-panel"
+                            >
+                                <content>
+                                    <FlexBox
+                                        direction="Column"
+                                        class="nom-tile-content"
+                                    >
+                                        <FlexBox
+                                            alignItems="Center"
+                                            class="nom-tile-row"
+                                        >
+                                            <Label
+                                                text="Deal Number"
+                                                class="nom-tile-label nom-lbl-fix"
+                                            />
+                                            <Text
+                                                text="{nomDialogModel>/OriginDealNumber}"
+                                                class="nom-tile-value nom-tile-value-highlight nom-plain-text"
+                                            />
+                                        </FlexBox>
+                                        <FlexBox
+                                            alignItems="Center"
+                                            class="nom-tile-row"
+                                        >
+                                            <Label
+                                                text="Location / Origin"
+                                                class="nom-tile-label nom-lbl-fix"
+                                            />
+                                            <Text
+                                                text="{nomDialogModel>/OriginLocation}"
+                                                class="nom-tile-value nom-plain-text"
+                                            />
+                                        </FlexBox>
+                                        <FlexBox
+                                            alignItems="Center"
+                                            class="nom-tile-row"
+                                        >
+                                            <Label
+                                                text="Quantity"
+                                                class="nom-tile-label nom-lbl-fix"
+                                            />
+                                            <Text
+                                                text="{nomDialogModel>/OriginQty}"
+                                                class="nom-tile-value nom-plain-text"
+                                            />
+                                        </FlexBox>
+                                        <FlexBox
+                                            alignItems="Center"
+                                            class="nom-tile-row"
+                                        >
+                                            <Label
+                                                text="Planned / Match Quantity"
+                                                class="nom-tile-label nom-lbl-fix"
+                                            />
+                                            <Text
+                                                text="{nomDialogModel>/MatchQtyFormatted}"
+                                                class="nom-tile-value nom-plain-text"
+                                            />
+                                        </FlexBox>
+                                        <FlexBox
+                                            alignItems="Center"
+                                            class="nom-tile-row"
+                                        >
+                                            <Label
+                                                text="Delivery Date"
+                                                class="nom-tile-label nom-lbl-fix"
+                                            />
+                                            <Text
+                                                text="{nomDialogModel>/PurchSchedDateDisplay}"
+                                                class="nom-tile-value nom-plain-text"
+                                            />
+                                        </FlexBox>
+                                        <FlexBox
+                                            alignItems="Center"
+                                            class="nom-tile-row"
+                                        >
+                                            <Label
+                                                text="Supplier"
+                                                class="nom-tile-label nom-lbl-fix"
+                                            />
+                                            <Text
+                                                text="{nomDialogModel>/OriginPartner}"
+                                                class="nom-tile-value nom-plain-text"
+                                            />
+                                        </FlexBox>
+                                    </FlexBox>
+                                </content>
+                            </Panel>
+
+                            <!-- DESTINATION TILE -->
+                            <Panel
+                                headerText="Destination"
+                                visible="{nomDialogModel>/ShowDestinationPanel}"
+                                expandable="false"
+                                expanded="true"
+                                class="nom-destination-panel nom-tile-panel"
+                            >
+                                <content>
+                                    <FlexBox
+                                        direction="Column"
+                                        class="nom-tile-content"
+                                    >
+                                        <FlexBox
+                                            alignItems="Center"
+                                            class="nom-tile-row"
+                                        >
+                                            <Label
+                                                text="Deal Number"
+                                                class="nom-tile-label nom-lbl-fix"
+                                            />
+                                            <Text
+                                                text="{nomDialogModel>/DestinationDealNumber}"
+                                                class="nom-tile-value nom-tile-value-highlight nom-plain-text"
+                                            />
+                                        </FlexBox>
+                                        <FlexBox
+                                            alignItems="Center"
+                                            class="nom-tile-row"
+                                        >
+                                            <Label
+                                                text="Location / Destination"
+                                                class="nom-tile-label nom-lbl-fix"
+                                            />
+                                            <Text
+                                                text="{nomDialogModel>/DestinationLocation}"
+                                                class="nom-tile-value nom-plain-text"
+                                            />
+                                        </FlexBox>
+                                        <FlexBox
+                                            alignItems="Center"
+                                            class="nom-tile-row"
+                                        >
+                                            <Label
+                                                text="Quantity"
+                                                class="nom-tile-label nom-lbl-fix"
+                                            />
+                                            <Text
+                                                text="{nomDialogModel>/DestinationQty}"
+                                                class="nom-tile-value nom-plain-text"
+                                            />
+                                        </FlexBox>
+                                        <FlexBox
+                                            alignItems="Center"
+                                            class="nom-tile-row"
+                                        >
+                                            <Label
+                                                text="Planned / Match Quantity"
+                                                class="nom-tile-label nom-lbl-fix"
+                                            />
+                                            <Text
+                                                text="{nomDialogModel>/MatchQtyFormatted}"
+                                                class="nom-tile-value nom-plain-text"
+                                            />
+                                        </FlexBox>
+                                        <FlexBox
+                                            alignItems="Center"
+                                            class="nom-tile-row"
+                                        >
+                                            <Label
+                                                text="Due Date"
+                                                class="nom-tile-label nom-lbl-fix"
+                                            />
+                                            <Text
+                                                text="{nomDialogModel>/SalesSchedDateDisplay}"
+                                                class="nom-tile-value nom-plain-text"
+                                            />
+                                        </FlexBox>
+                                        <FlexBox
+                                            alignItems="Center"
+                                            class="nom-tile-row"
+                                        >
+                                            <Label
+                                                text="Customer"
+                                                class="nom-tile-label nom-lbl-fix"
+                                            />
+                                            <Text
+                                                text="{nomDialogModel>/DestinationPartner}"
+                                                class="nom-tile-value nom-plain-text"
+                                            />
+                                        </FlexBox>
+                                    </FlexBox>
+                                </content>
+                            </Panel>
+                        </FlexBox>
+
+                        <!-- ── Editable controls row (Match Qty + No of Nominations only) ── -->
+                        <FlexBox
+                            alignItems="End"
+                            justifyContent="Center"
+                            wrap="Wrap"
+                            class="nom-ctrl-row"
+                        >
+                            <!-- Match Qty -->
+                            <FlexBox
+                                direction="Column"
+                                alignItems="Center"
+                                class="nom-ctrl-cell"
+                            >
+                                <Label
+                                    text="Match Qty"
+                                    design="Bold"
+                                    class="nom-ctrl-label nom-lbl-fix"
+                                />
+                                <Input
+                                    id="dlgEditMatchQty"
+                                    value="{nomDialogModel>/EditMatchQty}"
+                                    width="140px"
+                                    textAlign="Right"
+                                    change="onNomMatchQtyChange"
+                                    class="nom-editable-input"
+                                    placeholder="0"
+                                />
+                            </FlexBox>
+
+                            <!-- No of Nominations -->
+                            <FlexBox
+                                direction="Column"
+                                alignItems="Center"
+                                class="nom-ctrl-cell"
+                            >
+                                <Label
+                                    text="No of Nominations"
+                                    design="Bold"
+                                    class="nom-ctrl-label nom-lbl-fix"
+                                />
+                                <StepInput
+                                    id="dlgNoOfRows"
+                                    value="{nomDialogModel>/NoOfRows}"
+                                    min="1"
+                                    max="50"
+                                    step="1"
+                                    width="140px"
+                                    change="onNomNoOfRowsChange"
+                                    class="nom-editable-input"
+                                />
+                            </FlexBox>
+                        </FlexBox>
+
+                        <!-- ── Schedule Table ── -->
+                        <table:Table
+                            id="nomScheduleTable"
+                            rows="{nomDialogModel>/scheduleRows}"
+                            alternateRowColors="false"
+                            visibleRowCountMode="Auto"
+                            selectionMode="None"
+                            class="nom-schedule-table"
+                            width="100%"
+                            noData="No rows added. Increase 'No of Nominations' to add rows."
+                        >
+                            <table:columns>
+                                <!-- Schedule Date -->
+                                <table:Column
+                                    width="10rem"
+                                    hAlign="Center"
+                                >
+                                    <table:label>
+                                        <Label text="Schedule Date" />
+                                    </table:label>
+                                    <table:template>
+                                        <DatePicker
+                                            value="{nomDialogModel>ScheduleDate}"
+                                            displayFormat="M/d/yyyy"
+                                            valueFormat="yyyy-MM-dd"
+                                            width="9rem"
+                                        />
+                                    </table:template>
+                                </table:Column>
+
+                                <!-- Schedule Qty -->
+                                <table:Column
+                                    width="10rem"
+                                    hAlign="End"
+                                >
+                                    <table:label>
+                                        <Label text="Schedule Qty" />
+                                    </table:label>
+                                    <table:template>
+                                        <Input
+                                            value="{nomDialogModel>ScheduleQty}"
+                                            textAlign="Right"
+                                            placeholder="0"
+                                            width="9rem"
+                                            change="onNomRowQtyChange"
+                                            class="nom-editable-input"
+                                        />
+                                    </table:template>
+                                </table:Column>
+
+                                <!-- MoT -->
+                                <table:Column width="9rem">
+                                    <table:label>
+                                        <Label text="MoT" />
+                                    </table:label>
+                                    <table:template>
+                                        <Select
+                                            selectedKey="{nomDialogModel>MoT}"
+                                            width="8rem"
+                                            items="{path: 'nomMOTModel>/options'}"
+                                            change="onNomRowMoTChange"
+                                        >
+                                            <core:Item
+                                                key="{nomMOTModel>key}"
+                                                text="{nomMOTModel>text}"
+                                            />
+                                        </Select>
+                                    </table:template>
+                                </table:Column>
+
+                                <!-- Carrier -->
+                                <table:Column width="14rem">
+                                    <table:label>
+                                        <Label text="Carrier" />
+                                    </table:label>
+                                    <table:template>
+                                        <Input
+                                            value="{nomDialogModel>CarrierCode}"
+                                            placeholder="F4 to search carrier..."
+                                            width="13rem"
+                                            showValueHelp="true"
+                                            valueHelpRequest="onCarrierValueHelp"
+                                            class="nom-editable-input"
+                                        />
+                                    </table:template>
+                                </table:Column>
+
+                                <!-- Shipper -->
+                                <table:Column width="14rem">
+                                    <table:label>
+                                        <Label text="Shipper" />
+                                    </table:label>
+                                    <table:template>
+                                        <Input
+                                            value="{nomDialogModel>ShipperCode}"
+                                            placeholder="F4 to search Shipper..."
+                                            width="13rem"
+                                            showValueHelp="true"
+                                            valueHelpRequest="onShipperValueHelp"
+                                            class="nom-editable-input"
+                                        />
+                                    </table:template>
+                                </table:Column>
+
+                                <!-- Vehicle ID -->
+                                <table:Column width="14rem">
+                                    <table:label>
+                                        <Label text="Vehicle ID" />
+                                    </table:label>
+                                    <table:template>
+                                        <Input
+                                            value="{nomDialogModel>VehicleId}"
+                                            placeholder="F4 to search vehicle..."
+                                            width="13rem"
+                                            showValueHelp="true"
+                                            valueHelpRequest="onVehicleValueHelp"
+                                            class="nom-editable-input"
+                                        />
+                                    </table:template>
+                                </table:Column>
+
+                                <!-- Delete -->
+                                <table:Column
+                                    width="4rem"
+                                    hAlign="Center"
+                                >
+                                    <table:label>
+                                        <Label text="" />
+                                    </table:label>
+                                    <table:template>
+                                        <Button
+                                            icon="sap-icon://delete"
+                                            tooltip="Remove this row"
+                                            press="onRemoveNominationRow"
+                                            type="Transparent"
+                                        />
+                                    </table:template>
+                                </table:Column>
+                            </table:columns>
+                        </table:Table>
+                    </FlexBox>
+                </ScrollContainer>
+            </FlexBox>
+        </content>
+        <beginButton>
+            <Button
+                text="Confirm Nomination(s)"
+                type="Emphasized"
+                icon="sap-icon://accept"
+                press="onNomDialogSubmit"
+            />
+        </beginButton>
+        <endButton>
+            <Button
+                text="Cancel"
+                type="Transparent"
+                press="onNomDialogCancel"
+            />
+        </endButton>
+    </Dialog>
+</core:FragmentDefinition>

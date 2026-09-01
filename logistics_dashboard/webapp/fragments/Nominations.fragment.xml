@@ -244,7 +244,7 @@
                 <Button id="NomPnl3Btn124"
                         text="Reverse Ticket"
                         icon="sap-icon://undo"
-                        press="navToCreateTicket"/>
+                        press="navToReverseTicket"/>
                 <Button id="NomPnl3Btn125"
                         text="Upload File"
                         icon="sap-icon://upload"
