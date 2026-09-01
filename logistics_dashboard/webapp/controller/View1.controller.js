@@ -9,7 +9,7 @@ sap.ui.define([
     "sap/ui/core/Fragment",
     "sap/m/Dialog",
     "sap/ui/unified/FileUploader"
-], (Controller, JSONModel, LayoutHelper, MessageToast, Filter, FilterOperator,Fragment,Dialog, FileUploader) => {
+], (Controller, JSONModel, LayoutHelper, MessageToast,MessageBox, Filter, FilterOperator,Fragment,Dialog, FileUploader) => {
     "use strict";
 
     return Controller.extend("genslogiques.logisticsdashboard.controller.View1", {
@@ -2790,6 +2790,7 @@ navToUploadTicket: function () {
 
     if (!this._oTicketUploadDialog) {
 
+        // Create FileUploader
         var oFileUploader = new FileUploader({
             width: "100%",
             placeholder: "Choose an Excel or CSV file...",
@@ -2798,23 +2799,26 @@ navToUploadTicket: function () {
             change: this.onTicketFileChange.bind(this)
         });
 
+        // Create VBox
+        var oVBox = new sap.m.VBox({
+            items: [
+                new sap.m.Label({
+                    text: "Select Ticket File"
+                }),
+                oFileUploader
+            ]
+        });
+
+        // Correct way to add CSS class
+        oVBox.addStyleClass("sapUiMediumMargin");
+
+        // Create Dialog
         this._oTicketUploadDialog = new Dialog({
             title: "Upload Ticket File",
             contentWidth: "500px",
 
             content: [
-                new sap.m.VBox({
-                    class: "sapUiMediumMargin",
-                    items: [
-
-                        new sap.m.Label({
-                            text: "Select Ticket File"
-                        }),
-
-                        oFileUploader
-
-                    ]
-                })
+                oVBox
             ],
 
             beginButton: new sap.m.Button({
@@ -2826,9 +2830,7 @@ navToUploadTicket: function () {
             endButton: new sap.m.Button({
                 text: "Cancel",
                 press: function () {
-
                     this._oTicketUploadDialog.close();
-
                 }.bind(this)
             })
         });
