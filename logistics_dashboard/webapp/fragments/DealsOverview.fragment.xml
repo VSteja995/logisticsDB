@@ -40,7 +40,7 @@
     items="{/MKZone}">
 
     <core:Item
-        id="_IDGenItem3"
+        id="_IDGenItem3E"
         key="{MarketZone}"
         text="{MarketZone}" />
 
@@ -54,7 +54,7 @@
         <f:items>
             <VBox id="DlPnl1Vbx019" class="sapUiTinyMargin">
                 <layoutData>
-                <f:GridContainerItemLayoutData id="DlPnl1Gri020" minRows="1" columns="5" />
+                <f:GridContainerItemLayoutData id="DlPnl1Gri020" minRows="1" columns="4" />
                 </layoutData>
                 <Title id="DlPnl1Ttl021" text="{= ['January','February','March','April','May','June','July','August','September','October','November','December']
                 [ parseInt(${dealQtyMotData>ScheduleMonth}, 10) - 1 ] }" />

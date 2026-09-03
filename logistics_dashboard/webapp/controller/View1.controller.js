@@ -2450,17 +2450,15 @@ onPlanningDetailRefresh: function () {
                 error: function () { checkDone(); MessageToast.show("Error loading PositionsSummary."); }
             });
             // 5. MatchPos
-            // oModel.read("/MatchPosSet", {
-            //     success: function (oData) {
-            //         var aResults = filterByCmdtyAndMot(oData);
-            //         var oJM = oView.getModel("MatchPosData");
-            //         if (oJM) { oJM.setProperty("/MatchPosSet", aResults); }
-            //         checkDone();
-            //     },
-            //     error: function () { checkDone(); MessageToast.show("Error loading MatchPosData."); }
-            // });
-            
-            checkDone();
+            oModel.read("/MatchConfirm", {
+                success: function (oData) {
+                    var aResults = filterByCmdtyAndMot(oData);
+                    var oJM = oView.getModel("MatchPosData");
+                    if (oJM) { oJM.setProperty("/MatchPosSet", aResults); }
+                    checkDone();
+                },
+                error: function () { checkDone(); MessageToast.show("Error loading MatchPosData."); }
+            });
         },
 
 
@@ -3056,7 +3054,7 @@ _applyTicketFilters: function (dFrom, dTo) {
                                  Matchquantity: String(parseFloat(oChild.MatchedQty) || 0),
                                  Matchuom: oChild.MatchedUOM || oTgt.UOM || oSrc.UOM || "LB",
                                  Matchstatus: "Confirmed",
-                                 Matchsource: (sSrcType === "inventory" || sTgtType === "inventory") ? "Inventory" : (oParent.MatchSrc || "Supply"),
+                                 Matchsource: (sSrcType === "purchase" && sTgtType === "inventory") ? "E2I" : (sSrcType === "inventory" && sTgtType === "sales") ? "I2O" : "E2O",
                                  ModeOfTransport: oChild._selectedMoT || oChild.ModeOfTransport || oSrc.ModeOfTransport || oTgt.ModeOfTransport || ""
                              };
 
@@ -3075,15 +3073,11 @@ _applyTicketFilters: function (dFrom, dTo) {
                                  oPayload.Originname = oSrc.OriginName || oParent.OriginName || "";
                                  oPayload.PTransactionType = oSrc.TransactionType || oParent.TransactionType || "P";
                                  oPayload.PIncoTerms = oSrc.IncoTerms || oParent.Incoterms || "";
-                                 if (!oPayload.Matchsource) {
-                                     oPayload.Matchsource = "Supply";
-                                 }
                              } else if (sSrcType === "inventory") {
                                  oPayload.Plant = oSrc.Plant || "";
                                  oPayload.Storagelocation = oSrc.StorageLocation || "";
                                  oPayload.Invquantity = String(parseFloat(oSrc.OnHandInventory || oSrc.InventoryQty || oSrc.Quantity) || 0);
                                  oPayload.Invuom = oSrc.UOM || oSrc.InventoryUOM || oParent.DisplayUOM || "";
-                                 oPayload.Matchsource = "Inventory";
                              }
 
                              // Target mapping
@@ -3131,7 +3125,7 @@ _applyTicketFilters: function (dFrom, dTo) {
                  oView.setBusy(true);
 
                  if (aPayloads.length === 1) {
-                     oModel.create("/MatchPos", aPayloads[0], {
+                     oModel.create("/MatchConfirm", aPayloads[0], {
                          success: function (oData) {
                              oView.setBusy(false);
                              MessageBox.success("Match confirmed successfully.", {
@@ -3158,7 +3152,7 @@ _applyTicketFilters: function (dFrom, dTo) {
 
                      aPayloads.forEach(function (oPayload, idx) {
                          var sChangeSetId = "cs_match_" + idx;
-                         oModel.create("/MatchConfirm", oPayload, {
+                         oModel.create("/MatchPos", oPayload, {
                              groupId: sGroupId,
                              changeSetId: sChangeSetId
                          });

@@ -57,10 +57,10 @@
                     <SegmentedButtonItem id="trainPosSeg" key="Train" text="Rail" icon="sap-icon://cargo-train"/>
                 </items>
             </SegmentedButton>
-            <Label id="commLbl" text="Commodity :"/>
-            <MultiComboBox id="commBox" placeholder="Select Commodity" width="100%" selectionChange=".onPosCommoditySelectionFinish" selectionFinish=".onPosCommoditySelectionFinish" items="{UniqDealCmdtyData>/UniqDealCmdtySet}">
+            <Label id="commLbl" text="Material :"/>
+            <MultiComboBox id="commBox" placeholder="Select Material" width="100%" selectionChange=".onPosCommoditySelectionFinish" selectionFinish=".onPosCommoditySelectionFinish" items="{UniqDealCmdtyData>/UniqDealCmdtySet}">
                 <items>
-                    <core:Item id="gas87Item" key="{UniqDealCmdtyData>Commodity}" text="{UniqDealCmdtyData>Commodity}"/>
+                    <core:Item id="gas87Item" key="{UniqDealCmdtyData>Material}" text="{UniqDealCmdtyData>Material}"/>
                      <!-- <core:Item id="DlPnl1Ite013" key="SOYBNOIL" text="SOYBNOIL"/> -->
                      <!-- <core:Item id="DlPnl1Ite014" key="CRUACCE01" text="CRUACCE01"/> -->
                 </items>
@@ -155,6 +155,7 @@
                         <columns>
                             <Column id="_IDGenColumn1"><header><Text id="_IDGenText" text="Deal ID"/></header></Column>
                             <Column id="_IDGenColumn2"><header><Text id="_IDGenText1" text="Commodity"/></header></Column>
+                            <Column id="_IDGenColumn2E"><header><Text id="_IDGenText1E" text="CommodityDes"/></header></Column>
                             <Column id="_IDGenColumn3"><header><Text id="_IDGenText2" text="Purchase Document"/></header></Column>
                             <Column id="_IDGenColumn4"><header><Text id="_IDGenText3" text="Purchase Item"/></header></Column>
                             <Column id="_IDGenColumn5"><header><Text id="_IDGenText4" text="Purchase Quantity"/></header></Column>
@@ -178,6 +179,7 @@
                                 <cells>
                                     <Text id="_IDGenText111" text="{EntDetailData>DealNumber}"></Text>
                                     <Text id="_IDGenText112" text="{EntDetailData>Commodity}"></Text>
+                                    <Text id="_IDGenText112E" text="{EntDetailData>CommodityDESC}"></Text>
                                     <Text id="_IDGenText113" text="{EntDetailData>DocumentNumber}"></Text>
                                     <Text id="_IDGenText114" text="{EntDetailData>DocumentItem}"></Text>
                                     <Text id="_IDGenText115" text="{EntDetailData>PurchaseQuantity}"></Text>
@@ -241,6 +243,7 @@
                         <columns>
                             <Column id="_IDGenColumn22"><header><Text id="_IDGenText21" text="Deal ID"/></header></Column>
                             <Column id="_IDGenColumn23"><header><Text id="_IDGenText22" text="Commodity"/></header></Column>
+                            <Column id="_IDGenColumn23E"><header><Text id="_IDGenText22E" text="CommodityDESC"/></header></Column>
                             <Column id="_IDGenColumn24"><header><Text id="_IDGenText23" text="Sales Document"/></header></Column>
                             <Column id="_IDGenColumn25"><header><Text id="_IDGenText24" text="Sales Item"/></header></Column>
                             <Column id="_IDGenColumn26"><header><Text id="_IDGenText25" text="Sales Quantity"/></header></Column>
@@ -264,6 +267,7 @@
                                 <cells>
                                      <Text id="_IDGenText133" text="{OblDetailData>DealNumber}"></Text>
                                      <Text id="_IDGenText134" text="{OblDetailData>Commodity}"></Text>
+                                     <Text id="_IDGenText112EO" text="{EntDetailData>CommodityDESC}"></Text>
                                      <Text id="_IDGenText135" text="{OblDetailData>DocumentNumber}"></Text>
                                      <Text id="_IDGenText136" text="{OblDetailData>DocumentItem}"></Text>
                                      <Text id="_IDGenText137" text="{OblDetailData>SalesQuantity}"></Text>
