@@ -521,8 +521,8 @@ if (!this._bDefaultNominationInitialized) {
     this._oDealFilterState.fromDate = dFromDate;
     this._oDealFilterState.toDate = dToday;
 
-    // Truck
-    this._oDealFilterState.motKey = "01";
+    // All modes
+    this._oDealFilterState.motKey = " ";
 
     // No commodity filter
     this._oDealFilterState.commodityKeys = [];
@@ -567,15 +567,15 @@ if (!this._bDefaultNominationInitialized) {
 
 
     // =====================================================
-    // 5. Set Mode = Truck
+    // 5. Set Mode = All
     // =====================================================
 
     if (oMode) {
 
-        oMode.setSelectedKey("Truck");
+        oMode.setSelectedKey("All");
 
         console.log(
-            "Default Mode set: Truck"
+            "Default Mode set: All"
         );
 
     } else {
@@ -1301,8 +1301,8 @@ onDealsRefresh: function () {
     this._oDealFilterState.fromDate = dFromDate;
     this._oDealFilterState.toDate = dToday;
 
-    // Default Mode = Truck
-    this._oDealFilterState.motKey = "01";
+    // Default Mode = All
+    this._oDealFilterState.motKey = " ";
 
     // Remove commodity filter
     this._oDealFilterState.commodityKeys = [];
@@ -1326,7 +1326,7 @@ onDealsRefresh: function () {
 
 
     // =====================================================
-    // 4. RESET MODE TO TRUCK
+    // 4. RESET MODE TO ALL
     // =====================================================
 
     var oMode = this.byId(
@@ -1334,7 +1334,7 @@ onDealsRefresh: function () {
     );
 
     if (oMode) {
-        oMode.setSelectedKey("Truck");
+        oMode.setSelectedKey("All");
     }
 
 
@@ -1430,7 +1430,7 @@ onDealsRefresh: function () {
         {
             fromDate: dFromDate,
             toDate: dToday,
-            mode: "Truck",
+            mode: "All",
             commodity: []
         }
     );
@@ -2554,7 +2554,6 @@ _applyNominationFilters: function (dFrom, dTo) {
         }
     ) + "/Set";
 
-
     console.log(
         "Nomination OData Path:",
         sNomKeyPath
@@ -2671,7 +2670,6 @@ _applyTicketFilters: function (dFrom, dTo) {
             p_ToDate: sFormattedTo
         }
     ) + "/Set";
-
 
     console.log(
         "Ticket OData Path:",
@@ -3203,7 +3201,7 @@ _applyTicketFilters: function (dFrom, dTo) {
 
                      aPayloads.forEach(function (oPayload, idx) {
                          var sChangeSetId = "cs_match_" + idx;
-                         oModel.create("/MatchPos", oPayload, {
+                         oModel.create("/MatchConfirm", oPayload, {
                              groupId: sGroupId,
                              changeSetId: sChangeSetId
                          });
@@ -4837,6 +4835,7 @@ _deleteSelectedMatchRecords: function (
                             schedqty: sSchedQty,
                             scheduom: sUOM,
                             schedtype: "ZO",
+                            rdi: "K",
                             schedmat: sCommodity,
                             locid: sOrigin,
                             incoterms: sPInco,
@@ -4851,6 +4850,7 @@ _deleteSelectedMatchRecords: function (
                             schedqty: sSchedQty,
                             scheduom: sUOM,
                             schedtype: "ZD",
+                            rdi: "X",
                             schedmat: sCommodity,
                             locid: sDestination,
                             incoterms: "DAP",
@@ -4867,6 +4867,7 @@ _deleteSelectedMatchRecords: function (
                             schedqty: sSchedQty,
                             scheduom: sUOM,
                             schedtype: "ZO",
+                            rdi: "I",
                             schedmat: sCommodity,
                             locid: sOrigin,
                             incoterms: "FOB",
@@ -4881,6 +4882,7 @@ _deleteSelectedMatchRecords: function (
                             schedqty: sSchedQty,
                             scheduom: sUOM,
                             schedtype: "ZD",
+                            rdi: "G",
                             schedmat: sCommodity,
                             locid: sDestination,
                             incoterms: sSInco,
@@ -4897,6 +4899,7 @@ _deleteSelectedMatchRecords: function (
                             schedqty: sSchedQty,
                             scheduom: sUOM,
                             schedtype: "ZO",
+                            rdi: "K",
                             schedmat: sCommodity,
                             locid: sOrigin,
                             incoterms: sPInco,
@@ -4911,6 +4914,7 @@ _deleteSelectedMatchRecords: function (
                             schedqty: sSchedQty,
                             scheduom: sUOM,
                             schedtype: "ZD",
+                            rdi: "G",
                             schedmat: sCommodity,
                             locid: sDestination,
                             incoterms: sSInco,
@@ -4925,7 +4929,7 @@ _deleteSelectedMatchRecords: function (
                     vehicleno: sRowVehicle,
                     carrier: sRowCarrier,
                     shipper: sRowShipper,
-                    to_items: { results: aItems }
+                    to_items: aItems
                 });
             });
 

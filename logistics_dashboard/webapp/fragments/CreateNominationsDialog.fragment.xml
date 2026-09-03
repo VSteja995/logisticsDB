@@ -3,6 +3,7 @@
     xmlns:core="sap.ui.core"
     xmlns:l="sap.ui.layout"
     xmlns:table="sap.ui.table"
+    xmlns:rowmodes="sap.ui.table.rowmodes"
 >
     <Dialog
         id="dlgCreateNominations"
@@ -13,35 +14,29 @@
         draggable="true"
         class="nom-create-dialog"
         verticalScrolling="true"
-        horizontalScrolling="false"
-    >
+        horizontalScrolling="false">
         <content>
-            <FlexBox id="_IDGenFlexBox5"
+            <FlexBox id="_IDGenFlexBox4"
                 direction="Column"
                 class="nom-dlg-container"
-                fitContainer="true"
-            >
+                fitContainer="true">
                 <ScrollContainer id="_IDGenScrollContainer"
                     vertical="true"
                     horizontal="false"
                     focusable="true"
-                    class="nom-scroll-container"
-                >
-                    <FlexBox id="_IDGenFlexBox6"
+                    class="nom-scroll-container">
+                    <FlexBox id="_IDGenFlexBox5"
                         direction="Column"
-                        class="nom-dlg-wrapper"
-                    >
+                        class="nom-dlg-wrapper">
                         <!-- ── Header strip ── -->
-                        <FlexBox id="_IDGenFlexBox7"
+                        <FlexBox id="_IDGenFlexBox6"
                             alignItems="Center"
                             justifyContent="SpaceBetween"
                             wrap="NoWrap"
-                            class="nom-dlg-header-strip"
-                        >
-                            <FlexBox id="_IDGenFlexBox8"
+                            class="nom-dlg-header-strip">
+                            <FlexBox id="_IDGenFlexBox7"
                                 alignItems="Center"
-                                class="nom-dlg-header-field"
-                            >
+                                class="nom-dlg-header-field">
                                 <Label id="_IDGenLabel"
                                     text="Commodity"
                                     design="Bold"
@@ -52,7 +47,7 @@
                                     class="nom-plain-text"
                                 />
                             </FlexBox>
-                            <FlexBox id="_IDGenFlexBox9"
+                            <FlexBox id="_IDGenFlexBox8" id="_IDGenFlexBox9"
                                 alignItems="Center"
                                 class="nom-dlg-header-field"
                             >
@@ -66,7 +61,7 @@
                                     class="nom-plain-text"
                                 />
                             </FlexBox>
-                            <FlexBox id="_IDGenFlexBox10"
+                            <FlexBox id="_IDGenFlexBox9"
                                 alignItems="Center"
                                 class="nom-dlg-header-field"
                             >
@@ -80,7 +75,7 @@
                                     class="nom-plain-text"
                                 />
                             </FlexBox>
-                            <FlexBox id="_IDGenFlexBox11"
+                            <FlexBox id="_IDGenFlexBox10"
                                 alignItems="Center"
                                 class="nom-dlg-header-field"
                             >
@@ -94,7 +89,7 @@
                                     class="nom-plain-text"
                                 />
                             </FlexBox>
-                            <FlexBox id="_IDGenFlexBox12"
+                            <FlexBox id="_IDGenFlexBox11"
                                 alignItems="Center"
                                 class="nom-dlg-header-field"
                             >
@@ -111,7 +106,7 @@
                         </FlexBox>
 
                         <!-- ── Two tiles: Origin | Destination ── -->
-                        <FlexBox id="_IDGenFlexBox13"
+                        <FlexBox id="_IDGenFlexBox12"
                             justifyContent="Center"
                             class="nom-tiles-row"
                         >
@@ -124,11 +119,11 @@
                                 class="nom-origin-panel nom-tile-panel"
                             >
                                 <content>
-                                    <FlexBox id="_IDGenFlexBox14"
+                                    <FlexBox id="_IDGenFlexBox13"
                                         direction="Column"
                                         class="nom-tile-content"
                                     >
-                                        <FlexBox id="_IDGenFlexBox15"
+                                        <FlexBox id="_IDGenFlexBox14"
                                             alignItems="Center"
                                             class="nom-tile-row"
                                         >
@@ -141,7 +136,7 @@
                                                 class="nom-tile-value nom-tile-value-highlight nom-plain-text"
                                             />
                                         </FlexBox>
-                                        <FlexBox id="_IDGenFlexBox16"
+                                        <FlexBox id="_IDGenFlexBox15"
                                             alignItems="Center"
                                             class="nom-tile-row"
                                         >
@@ -154,7 +149,7 @@
                                                 class="nom-tile-value nom-plain-text"
                                             />
                                         </FlexBox>
-                                        <FlexBox id="_IDGenFlexBox17"
+                                        <FlexBox id="_IDGenFlexBox16"
                                             alignItems="Center"
                                             class="nom-tile-row"
                                         >
@@ -167,7 +162,7 @@
                                                 class="nom-tile-value nom-plain-text"
                                             />
                                         </FlexBox>
-                                        <FlexBox id="_IDGenFlexBox18"
+                                        <FlexBox id="_IDGenFlexBox17"
                                             alignItems="Center"
                                             class="nom-tile-row"
                                         >
@@ -180,7 +175,7 @@
                                                 class="nom-tile-value nom-plain-text"
                                             />
                                         </FlexBox>
-                                        <FlexBox id="_IDGenFlexBox19"
+                                        <FlexBox id="_IDGenFlexBox18"
                                             alignItems="Center"
                                             class="nom-tile-row"
                                         >
@@ -193,7 +188,7 @@
                                                 class="nom-tile-value nom-plain-text"
                                             />
                                         </FlexBox>
-                                        <FlexBox id="_IDGenFlexBox20"
+                                        <FlexBox id="_IDGenFlexBox19"
                                             alignItems="Center"
                                             class="nom-tile-row"
                                         >
@@ -219,11 +214,11 @@
                                 class="nom-destination-panel nom-tile-panel"
                             >
                                 <content>
-                                    <FlexBox id="_IDGenFlexBox21"
+                                    <FlexBox id="_IDGenFlexBox20"
                                         direction="Column"
                                         class="nom-tile-content"
                                     >
-                                        <FlexBox id="_IDGenFlexBox22"
+                                        <FlexBox id="_IDGenFlexBox21"
                                             alignItems="Center"
                                             class="nom-tile-row"
                                         >
@@ -236,7 +231,7 @@
                                                 class="nom-tile-value nom-tile-value-highlight nom-plain-text"
                                             />
                                         </FlexBox>
-                                        <FlexBox id="_IDGenFlexBox23"
+                                        <FlexBox id="_IDGenFlexBox22"
                                             alignItems="Center"
                                             class="nom-tile-row"
                                         >
@@ -249,7 +244,7 @@
                                                 class="nom-tile-value nom-plain-text"
                                             />
                                         </FlexBox>
-                                        <FlexBox id="_IDGenFlexBox24"
+                                        <FlexBox id="_IDGenFlexBox23"
                                             alignItems="Center"
                                             class="nom-tile-row"
                                         >
@@ -262,7 +257,7 @@
                                                 class="nom-tile-value nom-plain-text"
                                             />
                                         </FlexBox>
-                                        <FlexBox id="_IDGenFlexBox25"
+                                        <FlexBox id="_IDGenFlexBox24"
                                             alignItems="Center"
                                             class="nom-tile-row"
                                         >
@@ -275,7 +270,7 @@
                                                 class="nom-tile-value nom-plain-text"
                                             />
                                         </FlexBox>
-                                        <FlexBox id="_IDGenFlexBox26"
+                                        <FlexBox id="_IDGenFlexBox25"
                                             alignItems="Center"
                                             class="nom-tile-row"
                                         >
@@ -288,7 +283,7 @@
                                                 class="nom-tile-value nom-plain-text"
                                             />
                                         </FlexBox>
-                                        <FlexBox id="_IDGenFlexBox27"
+                                        <FlexBox id="_IDGenFlexBox26"
                                             alignItems="Center"
                                             class="nom-tile-row"
                                         >
@@ -307,14 +302,14 @@
                         </FlexBox>
 
                         <!-- ── Editable controls row (Match Qty + No of Nominations only) ── -->
-                        <FlexBox id="_IDGenFlexBox28"
+                        <FlexBox id="_IDGenFlexBox27"
                             alignItems="End"
                             justifyContent="Center"
                             wrap="Wrap"
                             class="nom-ctrl-row"
                         >
                             <!-- Match Qty -->
-                            <FlexBox id="_IDGenFlexBox29"
+                            <FlexBox id="_IDGenFlexBox28"
                                 direction="Column"
                                 alignItems="Center"
                                 class="nom-ctrl-cell"
@@ -336,7 +331,7 @@
                             </FlexBox>
 
                             <!-- No of Nominations -->
-                            <FlexBox id="_IDGenFlexBox30"
+                            <FlexBox id="_IDGenFlexBox29"
                                 direction="Column"
                                 alignItems="Center"
                                 class="nom-ctrl-cell"
@@ -364,15 +359,17 @@
                             id="nomScheduleTable"
                             rows="{nomDialogModel>/scheduleRows}"
                             alternateRowColors="false"
-                            visibleRowCountMode="Auto"
                             selectionMode="None"
                             class="nom-schedule-table"
                             width="100%"
                             noData="No rows added. Increase 'No of Nominations' to add rows."
                         >
+                            <table:rowMode>
+                                <rowmodes:Auto id="_IDGenAuto" />
+                            </table:rowMode>
                             <table:columns>
                                 <!-- Schedule Date -->
-                                <table:Column id="_IDGenColumn"
+                                <table:Column id="_IDGenColumn20"
                                     width="10rem"
                                     hAlign="Center"
                                 >
@@ -390,7 +387,7 @@
                                 </table:Column>
 
                                 <!-- Schedule Qty -->
-                                <table:Column id="_IDGenColumn20"
+                                <table:Column id="_IDGenColumn21"
                                     width="10rem"
                                     hAlign="End"
                                 >
@@ -410,7 +407,7 @@
                                 </table:Column>
 
                                 <!-- MoT -->
-                                <table:Column id="_IDGenColumn21" width="9rem">
+                                <table:Column id="_IDGenColumn39" width="9rem">
                                     <table:label>
                                         <Label id="_IDGenLabel45" text="MoT" />
                                     </table:label>
@@ -430,7 +427,7 @@
                                 </table:Column>
 
                                 <!-- Carrier -->
-                                <table:Column id="_IDGenColumn39" width="14rem">
+                                <table:Column id="_IDGenColumn51" width="14rem">
                                     <table:label>
                                         <Label id="_IDGenLabel46" text="Carrier" />
                                     </table:label>
@@ -447,7 +444,7 @@
                                 </table:Column>
 
                                 <!-- Shipper -->
-                                <table:Column id="_IDGenColumn51" width="14rem">
+                                <table:Column id="_IDGenColumn52" width="14rem">
                                     <table:label>
                                         <Label id="_IDGenLabel47" text="Shipper" />
                                     </table:label>
@@ -464,7 +461,7 @@
                                 </table:Column>
 
                                 <!-- Vehicle ID -->
-                                <table:Column id="_IDGenColumn52" width="14rem">
+                                <table:Column id="_IDGenColumn53" width="14rem">
                                     <table:label>
                                         <Label id="_IDGenLabel48" text="Vehicle ID" />
                                     </table:label>
@@ -481,7 +478,7 @@
                                 </table:Column>
 
                                 <!-- Delete -->
-                                <table:Column id="_IDGenColumn53"
+                                <table:Column id="_IDGenColumn54"
                                     width="4rem"
                                     hAlign="Center"
                                 >

@@ -149,8 +149,8 @@
                     <Column id="NomPnl2Col081"    ><header><Text id="NomPnl2Txt082"     text="Schedule Date"/></header></Column>
                     <Column id="NomPnl2Col083"      ><header><Text id="NomPnl2Txt084"       text="Loaction ID"/></header></Column>
                     <Column id="NomPnl2Col085"        ><header><Text id="NomPnl2Txt086"         text="Loaction"/></header></Column>
-                    <Column id="NomPnl2Col087"    ><header><Text id="NomPnl2Txt088"     text="MarketZone ID"/></header></Column>
-                    <Column id="NomPnl2Col089"      ><header><Text id="NomPnl2Txt090"       text="Market Zone"/></header></Column>
+                    <!-- <Column id="NomPnl2Col087"    ><header><Text id="NomPnl2Txt088"     text="MarketZone ID"/></header></Column> -->
+                    <!-- <Column id="NomPnl2Col089"      ><header><Text id="NomPnl2Txt090"       text="Market Zone"/></header></Column> -->
                     <Column id="NomPnl2Col091"      ><header><Text id="NomPnl2Txt092"       text="Planned Schedule Qty"/></header></Column>
                     <Column id="NomPnl2Col093"             ><header><Text id="NomPnl2Txt094"              text="Actualized Qunatity"/></header></Column>
                  
@@ -497,7 +497,6 @@
         </ScrollContainer>
         </VBox>
     </Panel>
-
-  
+    
 
 </core:FragmentDefinition>

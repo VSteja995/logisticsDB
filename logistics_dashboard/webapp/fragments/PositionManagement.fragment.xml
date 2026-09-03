@@ -57,7 +57,7 @@
                     <SegmentedButtonItem id="trainPosSeg" key="Train" text="Rail" icon="sap-icon://cargo-train"/>
                 </items>
             </SegmentedButton>
-            <Label id="commLbl" text="Material :"/>
+            <Label id="commLbl" text="Commodity :"/>
             <MultiComboBox id="commBox" placeholder="Select Material" width="100%" selectionChange=".onPosCommoditySelectionFinish" selectionFinish=".onPosCommoditySelectionFinish" items="{UniqDealCmdtyData>/UniqDealCmdtySet}">
                 <items>
                     <core:Item id="gas87Item" key="{UniqDealCmdtyData>Material}" text="{UniqDealCmdtyData>Material}"/>
@@ -669,13 +669,32 @@
             <Text id="_IDGenText185" text="{MatchPosData>ModeOfTransport}"/>
             <Text id="_IDGenText186" text="{MatchPosData>ModeOfTransportText}"/>
             <Text id="_IDGenText187" text="{MatchPosData>Matchstatus}"/>
-            <Text id="_IDGenText188" text="{MatchPosData>Purchscheddate}"/>
+            <!-- text="{
+                                     path :'OblDetailData>DueDate',
+                                     type :'sap.ui.model.type.Date',
+                                     formatOptions :{
+                                          pattern :'YYYY/MMM/dd'
+                                     }
+                                     }" -->
+            <Text id="_IDGenText188" text="{path :'MatchPosData>Purchscheddate',
+                                            type :'sap.ui.model.type.Date',
+                                            formatOptions :{
+                                                pattern :'yyyy/MMM/dd'
+                                            }  }"/>
             <Text id="_IDGenText189" text="{MatchPosData>PIncoTerms}"/>
             <Text id="_IDGenText190" text="{MatchPosData>PTransactionType}"/>
-            <Text id="_IDGenText191" text="{MatchPosData>Salescheddate}"/>
+            <Text id="_IDGenText191" text="{path :'MatchPosData>Salescheddate',
+                                            type :'sap.ui.model.type.Date',
+                                            formatOptions :{
+                                                pattern :'yyyy/MMM/dd'
+                                            }  }"/>
             <Text id="_IDGenText192" text="{MatchPosData>SIncoTerms}"/>
             <Text id="_IDGenText193" text="{MatchPosData>STransactionType}"/>
-            <Text id="_IDGenText194" text="{MatchPosData>CreatedAt}"/>
+            <Text id="_IDGenText194" text="{path :'MatchPosData>CreatedAt',
+                                            type :'sap.ui.model.type.Date',
+                                            formatOptions :{
+                                                pattern :'yyyy/MMM/dd'
+                                            }  }"/>
             <Text id="_IDGenText195" text="{MatchPosData>CreatedBy}"/>
        
         </cells>
