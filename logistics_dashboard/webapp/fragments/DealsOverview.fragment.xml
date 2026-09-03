@@ -29,7 +29,7 @@
                             
                             </items>
                     </MultiComboBox>
-            <Label 
+            <!-- <Label 
     id="DlPnl1Lbl014" 
     text="Market Zone :" />
 
@@ -44,7 +44,7 @@
         key="{MarketZone}"
         text="{MarketZone}" />
 
-</MultiComboBox>
+</MultiComboBox> -->
             </HBox>
            
     
@@ -295,49 +295,6 @@
 </VBox >
 </Panel>
 
-<Panel id="_IDGenPanel" class="sapUiSmallMargin" expanded="true" expandable="true" >
-<HBox id="DlPnl2Hbx119" wrap="Wrap" class="sapUiContentPadding sapUiSmallMargin">
-    <Panel id="DlPnl3Pnl120" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" width="14rem">
-        <VBox id="DlPnl3Vbx121" class="sapUiSmallMargin">
-            <HBox id="DlPnl3Hbx122" justifyContent="SpaceBetween" alignItems="Center">
-                <Title id="DlPnl3Ttl123" text="Active Deals" level="H6" titleStyle="H6"/>
-                <Avatar id="DlPnl3Avt124" src="sap-icon://accept" displaySize="XS" displayShape="Square" class="sapFAvatarSuccess"/>
-            </HBox>
-            <NumericContent id="DlPnl3Num125" value="247" indicator="Up" valueColor="Good"/>
-            <Text id="DlPnl3Txt126" text="+12%" class="sapUiTinyMarginTop"/>
-        </VBox>
-    </Panel>
-    <Panel id="DlPnl4Pnl127" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" width="14rem">
-        <VBox id="DlPnl4Vbx128" class="sapUiSmallMargin">
-            <HBox id="DlPnl4Hbx129" justifyContent="SpaceBetween" alignItems="Center">
-                <Title id="DlPnl4Ttl130" text="Pending Obligations" level="H6" titleStyle="H6"/>
-                <Avatar id="DlPnl4Avt131" src="sap-icon://exclamation" displaySize="XS" displayShape="Square" class="sapFAvatarWarning"/>
-            </HBox>
-            <NumericContent id="DlPnl4Num132" value="58" indicator="Down" valueColor="Critical"/>
-            <Text id="DlPnl4Txt133" text="-5%" class="sapUiTinyMarginTop"/>
-        </VBox>
-    </Panel>
-    <Panel id="DlPnl5Pnl134" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" width="14rem">
-        <VBox id="DlPnl5Vbx135" class="sapUiSmallMargin">
-            <HBox id="DlPnl5Hbx136" justifyContent="SpaceBetween" alignItems="Center">
-                <Title id="DlPnl5Ttl137" text="Fulfilled Entitlements" level="H6" titleStyle="H6"/>
-                <Avatar id="DlPnl5Avt138" src="sap-icon://accept" displaySize="XS" displayShape="Square" class="sapFAvatarSuccess"/>
-            </HBox>
-            <NumericContent id="DlPnl5Num139" value="1,842" indicator="Up" valueColor="Good"/>
-            <Text id="DlPnl5Txt140" text="+18%" class="sapUiTinyMarginTop"/>
-        </VBox>
-    </Panel>
-    <Panel id="DlPnl6Pnl141" class="sapUiSmallMarginEnd sapUiSmallMarginBottom" width="14rem">
-        <VBox id="DlPnl6Vbx142" class="sapUiSmallMargin">
-            <HBox id="DlPnl6Hbx143" justifyContent="SpaceBetween" alignItems="Center">
-                <Title id="DlPnl6Ttl144" text="Total Volume" level="H6" titleStyle="H6"/>
-                <Avatar id="DlPnl6Avt145" src="sap-icon://bar-chart" displaySize="XS" displayShape="Square" class="sapFAvatarSuccess"/>
-            </HBox>
-            <NumericContent id="DlPnl6Num146" value="12.4k" indicator="Up" valueColor="Good"/>
-            <Text id="DlPnl6Txt147" text="+8%" class="sapUiTinyMarginTop"/>
-        </VBox>
-    </Panel>
-</HBox>
-</Panel>
+
 
 </core:FragmentDefinition>

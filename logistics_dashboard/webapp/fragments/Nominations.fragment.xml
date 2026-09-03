@@ -497,64 +497,7 @@
         </ScrollContainer>
         </VBox>
     </Panel>
-    <!-- ═══════════════════════════════════════════════════════
-         PANEL 4 : KPI  CARDS
-         ═══════════════════════════════════════════════════════ -->
-    <Panel id="NomPnl4Pnl185">
-    <HBox id="NomPnl4Hbx186" wrap="Wrap" height="8rem">
-        <VBox id="NomPnl4Vbx187" class="kpiCard sapUiSmallMarginEnd">
-            
-            <!-- Top row with SpaceBetween to push text left and icon right -->
-            <HBox id="_IDGenHBox" justifyContent="SpaceBetween" alignItems="Center" width="100%">
-                <Text id="_IDGenText109" text="Draft" />
-                <core:Icon id="NomPnl4Ico188" src="sap-icon://document-text"
-                            size="1.8rem"
-                             color="#1905f7" />
-            </HBox>
-            
-            <!-- Bottom text -->
-            <Text id="NomPnl4Txt189" text="nomination" />
-            
-        </VBox>
 
-        <VBox id="NomPnl4Vbx190" class="kpiCard sapUiSmallMarginEnd" >
-            <HBox id="_IDGenHBox2" justifyContent="SpaceBetween" alignItems="Center"  width="100%" >
-                <Text id="NomPnl4Txt192E" text="Submitted" />
-                <core:Icon id="NomPnl4Ico191" src="sap-icon://upload"
-                                size="1.8rem"
-                                color="#f1b207"></core:Icon>
-            </HBox>
-            
-                <Text id="NomPnl4Txt192" text="nomination" />
-                
-            </VBox>
-            <VBox id="NomPnl4Vbx193" class="kpiCard sapUiSmallMarginEnd">
-            <HBox id="_IDGenHBox3" justifyContent="SpaceBetween" alignItems="Center" width="100%" >
-                <Text id="NomPnl4Txt192r" text="Confirmed" />
-                <core:Icon id="NomPnl4Ico191r" src="sap-icon://accept"
-                             size="1.8rem"
-                             color="#107e3e"></core:Icon>
-            </HBox>
-            
-                <Text id="NomPnl4Txt192p" text="nomination" />
-               
-            </VBox>
-
-            <VBox id="NomPnl4Vbx196" class="kpiCard top-right-container sapUiSmallMarginEnd">
-            
-            <HBox id="_IDGenHBox4" justifyContent="SpaceBetween" alignItems="Center" width="100%" >
-                <Text id="NomPnl4Txt192Ew" text="Rejected" />
-                <core:Icon id="NomPnl4Ico191w" src="sap-icon://decline"
-                             size="1.8rem"
-                             color="#bb0000"></core:Icon>
-            </HBox>
-            
-                <Text id="NomPnl4Txt192w" text="nomination" />
-             
-               
-            </VBox>
-        </HBox>
-    
-    </Panel>
+  
 
 </core:FragmentDefinition>

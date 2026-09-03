@@ -598,8 +598,8 @@
             <Title id="tmd2m" text="Matched Positions" />
             <ToolbarSpacer id="mdspacer" />
             <Button id="nomBtn" text="Create Nominations" icon="sap-icon://add" type="Emphasized" press="onCreateNominationsFromMatches" />
-            <Button id="nomdelBtn" text="DeleteSelected" icon="sap-icon://delete" type="Reject"/>
-            <Button id="nomref" text="Refresh" icon="sap-icon://refresh" type="Ghost"/>
+            <Button id="nomdelBtn" text="DeleteSelected" icon="sap-icon://delete" type="Reject"  press="onDeleteSelectedMatches"/>
+            <Button id="nomref" text="Refresh" icon="sap-icon://refresh" type="Ghost"   press="onMatchPosRefresh" />
             <Button id="matchFullBtn" icon="{= ${view>/isMatchTableFullScreen} ? 'sap-icon://exit-full-screen' : 'sap-icon://full-screen'}" tooltip="{= ${view>/isMatchTableFullScreen} ? 'Exit Full Screen' : 'Full Screen'}" type="Transparent" press=".onMatchTableToggleFullScreen"/>
         </OverflowToolbar>
 

@@ -1972,12 +1972,21 @@ _readAllODataPages: function (sPath) {
                         checkDone();
                         return;
                     }
-                    var aResults = (oData && oData.results) ? oData.results : (Array.isArray(oData) ? oData : [oData]);
-                    if (aCommodityKeys.length > 0) {
-                        aResults = aResults.filter(function (oItem) {
-                            return aCommodityKeys.indexOf(oItem.Commodity) !== -1;
-                        });
-                    }
+                 var aResults = (oData && oData.results)
+    ? oData.results
+    : (Array.isArray(oData) ? oData : [oData]);
+
+// Remove blank Commodity entries
+aResults = aResults.filter(function (oItem) {
+    return oItem.Commodity &&
+        String(oItem.Commodity).trim() !== "";
+});
+
+if (aCommodityKeys.length > 0) {
+    aResults = aResults.filter(function (oItem) {
+        return aCommodityKeys.indexOf(oItem.Commodity) !== -1;
+    });
+}
                     var oJM = oView.getModel("UniqDealCmdtyData");
                     if (oJM) { oJM.setProperty("/UniqDealCmdtySet", aResults); }
                     checkDone();
@@ -2168,6 +2177,48 @@ console.log(
         //  LOGISTICS PLANNING TAB — Filter Handlers
         // ══════════════════════════════════════════════════════════════════════
 
+
+onMatchPosRefresh: function () {
+
+    var oView = this.getView();
+
+    var dFrom = this._oPosFilterState.fromDate;
+    var dTo = this._oPosFilterState.toDate;
+
+    if (!dFrom || !dTo) {
+        var oDateRange = this.byId("MainPnlFra013--dateDrs");
+
+        if (oDateRange) {
+            dFrom = oDateRange.getDateValue();
+            dTo = oDateRange.getSecondDateValue();
+        }
+    }
+
+    if (!dFrom || !dTo) {
+        MessageToast.show("Please select a valid date range.");
+        return;
+    }
+
+    var oMatchModel =
+        oView.getModel("MatchPosData");
+
+    if (oMatchModel) {
+        oMatchModel.setProperty(
+            "/MatchPosSet",
+            []
+        );
+    }
+
+    this._applyPositionFilters(
+        dFrom,
+        dTo
+    );
+
+    MessageToast.show(
+        "Matched Positions refreshed."
+    );
+},
+        
 onPlanningDetailRefresh: function () {
 
     console.log("===== PLANNING DETAIL REFRESH STARTED =====");
@@ -3353,6 +3404,304 @@ aResults.splice(iParentIdx, 1);
                  MessageToast.show("Matched row removed.");
              },
 
+
+ onDeleteSelectedMatches: function () {
+
+    var that = this;
+
+    // =====================================================
+    // 1. Get Matched Positions table
+    // =====================================================
+
+    var oTable = this.byId("MainPnlFra013--matchTbl") ||
+                 this.byId("matchTbl");
+
+    if (!oTable) {
+        MessageBox.error("Matched Positions table not found.");
+        return;
+    }
+
+
+    // =====================================================
+    // 2. Get selected row(s)
+    // =====================================================
+
+    var aSelectedItems = [];
+
+    if (typeof oTable.getSelectedItems === "function") {
+        aSelectedItems = oTable.getSelectedItems();
+    }
+
+
+    // =====================================================
+    // 3. Validate selection
+    // =====================================================
+
+    if (!aSelectedItems || aSelectedItems.length === 0) {
+
+        MessageBox.warning(
+            "Please select a record to delete.",
+            {
+                title: "Delete Selected"
+            }
+        );
+
+        return;
+    }
+
+
+    // =====================================================
+    // 4. Get OData model
+    // =====================================================
+
+    var oODataModel =
+        (this.getOwnerComponent() &&
+         this.getOwnerComponent().getModel()) ||
+        this.getView().getModel();
+
+
+    if (!oODataModel) {
+
+        MessageBox.error(
+            "OData model not found."
+        );
+
+        return;
+    }
+
+
+    // =====================================================
+    // 5. Get selected MatchConfirm records
+    // =====================================================
+
+    var aSelectedRecords = [];
+
+    aSelectedItems.forEach(function (oItem) {
+
+        var oContext =
+            oItem.getBindingContext("MatchPosData");
+
+        if (!oContext) {
+            return;
+        }
+
+        var oObject = oContext.getObject();
+
+        if (oObject && oObject.Matchid) {
+            aSelectedRecords.push(oObject);
+        }
+    });
+
+
+    // =====================================================
+    // 6. Validate Matchid
+    // =====================================================
+
+    if (aSelectedRecords.length === 0) {
+
+        MessageBox.error(
+            "Selected record does not contain Matchid."
+        );
+
+        return;
+    }
+
+
+    // =====================================================
+    // 7. Confirmation popup
+    // =====================================================
+
+    MessageBox.confirm(
+        "Are you sure you want to delete " +
+        aSelectedRecords.length +
+        " selected record(s)?",
+        {
+            title: "Confirm Delete",
+
+            actions: [
+                MessageBox.Action.YES,
+                MessageBox.Action.NO
+            ],
+
+            emphasizedAction: MessageBox.Action.YES,
+
+            onClose: function (sAction) {
+
+                if (sAction !== MessageBox.Action.YES) {
+                    return;
+                }
+
+                that._deleteSelectedMatchRecords(
+                    oODataModel,
+                    oTable,
+                    aSelectedRecords
+                );
+            }
+        }
+    );
+},
+
+
+_deleteSelectedMatchRecords: function (
+    oODataModel,
+    oTable,
+    aSelectedRecords
+) {
+
+    var that = this;
+
+    var iTotal = aSelectedRecords.length;
+    var iCompleted = 0;
+    var iSuccess = 0;
+    var aErrors = [];
+
+
+    oTable.setBusy(true);
+
+
+    aSelectedRecords.forEach(function (oRecord) {
+
+        var sMatchId = oRecord.Matchid;
+
+        // =================================================
+        // Build OData key
+        // =================================================
+
+        var sPath = oODataModel.createKey(
+            "MatchConfirm",
+            {
+                Matchid: sMatchId
+            }
+        );
+
+
+        // =================================================
+        // Get ETag
+        // =================================================
+
+        var sETag = null;
+
+        if (oRecord.__metadata &&
+            oRecord.__metadata.etag) {
+
+            sETag = oRecord.__metadata.etag;
+        }
+
+
+        // =================================================
+        // DELETE MatchConfirm record
+        // =================================================
+
+        oODataModel.remove(
+            "/" + sPath,
+            {
+
+                eTag: sETag || "*",
+
+                success: function () {
+
+                    iSuccess++;
+                    iCompleted++;
+
+                    checkFinished();
+                },
+
+                error: function (oError) {
+
+                    iCompleted++;
+
+                    var sError =
+                        that._extractODataError(oError);
+
+                    aErrors.push(
+                        sMatchId + ": " + sError
+                    );
+
+                    checkFinished();
+                }
+            }
+        );
+    });
+
+
+    // =====================================================
+    // Check whether all DELETE calls completed
+    // =====================================================
+
+    function checkFinished() {
+
+        if (iCompleted !== iTotal) {
+            return;
+        }
+
+
+        oTable.setBusy(false);
+
+
+        // =================================================
+        // Clear selected rows
+        // =================================================
+
+        if (typeof oTable.removeSelections === "function") {
+            oTable.removeSelections(true);
+        }
+
+
+        // =================================================
+        // Refresh MatchConfirm data
+        // =================================================
+
+        var oBinding =
+            oTable.getBinding("items");
+
+        if (oBinding) {
+            oBinding.refresh();
+        }
+
+
+        // =================================================
+        // Show result
+        // =================================================
+
+        if (aErrors.length === 0) {
+
+            MessageBox.success(
+                iSuccess +
+                " record(s) deleted successfully.",
+                {
+                    title: "Delete Successful"
+                }
+            );
+
+        } else if (iSuccess > 0) {
+
+            MessageBox.warning(
+                iSuccess +
+                " record(s) deleted successfully.\n\n" +
+                aErrors.length +
+                " record(s) failed:\n\n" +
+                aErrors.join("\n"),
+                {
+                    title: "Partial Delete"
+                }
+            );
+
+        } else {
+
+            MessageBox.error(
+                "Failed to delete the selected record(s).\n\n" +
+                aErrors.join("\n"),
+                {
+                    title: "Delete Failed"
+                }
+            );
+        }
+    }
+},
+
+
+
+
         // ══════════════════════════════════════════════════════════════════════
         //  CREATE NOMINATIONS DIALOG SUBSYSTEM (from Matched Positions)
         // ══════════════════════════════════════════════════════════════════════
@@ -4488,7 +4837,6 @@ aResults.splice(iParentIdx, 1);
                             schedqty: sSchedQty,
                             scheduom: sUOM,
                             schedtype: "ZO",
-                            refdoctype: "K",
                             schedmat: sCommodity,
                             locid: sOrigin,
                             incoterms: sPInco,
@@ -4503,7 +4851,6 @@ aResults.splice(iParentIdx, 1);
                             schedqty: sSchedQty,
                             scheduom: sUOM,
                             schedtype: "ZD",
-                            refdoctype: "X",
                             schedmat: sCommodity,
                             locid: sDestination,
                             incoterms: "DAP",
@@ -4520,7 +4867,6 @@ aResults.splice(iParentIdx, 1);
                             schedqty: sSchedQty,
                             scheduom: sUOM,
                             schedtype: "ZO",
-                            refdoctype: "I",
                             schedmat: sCommodity,
                             locid: sOrigin,
                             incoterms: "FOB",
@@ -4535,7 +4881,6 @@ aResults.splice(iParentIdx, 1);
                             schedqty: sSchedQty,
                             scheduom: sUOM,
                             schedtype: "ZD",
-                            refdoctype: "G",
                             schedmat: sCommodity,
                             locid: sDestination,
                             incoterms: sSInco,
@@ -4552,7 +4897,6 @@ aResults.splice(iParentIdx, 1);
                             schedqty: sSchedQty,
                             scheduom: sUOM,
                             schedtype: "ZO",
-                            refdoctype: "K",
                             schedmat: sCommodity,
                             locid: sOrigin,
                             incoterms: sPInco,
@@ -4567,7 +4911,6 @@ aResults.splice(iParentIdx, 1);
                             schedqty: sSchedQty,
                             scheduom: sUOM,
                             schedtype: "ZD",
-                            refdoctype: "G",
                             schedmat: sCommodity,
                             locid: sDestination,
                             incoterms: sSInco,
