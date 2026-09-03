@@ -2164,11 +2164,122 @@ console.log(
         },
 
 
-        
-
         // ══════════════════════════════════════════════════════════════════════
         //  LOGISTICS PLANNING TAB — Filter Handlers
         // ══════════════════════════════════════════════════════════════════════
+
+onPlanningDetailRefresh: function () {
+
+    console.log("===== PLANNING DETAIL REFRESH STARTED =====");
+
+    var oView = this.getView();
+
+    // Get current Planning Detail filter values
+    var dFrom = this._oPosFilterState.fromDate;
+    var dTo   = this._oPosFilterState.toDate;
+
+    // If filter state is not available, get dates from UI
+    if (!dFrom || !dTo) {
+
+        var oDateRange = this.byId(
+            "MainPnlFra013--dateDrs"
+        );
+
+        if (oDateRange) {
+            dFrom = oDateRange.getDateValue();
+            dTo   = oDateRange.getSecondDateValue();
+        }
+    }
+
+    // Validate dates
+    if (!dFrom || !dTo) {
+
+        MessageToast.show(
+            "Please select a valid date range."
+        );
+
+        return;
+    }
+
+    // ---------------------------------------------------------
+    // Clear existing Planning Detail table data
+    // ---------------------------------------------------------
+
+    var oEntModel = oView.getModel("EntDetailData");
+
+    if (oEntModel) {
+        oEntModel.setProperty(
+            "/EntDetailSet",
+            []
+        );
+    }
+
+
+    var oOblModel = oView.getModel("OblDetailData");
+
+    if (oOblModel) {
+        oOblModel.setProperty(
+            "/OblDetailSet",
+            []
+        );
+    }
+
+
+    var oTotalModel = oView.getModel("TotalSummaryData");
+
+    if (oTotalModel) {
+        oTotalModel.setProperty(
+            "/TotalSummarySet",
+            []
+        );
+    }
+
+
+    var oMonthModel = oView.getModel("MonthPosSmryData");
+
+    if (oMonthModel) {
+        oMonthModel.setProperty(
+            "/MonthPosSmrySet",
+            []
+        );
+    }
+
+
+    var oMatchModel = oView.getModel("MatchPosData");
+
+    if (oMatchModel) {
+        oMatchModel.setProperty(
+            "/MatchPosSet",
+            []
+        );
+    }
+
+
+    // ---------------------------------------------------------
+    // Reload Planning Detail using CURRENT filters
+    // ---------------------------------------------------------
+
+    this._applyPositionFilters(
+        dFrom,
+        dTo
+    );
+
+
+    console.log(
+        "Planning Detail refreshed with current filters:",
+        {
+            fromDate: dFrom,
+            toDate: dTo,
+            mode: this._oPosFilterState.motKey,
+            commodity: this._oPosFilterState.commodityKeys
+        }
+    );
+
+    console.log(
+        "===== PLANNING DETAIL REFRESH COMPLETED ====="
+    );
+},
+
 
         onPosDateRangeChange: function (oEvent) {
             var oDRS  = oEvent.getSource();
@@ -2188,6 +2299,8 @@ console.log(
                 this._applyPositionFilters(dFrom, dTo);
             }
         },
+
+
 
         onPosModeChange: function (oEvent) {
             var sKey = oEvent.getParameter("key") || (oEvent.getParameter("item") && oEvent.getParameter("item").getKey()) || oEvent.getSource().getSelectedKey();
@@ -2337,15 +2450,17 @@ console.log(
                 error: function () { checkDone(); MessageToast.show("Error loading PositionsSummary."); }
             });
             // 5. MatchPos
-            oModel.read("/MatchPosSet", {
-                success: function (oData) {
-                    var aResults = filterByCmdtyAndMot(oData);
-                    var oJM = oView.getModel("MatchPosData");
-                    if (oJM) { oJM.setProperty("/MatchPosSet", aResults); }
-                    checkDone();
-                },
-                error: function () { checkDone(); MessageToast.show("Error loading MatchPosData."); }
-            });
+            // oModel.read("/MatchPosSet", {
+            //     success: function (oData) {
+            //         var aResults = filterByCmdtyAndMot(oData);
+            //         var oJM = oView.getModel("MatchPosData");
+            //         if (oJM) { oJM.setProperty("/MatchPosSet", aResults); }
+            //         checkDone();
+            //     },
+            //     error: function () { checkDone(); MessageToast.show("Error loading MatchPosData."); }
+            // });
+            
+            checkDone();
         },
 
 

@@ -14,7 +14,7 @@
               class="filterContainer sapUiSmallMargin">
 
             <VBox id="NomPnl1Vbx003" class="sapUiSmallMarginEnd">
-                <Label id="NomPnl1Lbl004" text="Deal ID :" class="sapUiTinyMarginBottom"/>
+                <Label id="NomPnl1Lbl004" text="Deal ID :" />
                 <Input id="NomPnl1Inp005" placeholder="Search Deal Id" width="8rem" liveChange="onNominationSearch"/>
             </VBox>
 

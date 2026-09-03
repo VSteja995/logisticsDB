@@ -115,7 +115,7 @@
          
             <ToolbarSpacer id="planSpc"/>
             
-            <Button id="refreshPlanBtn" text="Refresh" icon="sap-icon://refresh" type="Ghost"/>
+            <Button id="refreshPlanBtn" text="Refresh" icon="sap-icon://refresh" type="Ghost"  press=".onPlanningDetailRefresh"/>
         </OverflowToolbar>
         </headerToolbar>
 
