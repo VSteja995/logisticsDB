@@ -47,7 +47,7 @@
                                     class="nom-plain-text"
                                 />
                             </FlexBox>
-                            <FlexBox id="_IDGenFlexBox8" id="_IDGenFlexBox9"
+                            <FlexBox id="_IDGenFlexBox8" 
                                 alignItems="Center"
                                 class="nom-dlg-header-field"
                             >
@@ -61,7 +61,7 @@
                                     class="nom-plain-text"
                                 />
                             </FlexBox>
-                            <FlexBox id="_IDGenFlexBox9"
+                            <FlexBox id="_IDGenFlexBox9E"
                                 alignItems="Center"
                                 class="nom-dlg-header-field"
                             >
