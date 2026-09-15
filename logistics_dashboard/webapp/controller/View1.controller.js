@@ -136,9 +136,12 @@ sap.ui.define([
 
             // Track latest Deals request
              this._iDealsRequestId = 0;
-
+            
             var oTotalSummaryModel = new JSONModel({ TotalSummarySet: [] });
             this.getView().setModel(oTotalSummaryModel, "TotalSummaryData");
+
+            var oPlanQtyMotModel = new JSONModel({ PlanQtyMotSet: [] });
+            this.getView().setModel(oPlanQtyMotModel, "PlanQtyMotData");
 
             var oEntDetailModel = new JSONModel({ EntDetailSet: [] });
             this.getView().setModel(oEntDetailModel, "EntDetailData");
@@ -2529,6 +2532,21 @@ if (oMonthModel) {
                 }
                 return aRes;
             };
+            // 0. EntDetails
+            var PlanQtyMotPath = oModel.createKey("/PlanQtyMot", {
+                p_FromDate: sFormattedFrom,
+                p_ToDate:   sFormattedTo
+            }) + "/Set";
+
+            oModel.read(PlanQtyMotPath, {
+                success: function (oData) {
+                    var aResults = filterByCmdtyAndMot(oData);
+                    var oJM = oView.getModel("PlanQtyMotData");
+                    if (oJM) { oJM.setProperty("/PlanQtyMotSet", aResults); }
+                    checkDone();
+                },
+                error: function () { checkDone(); MessageToast.show("Error loading PlanQtyMot."); }
+            });
 
             // 1. EntDetails
             var EntKeyPath = oModel.createKey("/EntDetails", {
@@ -2716,6 +2734,13 @@ oModel.read(PosSmryKeyPath, {
 
 
 _applyNominationFilters: function (dFrom, dTo) {
+    if (!dFrom || !dTo) {
+        dFrom = this._oNomFilterState && this._oNomFilterState.fromDate;
+        dTo   = this._oNomFilterState && this._oNomFilterState.toDate;
+    }
+    if (!dFrom || !dTo) {
+        return;
+    }
 
     var oModel = this.getView().getModel();
 
@@ -4888,6 +4913,9 @@ if (dFrom && dTo) {
                                     if (typeof that._applyPositionFilters === "function") {
                                         that._applyPositionFilters();
                                     }
+                                    if (typeof that._applyNominationFilters === "function") {
+                                        that._applyNominationFilters();
+                                    }
                                 }
                             }
                         );
@@ -4948,6 +4976,9 @@ if (dFrom && dTo) {
                                         if (typeof that._applyPositionFilters === "function") {
                                             that._applyPositionFilters();
                                         }
+                                        if (typeof that._applyNominationFilters === "function") {
+                                            that._applyNominationFilters();
+                                        }
                                     }
                                 }
                             }
@@ -4969,6 +5000,9 @@ if (dFrom && dTo) {
                                 }
                                 if (typeof that._applyPositionFilters === "function") {
                                     that._applyPositionFilters();
+                                }
+                                if (typeof that._applyNominationFilters === "function") {
+                                    that._applyNominationFilters();
                                 }
                             }
                         }

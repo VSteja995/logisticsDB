@@ -14,29 +14,29 @@
         <HBox id="kpiBox" wrap="Wrap">
             <VBox id="entCard" class="kpiCard green-border sapUiSmallMarginEnd">
                 <Text id="entLbl" text="Total Entitlements" class="kpiLabel"/>
-                <Title id="entVal" text="2,40,000" class="kpiValue"/>
-                <Text id="entSub" text="6 positions" class="kpiSubtext"/>
+                <Title id="entVal" text="" class="kpiValue"/>
+                <!-- <Text id="entSub" text="6 positions" class="kpiSubtext"/> -->
                 
-                <core:Icon id="entIcon" size="25px" src="sap-icon://trend-up"  color="#2b7d2b"/>
+                <!-- <core:Icon id="entIcon" size="25px" src="sap-icon://trend-up"  color="#2b7d2b"/> -->
             </VBox>
             <VBox id="oblCard" class="kpiCard red-border sapUiSmallMarginEnd">
                 <Text id="oblLbl" text="Total Obligations" class="kpiLabel"/>
                 <Title id="oblVal" text="2,02,000" class="kpiValue"/>
-                <Text id="oblSub" text="6 positions" class="kpiSubtext"/>
-                <core:Icon id="oblIcon" size="25px" src="sap-icon://trend-down"  color="#fb0404"/>
+                <!-- <Text id="oblSub" text="6 positions" class="kpiSubtext"/>
+                <core:Icon id="oblIcon" size="25px" src="sap-icon://trend-down"  color="#fb0404"/> -->
             </VBox>
-            <VBox id="planCard" class="kpiCard blue-border sapUiSmallMarginEnd">
+            <!-- <VBox id="planCard" class="kpiCard blue-border sapUiSmallMarginEnd">
                 <Text id="planLbl" text="Total Planned" class="kpiLabel"/>
                 <Title id="planVal" text="2,02,000" class="kpiValue"/>
                 <Text id="planSub" text="6 positions" class="kpiSubtext"/>
                 <core:Icon id="planIcon" size="25px" src="sap-icon://select-appointments"  color="#048ef7"/>
-            </VBox>
-            <VBox id="netCard" class="kpiCard green-border sapUiSmallMarginEnd">
+            </VBox> -->
+            <!-- <VBox id="netCard" class="kpiCard green-border sapUiSmallMarginEnd">
                 <Text id="netLbl" text="Net Position" class="kpiLabel"/>
                 <Title id="netVal" text="2,02,000" class="kpiValue"/>
                 <Text id="netSub" text="6 positions" class="kpiSubtext"/>
                
-            </VBox>
+            </VBox> -->
         </HBox>
     </Panel>
 
