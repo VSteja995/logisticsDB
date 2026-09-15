@@ -559,9 +559,9 @@
     <headerToolbar>
         <Toolbar id="monthBar" >
            <Title id="idmpt1" text="Monthly Planning Summary">  </Title>  
-            <DateRangeSelection id="monthDrs" width="15rem" placeholder="MM/DD/YYYY - MM/DD/YYYY"></DateRangeSelection>
+            <!-- <DateRangeSelection id="monthDrs" width="15rem" placeholder="MM/DD/YYYY - MM/DD/YYYY"></DateRangeSelection> -->
             <ToolbarSpacer id="monthSpc" ></ToolbarSpacer>
-            <Button  id="monthRefreshBtn"  text="Refresh" icon="sap-icon://refresh" type="Ghost"></Button>
+            <Button  id="monthRefreshBtn"  text="Refresh" icon="sap-icon://refresh" type="Ghost"  press=".onMonthRefresh"></Button>
             <!-- <Button id="monthFullBtn" icon="{= ${view>/isMonthTableFullScreen} ? 'sap-icon://exit-full-screen' : 'sap-icon://full-screen'}" tooltip="{= ${view>/isMonthTableFullScreen} ? 'Exit Full Screen' : 'Full Screen'}" type="Transparent" press=".onMonthTableToggleFullScreen"/> -->
        </Toolbar> 
     </headerToolbar>
@@ -576,18 +576,46 @@
                 <Column id="_IDGenColumn75"><header><Text id="_IDGenText74" text="Net Positions" /></header></Column>
                 <Column id="_IDGenColumn76"><header><Text id="_IDGenText75" text="status " /></header></Column>
             </columns>
-            <items>
-                <ColumnListItem id="monthRow">
-                    <cells>
-                        <Text id="monthTxt" text="{PosSmryData>Month}"/>
-                        <Text id="monthEntTxt" text="{PosSmryData>EntitlementsFormatted}"/>
-                        <Text id="monthOblTxt" text="{PosSmryData>ObligationsFormatted}"/>
-                        <Text id="monthMatchTxt" text="{PosSmryData>MatchedFormatted}"/>
-                        <Text id="monthNetTxt" text="{PosSmryData>NetPositionFormatted}"/>
-                        <ObjectStatus id="monthSts" text="{PosSmryData>NetPosition}" state="Success"/>
-                    </cells>
-                </ColumnListItem>
-            </items>
+         <items>
+    <ColumnListItem id="monthRow">
+
+        <cells>
+
+            <!-- Month -->
+            <Text
+                id="monthTxt"
+                text="{PosSmryData>ScheduleMonth}" />
+
+            <!-- Entitlements -->
+            <Text
+                id="monthEntTxt"
+                text="{PosSmryData>PurchaseQuantity}" />
+
+            <!-- Obligations -->
+            <Text
+                id="monthOblTxt"
+                text="{PosSmryData>SalesQuantity}" />
+
+            <!-- Matched -->
+            <Text
+                id="monthMatchTxt"
+                text="{PosSmryData>MatchQuantity}" />
+
+            <!-- Net Position -->
+            <Text
+                id="monthNetTxt"
+                text="{PosSmryData>NetPosition}" />
+
+            <!-- Status -->
+            <ObjectStatus
+                id="monthSts"
+                text="{PosSmryData>NetPosition}"
+                state="Success" />
+
+        </cells>
+
+    </ColumnListItem>
+</items>
         </Table>
         </ScrollContainer>
 </Panel>
@@ -639,7 +667,9 @@
                     <Column id="salesTxCol"><header><Text id="_IDGenText106" text="Sales transation type" /></header></Column>
                     <Column id="createdAtCol"><header><Text id="_IDGenText107" text="Created At" /></header></Column>
                     <Column id="createdByCol"><header><Text id="_IDGenText108" text="Created By" /></header></Column>
+                    <!-- <Column id="_IDGenColumn" ><header><Text id="_IDGenText209"  text="Nomination Quantity" /></header></Column> -->
             </columns>
+
             <items>
                 <ColumnListItem id="monthRo">
                     <cells>
@@ -669,6 +699,8 @@
             <Text id="_IDGenText185" text="{MatchPosData>ModeOfTransport}"/>
             <Text id="_IDGenText186" text="{MatchPosData>ModeOfTransportText}"/>
             <Text id="_IDGenText187" text="{MatchPosData>Matchstatus}"/>
+              <!-- <Text id="_IDGenText109" text="{MatchPosData>Nominationquanity}"/> -->
+            
             <!-- text="{
                                      path :'OblDetailData>DueDate',
                                      type :'sap.ui.model.type.Date',

@@ -2218,7 +2218,97 @@ onMatchPosRefresh: function () {
         "Matched Positions refreshed."
     );
 },
-        
+      
+onMonthRefresh: function () {
+
+    console.log("===== MONTHLY PLANNING SUMMARY REFRESH STARTED =====");
+
+    var oView = this.getView();
+
+    // =====================================================
+    // 1. Get current date range from filter state
+    // =====================================================
+
+    var dFrom = this._oPosFilterState.fromDate;
+    var dTo   = this._oPosFilterState.toDate;
+
+
+    // =====================================================
+    // 2. If filter state is empty, get dates from UI
+    // =====================================================
+
+    if (!dFrom || !dTo) {
+
+        var oDateRange = this.byId(
+            "MainPnlFra013--dateDrs"
+        );
+
+        if (oDateRange) {
+
+            dFrom = oDateRange.getDateValue();
+            dTo   = oDateRange.getSecondDateValue();
+
+        }
+    }
+
+
+    // =====================================================
+    // 3. Validate date range
+    // =====================================================
+
+    if (!dFrom || !dTo) {
+
+        MessageToast.show(
+            "Please select a valid date range."
+        );
+
+        return;
+    }
+
+
+    // =====================================================
+    // 4. Clear current Monthly Planning Summary data
+    // =====================================================
+
+    var oMonthModel =
+        oView.getModel("PosSmryData");
+
+    if (oMonthModel) {
+
+        oMonthModel.setProperty(
+            "/PosSmrySet",
+            []
+        );
+
+    }
+
+
+    // =====================================================
+    // 5. Reload PositionsSummary from backend
+    // =====================================================
+
+    this._applyPositionFilters(
+        dFrom,
+        dTo
+    );
+
+
+    console.log(
+        "Monthly Planning Summary refreshed:",
+        {
+            fromDate: dFrom,
+            toDate: dTo,
+            mode: this._oPosFilterState.motKey,
+            commodity: this._oPosFilterState.commodityKeys
+        }
+    );
+
+    console.log(
+        "===== MONTHLY PLANNING SUMMARY REFRESH COMPLETED ====="
+    );
+},
+
+
 onPlanningDetailRefresh: function () {
 
     console.log("===== PLANNING DETAIL REFRESH STARTED =====");
@@ -2286,15 +2376,17 @@ onPlanningDetailRefresh: function () {
     }
 
 
-    var oMonthModel = oView.getModel("MonthPosSmryData");
+ var oMonthModel =
+    oView.getModel("PosSmryData");
 
-    if (oMonthModel) {
-        oMonthModel.setProperty(
-            "/MonthPosSmrySet",
-            []
-        );
-    }
+if (oMonthModel) {
 
+    oMonthModel.setProperty(
+        "/PosSmrySet",
+        []
+    );
+
+}
 
     var oMatchModel = oView.getModel("MatchPosData");
 
@@ -2485,31 +2577,141 @@ onPlanningDetailRefresh: function () {
                 },
                 error: function () { checkDone(); MessageToast.show("Error loading TotalSummary."); }
             });
-            // 4. positionSummary
-            var PosSmryKeyPath = oModel.createKey("/PositionsSummary", {
-                p_FromDate:  sFormattedFrom,
-                p_ToDate:    sFormattedTo,
-            }) + "/Set";
+        // 4. PositionsSummary - Monthly Planning Summary
+var PosSmryKeyPath = oModel.createKey("/PositionsSummary", {
+    p_FromDate: sFormattedFrom,
+    p_ToDate:   sFormattedTo
+}) + "/Set";
 
-            oModel.read(PosSmryKeyPath, {
-                success: function (oData) {
-                    var aResults = filterByCmdtyAndMot(oData);
-                    var oJM = oView.getModel("MonthPosSmryData");
-                    if (oJM) { oJM.setProperty("/MonthPosSmrySet", aResults); }
-                    checkDone();
-                },
-                error: function () { checkDone(); MessageToast.show("Error loading PositionsSummary."); }
-            });
+console.log("PositionsSummary OData Path:", PosSmryKeyPath);
+
+oModel.read(PosSmryKeyPath, {
+
+    success: function (oData) {
+
+        console.log("PositionsSummary Backend Response:", oData);
+
+        var aResults = filterByCmdtyAndMot(oData);
+
+        console.log(
+            "PositionsSummary records received:",
+            aResults.length
+        );
+
+        // IMPORTANT:
+        // XML table is bound to PosSmryData>/PosSmrySet
+        var oJM = oView.getModel("PosSmryData");
+
+        if (oJM) {
+
+            oJM.setProperty(
+                "/PosSmrySet",
+                aResults
+            );
+
+            oJM.refresh(true);
+
+            console.log(
+                "Monthly Planning Summary model updated:",
+                aResults
+            );
+
+        } else {
+
+            console.error(
+                "PosSmryData JSONModel not found"
+            );
+
+        }
+
+        checkDone();
+    },
+
+    error: function (oError) {
+
+        console.error(
+            "Error loading PositionsSummary:",
+            oError
+        );
+
+        checkDone();
+
+        MessageToast.show(
+            "Error loading PositionsSummary."
+        );
+    }
+});
             // 5. MatchPos
-            oModel.read("/MatchConfirm", {
-                success: function (oData) {
-                    var aResults = filterByCmdtyAndMot(oData);
-                    var oJM = oView.getModel("MatchPosData");
-                    if (oJM) { oJM.setProperty("/MatchPosSet", aResults); }
-                    checkDone();
-                },
-                error: function () { checkDone(); MessageToast.show("Error loading MatchPosData."); }
+            // oModel.read("/MatchConfirm", {
+            //     success: function (oData) {
+            //         var aResults = filterByCmdtyAndMot(oData);
+            //         var oJM = oView.getModel("MatchPosData");
+            //         if (oJM) { oJM.setProperty("/MatchPosSet", aResults); }
+            //         checkDone();
+            //     },
+            //     error: function () { checkDone(); MessageToast.show("Error loading MatchPosData."); }
+            // });
+
+
+           oModel.read("/MatchConfirm", {
+    success: function (oData) {
+
+        var aResults =
+            filterByCmdtyAndMot(oData);
+
+        // =====================================================
+        // Put the newly created MatchConfirm record FIRST
+        // =====================================================
+
+        var oNewMatch =
+            oView.getController()._oLastCreatedMatch;
+
+        if (oNewMatch && oNewMatch.Matchid) {
+
+            var iNewIndex = aResults.findIndex(function (oItem) {
+                return String(oItem.Matchid) ===
+                       String(oNewMatch.Matchid);
             });
+
+            if (iNewIndex > -1) {
+
+                var oCreatedRecord =
+                    aResults.splice(iNewIndex, 1)[0];
+
+                // Put newly created record at TOP
+                aResults.unshift(oCreatedRecord);
+            }
+        }
+
+        // =====================================================
+        // Update Match Positions table
+        // =====================================================
+
+        var oJM =
+            oView.getModel("MatchPosData");
+
+        if (oJM) {
+
+            oJM.setProperty(
+                "/MatchPosSet",
+                aResults
+            );
+
+            oJM.refresh(true);
+        }
+
+        checkDone();
+    },
+
+    error: function () {
+
+        checkDone();
+
+        MessageToast.show(
+            "Error loading MatchConfirm data."
+        );
+    }
+});
         },
 
 
@@ -3173,17 +3375,35 @@ _applyTicketFilters: function (dFrom, dTo) {
 
                  oView.setBusy(true);
 
-                 if (aPayloads.length === 1) {
-                     oModel.create("/MatchConfirm", aPayloads[0], {
-                         success: function (oData) {
-                             oView.setBusy(false);
-                             MessageBox.success("Match confirmed successfully.", {
-                                 title: "Match Confirmed",
-                                 onClose: function () {
-                                     this._onMatchSaveSuccess();
-                                 }.bind(this)
-                             });
-                         }.bind(this),
+                //  if (aPayloads.length === 1) {
+                //      oModel.create("/MatchConfirm", aPayloads[0], {
+                //          success: function (oData) {
+                //              oView.setBusy(false);
+                //              MessageBox.success("Match confirmed successfully.", {
+                //                  title: "Match Confirmed",
+                //                  onClose: function () {
+                //                      this._onMatchSaveSuccess();
+                //                  }.bind(this)
+                //              });
+                //          }.bind(this),
+
+                if (aPayloads.length === 1) {
+    oModel.create("/MatchConfirm", aPayloads[0], {
+        success: function (oData) {
+
+            oView.setBusy(false);
+
+            // Store the newly created MatchConfirm record
+            this._oLastCreatedMatch = oData;
+
+            MessageBox.success("Match confirmed successfully.", {
+                title: "Match Confirmed",
+                onClose: function () {
+                    this._onMatchSaveSuccess();
+                }.bind(this)
+            });
+
+        }.bind(this),
                          error: function (oError) {
                              oView.setBusy(false);
                              var sMsg = this._extractODataError(oError);
@@ -3645,17 +3865,34 @@ _deleteSelectedMatchRecords: function (
         }
 
 
-        // =================================================
-        // Refresh MatchConfirm data
-        // =================================================
+      // =================================================
+// Refresh Matched Positions automatically
+// =================================================
 
-        var oBinding =
-            oTable.getBinding("items");
+var oMatchModel = that.getView().getModel("MatchPosData");
 
-        if (oBinding) {
-            oBinding.refresh();
-        }
+if (oMatchModel) {
+    // Clear old data first
+    oMatchModel.setProperty("/MatchPosSet", []);
+}
 
+// Get CURRENT filter values
+var dFrom = that._oPosFilterState.fromDate;
+var dTo   = that._oPosFilterState.toDate;
+
+// Reload Matched Positions using current filters
+if (dFrom && dTo) {
+
+    that._applyPositionFilters(
+        dFrom,
+        dTo
+    );
+
+} else {
+
+    // Fallback: use the existing refresh function
+    that.onMatchPosRefresh();
+}
 
         // =================================================
         // Show result
