@@ -38,6 +38,13 @@ sap.ui.define([
         return d || null;
     }
 
+    function _toStartOfDay(d) {
+        if (!d || !(d instanceof Date) || isNaN(d.getTime())) {
+            return null;
+        }
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    }
+
     function _toODataMonth(vDate, sFallbackMonth) {
         if (sFallbackMonth && typeof sFallbackMonth === "string" && sFallbackMonth.trim()) {
             var sClean = sFallbackMonth.trim();
@@ -1518,6 +1525,78 @@ onDealsRefresh: function () {
 
 },
 
+_sortNominationsNewestFirst: function (a, b) {
+    if (!a && !b) { return 0; }
+    if (!a) { return 1; }
+    if (!b) { return -1; }
+
+    // 1. Prioritize newly created nominations from active session
+    var aLastKeys = this._aLastCreatedNominationKeys || [];
+    if (aLastKeys.length > 0) {
+        var sKeyA = String(a.NominationKey || "").trim();
+        var sKeyB = String(b.NominationKey || "").trim();
+        var iIdxA = aLastKeys.indexOf(sKeyA);
+        var iIdxB = aLastKeys.indexOf(sKeyB);
+
+        if (iIdxA !== -1 && iIdxB === -1) {
+            return -1;
+        }
+        if (iIdxA === -1 && iIdxB !== -1) {
+            return 1;
+        }
+        if (iIdxA !== -1 && iIdxB !== -1 && iIdxA !== iIdxB) {
+            return iIdxA - iIdxB;
+        }
+    }
+
+    // 2. Creation timestamp/date descending if present
+    var vDateA = a.CreatedAt || a.CreatedOn || a.CreationDate || a.Erdat || a.CreateDate;
+    var vDateB = b.CreatedAt || b.CreatedOn || b.CreationDate || b.Erdat || b.CreateDate;
+    if (vDateA && vDateB) {
+        var tA = vDateA instanceof Date ? vDateA.getTime() : new Date(vDateA).getTime();
+        var tB = vDateB instanceof Date ? vDateB.getTime() : new Date(vDateB).getTime();
+        if (!isNaN(tA) && !isNaN(tB) && tA !== tB) {
+            return tB - tA;
+        }
+    }
+
+    // 3. NominationKey DESCENDING (numeric / natural sort)
+    var sNomA = String(a.NominationKey || "").trim();
+    var sNomB = String(b.NominationKey || "").trim();
+
+    if (sNomA !== sNomB) {
+        var nNumA = Number(sNomA);
+        var nNumB = Number(sNomB);
+        if (!isNaN(nNumA) && !isNaN(nNumB) && sNomA !== "" && sNomB !== "") {
+            var nDiff = nNumB - nNumA;
+            if (nDiff !== 0) {
+                return nDiff;
+            }
+        }
+        var nComp = sNomB.localeCompare(sNomA, undefined, { numeric: true, sensitivity: "base" });
+        if (nComp !== 0) {
+            return nComp;
+        }
+    }
+
+    // 4. Same NominationKey -> sort by NominationItem ASCENDING
+    var sItemA = String(a.NominationItem || "").trim();
+    var sItemB = String(b.NominationItem || "").trim();
+    if (sItemA !== sItemB) {
+        var nItemNumA = Number(sItemA);
+        var nItemNumB = Number(sItemB);
+        if (!isNaN(nItemNumA) && !isNaN(nItemNumB) && sItemA !== "" && sItemB !== "") {
+            var nItemDiff = nItemNumA - nItemNumB;
+            if (nItemDiff !== 0) {
+                return nItemDiff;
+            }
+        }
+        return sItemA.localeCompare(sItemB, undefined, { numeric: true, sensitivity: "base" });
+    }
+
+    return 0;
+},
+
 _filterNominationTable: function () {
 
     var oNomModel =
@@ -1654,6 +1733,13 @@ _filterNominationTable: function () {
             );
 
         });
+
+
+    // =====================================================
+    // Sort so newly created nominations come first
+    // =====================================================
+
+    aFilteredResults.sort(this._sortNominationsNewestFirst.bind(this));
 
 
     // =====================================================
@@ -2821,6 +2907,9 @@ _applyNominationFilters: function (dFrom, dTo) {
     oView.getModel("NomDetailsData");
 
 if (oNomModel) {
+
+    // Sort complete nomination data so newly created comes first
+    aResults.sort(this._sortNominationsNewestFirst.bind(this));
 
     // Store complete nomination data
     this._aNominationResults =
@@ -4897,6 +4986,20 @@ if (dFrom && dTo) {
                             console.error("SAP Message Parse Error", e);
                             sMessageText = "1 nomination created successfully.";
                         }
+
+                        // Record newly created nomination key for prioritization
+                        that._aLastCreatedNominationKeys = that._aLastCreatedNominationKeys || [];
+                        var sNewNomKey = (oData && (oData.NominationKey || oData.Nomnum || oData.Nomination || oData.nomination)) || "";
+                        if (!sNewNomKey && sSapMessage) {
+                            var aNomMatch = sSapMessage.match(/nomination\s*([0-9A-Za-z_-]+)/i);
+                            if (aNomMatch && aNomMatch[1]) {
+                                sNewNomKey = aNomMatch[1];
+                            }
+                        }
+                        if (sNewNomKey) {
+                            that._aLastCreatedNominationKeys.unshift(String(sNewNomKey).trim());
+                        }
+
                         MessageBox.information(
                             sMessageText || "1 nomination created successfully.",
                             {
@@ -4953,6 +5056,27 @@ if (dFrom && dTo) {
                     oODataModel.setDeferredGroups([]);
 
                     var aErrors = that._parseBatchErrors(oData);
+
+                    // Record newly created nomination keys from batch response
+                    that._aLastCreatedNominationKeys = that._aLastCreatedNominationKeys || [];
+                    if (oData && oData.__batchResponses) {
+                        oData.__batchResponses.forEach(function (oBatchResp) {
+                            if (oBatchResp && oBatchResp.__changeResponses) {
+                                oBatchResp.__changeResponses.forEach(function (oChg) {
+                                    var oChgData = oChg && oChg.data;
+                                    var sKey = (oChgData && (oChgData.NominationKey || oChgData.Nomnum || oChgData.Nomination || oChgData.nomination)) || "";
+                                    if (!sKey && oChg.headers) {
+                                        var sHdrMsg = oChg.headers["sap-message"] || oChg.headers["SAP-Message"] || "";
+                                        var aM = sHdrMsg.match(/nomination\s*([0-9A-Za-z_-]+)/i);
+                                        if (aM && aM[1]) { sKey = aM[1]; }
+                                    }
+                                    if (sKey) {
+                                        that._aLastCreatedNominationKeys.unshift(String(sKey).trim());
+                                    }
+                                });
+                            }
+                        });
+                    }
 
                     if (aErrors.length) {
                         var nFailed = aErrors.length;
@@ -5236,125 +5360,763 @@ if (dFrom && dTo) {
             this._navigateToIntent("Nomination", "create");
         },
 
-navToCreateTicket: function () {
-    this._navigateToIntent(
-        "Ticket",
-        "create"
-    );
-},
+        navToCreateTicket: function () {
+            /* PREVIOUS IMPLEMENTATION:
+            this._navigateToIntent(
+                "Ticket",
+                "create"
+            );
+            */
+            var oView = this.getView();
+            var that = this;
 
-navToUploadTicket: function () {
+            var oTable = this.byId("MainPnlFra015--NomPnl2Tbl062") || this.byId("NomPnl2Tbl062");
+            if (!oTable) {
+                MessageBox.error("Nomination Details table not found.");
+                return;
+            }
 
-    if (!this._oTicketUploadDialog) {
+            var aSelectedItems = (typeof oTable.getSelectedItems === "function") ? oTable.getSelectedItems() : [];
+            if (!aSelectedItems || aSelectedItems.length === 0) {
+                MessageBox.warning("Please select at least one nomination row to create a ticket.", {
+                    title: "No Nomination Selected"
+                });
+                return;
+            }
 
-        // Create FileUploader
-        var oFileUploader = new FileUploader({
-            width: "100%",
-            placeholder: "Choose an Excel or CSV file...",
-            buttonText: "Browse",
-            fileType: ["xlsx", "xls", "csv"],
-            change: this.onTicketFileChange.bind(this)
-        });
+            // Map selected nomination rows into ticketModel items
+            var aItems = [];
+            aSelectedItems.forEach(function (oItem) {
+                var oCtx = oItem.getBindingContext("NomDetailsData");
+                if (!oCtx) { return; }
+                var oRow = oCtx.getObject() || {};
+                var oSchedDate = _parseDate(oRow.ScheduleDate) || new Date();
 
-        // Create VBox
-        var oVBox = new sap.m.VBox({
-            items: [
-                new sap.m.Label({
-                    text: "Select Ticket File"
-                }),
-                oFileUploader
-            ]
-        });
+                aItems.push({
+                    nomno: oRow.NominationKey || "",
+                    nomitem: oRow.NominationItem || "",
+                    locationName: oRow.LocationName || oRow.Locationid || "",
+                    schedmat: oRow.ScheduleProduct || oRow.DemandProduct || oRow.CommodityName || oRow.Commodity || "",
+                    scheduom: oRow.Uom || oRow.AUom || "",
+                    schedqty: oRow.ScheduledQuantity != null ? String(oRow.ScheduledQuantity) : (oRow.ActualScheduleQuantity != null ? String(oRow.ActualScheduleQuantity) : ""),
+                    postingDate: new Date(oSchedDate.getTime()),
+                    startDate: new Date(oSchedDate.getTime()),
+                    endDate: new Date(oSchedDate.getTime()),
+                    schedDate: oSchedDate,
+                    _raw: oRow
+                });
+            });
 
-        // Correct way to add CSS class
-        oVBox.addStyleClass("sapUiMediumMargin");
+            if (aItems.length === 0) {
+                MessageBox.warning("No valid nomination data found for selected rows.");
+                return;
+            }
 
-        // Create Dialog
-        this._oTicketUploadDialog = new Dialog({
-            title: "Upload Ticket File",
-            contentWidth: "500px",
+            var sVehicle = "";
+            for (var i = 0; i < aItems.length; i++) {
+                if (aItems[i]._raw && (aItems[i]._raw.Carrier || aItems[i]._raw.VehicleId)) {
+                    sVehicle = aItems[i]._raw.Carrier || aItems[i]._raw.VehicleId;
+                    break;
+                }
+            }
 
-            content: [
-                oVBox
-            ],
+            var oTicketData = {
+                ticketNo: "",
+                vehicleNo: sVehicle,
+                itemCount: aItems.length,
+                items: aItems
+            };
 
-            beginButton: new sap.m.Button({
-                text: "Upload",
-                type: "Emphasized",
-                press: this.onTicketUploadConfirm.bind(this)
-            }),
+            var oTicketModel = oView.getModel("ticketModel");
+            if (!oTicketModel) {
+                oTicketModel = new JSONModel(oTicketData);
+                oView.setModel(oTicketModel, "ticketModel");
+            } else {
+                oTicketModel.setData(oTicketData);
+            }
 
-            endButton: new sap.m.Button({
-                text: "Cancel",
-                press: function () {
-                    this._oTicketUploadDialog.close();
-                }.bind(this)
-            })
-        });
+            // Lazy load the CreateTicketDialog fragment once
+            if (!this._pCreateTicketDialog) {
+                this._pCreateTicketDialog = Fragment.load({
+                    id: oView.getId(),
+                    name: "genslogiques.logisticsdashboard.fragments.CreateTicketDialog",
+                    controller: this
+                }).then(function (oDialog) {
+                    oView.addDependent(oDialog);
+                    that._oCreateTicketDialog = oDialog;
+                    return oDialog;
+                }).catch(function (oErr) {
+                    console.error("Error loading CreateTicketDialog fragment:", oErr);
+                    MessageBox.error("Failed to load Create Ticket dialog: " + (oErr && oErr.message ? oErr.message : oErr));
+                    that._pCreateTicketDialog = null;
+                });
+            }
 
-        this.getView().addDependent(
-            this._oTicketUploadDialog
-        );
-    }
+            this._pCreateTicketDialog.then(function (oDialog) {
+                if (oDialog) {
+                    // Reset valueState on Ticket No input if present
+                    var oExtInput = that.byId(oView.getId() + "--_IDGenInput5") || sap.ui.getCore().byId(oView.getId() + "--_IDGenInput5");
+                    if (oExtInput && typeof oExtInput.setValueState === "function") {
+                        oExtInput.setValueState("None");
+                        oExtInput.setValueStateText("");
+                    }
+                    oDialog.open();
+                }
+            });
+        },
 
-    this._oTicketUploadDialog.open();
-},
+        onCreateTicket: function () {
+            return this.navToCreateTicket();
+        },
 
-onTicketFileChange: function (oEvent) {
+        onCloseTicketDialog: function () {
+            if (this._oCreateTicketDialog) {
+                this._oCreateTicketDialog.close();
+            }
+        },
 
-    var aFiles = oEvent.getParameter("files");
+        onPostingDateChange: function (oEvent) {
+            var oDP = oEvent.getSource();
+            var oCtx = oDP.getBindingContext("ticketModel");
+            if (!oCtx) { return; }
+            var oModel = oCtx.getModel();
+            var sPath = oCtx.getPath();
 
-    if (aFiles && aFiles.length > 0) {
+            var dPosting = oDP.getDateValue();
+            var dSched = oModel.getProperty(sPath + "/schedDate");
 
-        this._oSelectedTicketFile = aFiles[0];
+            if (!dPosting) {
+                oDP.setValueState("Error");
+                oDP.setValueStateText("Posting Date is required.");
+                return;
+            }
 
-        console.log(
-            "Selected Ticket File:",
-            this._oSelectedTicketFile.name
-        );
+            var dPostDay = _toStartOfDay(dPosting);
+            var dSchedDay = _toStartOfDay(dSched);
 
-        MessageToast.show(
-            "File selected: " +
-            this._oSelectedTicketFile.name
-        );
-    }
-},
+            // Posting Date has ceiling of nomination Schedule Date
+            if (dSchedDay && dPostDay > dSchedDay) {
+                oDP.setValueState("Error");
+                oDP.setValueStateText("Posting Date cannot be after Schedule Date (" + (dSched ? dSched.toLocaleDateString() : "") + ").");
+                return;
+            }
 
-onTicketUploadConfirm: function () {
+            oDP.setValueState("None");
+            oDP.setValueStateText("");
 
-    if (!this._oSelectedTicketFile) {
+            // Rule 3: Changing Posting Date syncs End Date
+            var dNewEnd = new Date(dPosting.getTime());
+            oModel.setProperty(sPath + "/endDate", dNewEnd);
 
-        MessageToast.show(
-            "Please select a file first."
-        );
+            // Rule 4: Start Date must not be after End Date
+            var dStart = oModel.getProperty(sPath + "/startDate");
+            var dStartDay = _toStartOfDay(dStart);
+            if (dStartDay && dStartDay > dPostDay) {
+                oModel.setProperty(sPath + "/startDate", new Date(dPosting.getTime()));
+            }
+        },
 
-        return;
-    }
+        onEndDateChange: function (oEvent) {
+            var oDP = oEvent.getSource();
+            var oCtx = oDP.getBindingContext("ticketModel");
+            if (!oCtx) { return; }
+            var oModel = oCtx.getModel();
+            var sPath = oCtx.getPath();
 
-    var oFile = this._oSelectedTicketFile;
+            var dEnd = oDP.getDateValue();
+            var dSched = oModel.getProperty(sPath + "/schedDate");
 
-    console.log(
-        "Uploading Ticket File:",
-        oFile.name
-    );
+            if (!dEnd) {
+                oDP.setValueState("Error");
+                oDP.setValueStateText("End Date is required.");
+                return;
+            }
 
-    /*
-     * FILE PROCESSING WILL COME HERE
-     *
-     * For example:
-     * Excel -> read rows
-     * -> validate data
-     * -> send data to OData
-     */
+            var dEndDay = _toStartOfDay(dEnd);
+            var dSchedDay = _toStartOfDay(dSched);
 
-    MessageToast.show(
-        "File selected: " + oFile.name
-    );
+            // End Date has ceiling of nomination Schedule Date
+            if (dSchedDay && dEndDay > dSchedDay) {
+                oDP.setValueState("Error");
+                oDP.setValueStateText("End Date cannot be after Schedule Date (" + (dSched ? dSched.toLocaleDateString() : "") + ").");
+                return;
+            }
 
-    this._oTicketUploadDialog.close();
+            oDP.setValueState("None");
+            oDP.setValueStateText("");
 
-    this._oSelectedTicketFile = null;
-},
+            // Rule 3: Changing End Date syncs Posting Date
+            var dNewPosting = new Date(dEnd.getTime());
+            oModel.setProperty(sPath + "/postingDate", dNewPosting);
+
+            // Rule 4: Start Date must not be after End Date
+            var dStart = oModel.getProperty(sPath + "/startDate");
+            var dStartDay = _toStartOfDay(dStart);
+            if (dStartDay && dStartDay > dEndDay) {
+                oModel.setProperty(sPath + "/startDate", new Date(dEnd.getTime()));
+            }
+        },
+
+        onStartDateChange: function (oEvent) {
+            var oDP = oEvent.getSource();
+            var oCtx = oDP.getBindingContext("ticketModel");
+            if (!oCtx) { return; }
+            var oModel = oCtx.getModel();
+            var sPath = oCtx.getPath();
+
+            var dStart = oDP.getDateValue();
+            var dEnd = oModel.getProperty(sPath + "/endDate");
+
+            if (!dStart) {
+                oDP.setValueState("Error");
+                oDP.setValueStateText("Start Date is required.");
+                return;
+            }
+
+            var dStartDay = _toStartOfDay(dStart);
+            var dEndDay = _toStartOfDay(dEnd);
+
+            // Rule 4: Start Date must not be after End Date
+            if (dEndDay && dStartDay > dEndDay) {
+                oDP.setValueState("Error");
+                oDP.setValueStateText("Start Date cannot be after End Date (" + (dEnd ? dEnd.toLocaleDateString() : "") + ").");
+                return;
+            }
+
+            oDP.setValueState("None");
+            oDP.setValueStateText("");
+        },
+
+        onSubmitTicket: function () {
+            var oView = this.getView();
+            var oModel = oView.getModel("ticketModel");
+            if (!oModel) { return; }
+
+            var sTicketNo = String(oModel.getProperty("/ticketNo") || "").trim();
+            var sVehicleNo = String(oModel.getProperty("/vehicleNo") || "").trim();
+            var aItems = oModel.getProperty("/items") || [];
+
+            // 1. Validate Ext Ticket No
+            var oTicketInput = this.byId(oView.getId() + "--_IDGenInput5") || sap.ui.getCore().byId(oView.getId() + "--_IDGenInput5");
+            if (!sTicketNo) {
+                if (oTicketInput && typeof oTicketInput.setValueState === "function") {
+                    oTicketInput.setValueState("Error");
+                    oTicketInput.setValueStateText("Ext Ticket No is required.");
+                }
+                MessageBox.error("Please enter an Ext Ticket No.", {
+                    title: "Validation Error"
+                });
+                return;
+            } else if (oTicketInput && typeof oTicketInput.setValueState === "function") {
+                oTicketInput.setValueState("None");
+                oTicketInput.setValueStateText("");
+            }
+
+            // 2. Validate Items
+            if (!aItems || aItems.length === 0) {
+                MessageBox.error("No nomination items found in the ticket.", {
+                    title: "Validation Error"
+                });
+                return;
+            }
+
+            var aErrors = [];
+
+            aItems.forEach(function (oRow, idx) {
+                var sPrefix = "Item " + (idx + 1) + " (" + (oRow.nomno || "") + "/" + (oRow.nomitem || "") + "): ";
+
+                var nQty = parseFloat(oRow.schedqty);
+                if (isNaN(nQty) || nQty <= 0) {
+                    aErrors.push(sPrefix + "Sched Qty must be a valid number greater than 0.");
+                }
+
+                if (!oRow.postingDate || !(oRow.postingDate instanceof Date) || isNaN(oRow.postingDate.getTime())) {
+                    aErrors.push(sPrefix + "Posting Date is required.");
+                }
+                if (!oRow.startDate || !(oRow.startDate instanceof Date) || isNaN(oRow.startDate.getTime())) {
+                    aErrors.push(sPrefix + "Start Date is required.");
+                }
+                if (!oRow.endDate || !(oRow.endDate instanceof Date) || isNaN(oRow.endDate.getTime())) {
+                    aErrors.push(sPrefix + "End Date is required.");
+                }
+
+                if (oRow.postingDate && oRow.endDate && oRow.startDate) {
+                    var dPostingDay = _toStartOfDay(oRow.postingDate);
+                    var dStartDay = _toStartOfDay(oRow.startDate);
+                    var dEndDay = _toStartOfDay(oRow.endDate);
+                    var dSchedDay = _toStartOfDay(oRow.schedDate);
+
+                    if (dSchedDay && dPostingDay > dSchedDay) {
+                        aErrors.push(sPrefix + "Posting Date cannot be after Schedule Date (" + (oRow.schedDate ? oRow.schedDate.toLocaleDateString() : "") + ").");
+                    }
+                    if (dSchedDay && dEndDay > dSchedDay) {
+                        aErrors.push(sPrefix + "End Date cannot be after Schedule Date (" + (oRow.schedDate ? oRow.schedDate.toLocaleDateString() : "") + ").");
+                    }
+                    if (dStartDay > dEndDay) {
+                        aErrors.push(sPrefix + "Start Date cannot be after End Date.");
+                    }
+                }
+            });
+
+            if (aErrors.length > 0) {
+                MessageBox.error(
+                    "Please resolve the following issue(s) before submitting:\n\n• " + aErrors.join("\n• "),
+                    { title: "Validation Error" }
+                );
+                return;
+            }
+
+            // 3. Build Submission Payload
+            var oODataModel = (this.getOwnerComponent() && this.getOwnerComponent().getModel()) || this.getView().getModel();
+            var that = this;
+
+            if (this._oCreateTicketDialog) {
+                this._oCreateTicketDialog.setBusy(true);
+            }
+
+            /* =========================================================================
+             * SUBMIT LOGIC:
+             * Inspect OData metadata for TicketCreate entity set and its EntityType.
+             * If TicketCreate exists, dynamically map payload properties to the exact
+             * property names & casing declared in the backend schema (avoiding Gateway
+             * 'Property X is invalid' errors).
+             * If no TicketCreate entity set exists, execute the clearly marked TODO stub.
+             * ========================================================================= */
+            var oTicketMeta = this._findEntitySetAndType("TicketCreate");
+            var bHasTicketCreateService = !!(oTicketMeta && oTicketMeta.entitySet);
+
+            var sEntitySetName = bHasTicketCreateService ? oTicketMeta.entitySet.name : "TicketCreate";
+            var oEntityType = oTicketMeta ? oTicketMeta.entityType : null;
+            var aHeaderProps = (oEntityType && oEntityType.property) ? oEntityType.property : [];
+            var aNavProps = (oEntityType && oEntityType.navigationProperty) ? oEntityType.navigationProperty : [];
+
+            // Helper to match property names case-insensitively against schema properties
+            function _matchPropName(aProperties, aCandidateNames) {
+                if (!aProperties || !aProperties.length) { return null; }
+                for (var m = 0; m < aCandidateNames.length; m++) {
+                    var sCandidate = aCandidateNames[m].toLowerCase();
+                    for (var p = 0; p < aProperties.length; p++) {
+                        if (aProperties[p].name.toLowerCase() === sCandidate) {
+                            return aProperties[p].name;
+                        }
+                    }
+                }
+                return null;
+            }
+
+            // Find Item EntityType if navigation property exists
+            var oItemEntityType = null;
+            var sNavPropName = _matchPropName(aNavProps, ["to_items", "to_ticketitems", "to_itemsset", "to_item", "items"]);
+            if (sNavPropName && oTicketMeta && oTicketMeta.schemas) {
+                var oNavProp = aNavProps.filter(function (np) { return np.name === sNavPropName; })[0];
+                var sTargetRole = oNavProp && (oNavProp.toRole || oNavProp.relationship);
+                oTicketMeta.schemas.forEach(function (schema) {
+                    (schema.entityType || []).forEach(function (et) {
+                        if (sTargetRole && (sTargetRole.indexOf(et.name) !== -1 || et.name.toLowerCase().indexOf("item") !== -1)) {
+                            oItemEntityType = et;
+                        }
+                    });
+                });
+            }
+            var aItemProps = (oItemEntityType && oItemEntityType.property) ? oItemEntityType.property : [];
+
+            // Dynamically resolve header property names from schema
+            var sPropTicketNo = _matchPropName(aHeaderProps, ["ticketno", "ticket_no", "ticketextnumber", "extticket", "extticketno", "ticketkey", "ticket_key", "ticket"]);
+            var sPropVehicle = _matchPropName(aHeaderProps, ["vehicleno", "vehicle_no", "vehicleid", "vehicle_id", "vehicle", "carrier"]);
+
+            // Dynamically resolve item property names from schema
+            var sItemNomNo = _matchPropName(aItemProps, ["nomno", "nominationkey", "nomdocnumber", "nom_key"]);
+            var sItemNomItem = _matchPropName(aItemProps, ["nomitem", "nominationitem", "nomdocitem", "nom_item"]);
+            var sItemTicketNo = _matchPropName(aItemProps, ["ticketno", "ticketextnumber", "extticket", "ticketkey", "ticket"]);
+            var sItemVehicle = _matchPropName(aItemProps, ["vehicleno", "vehicleid", "vehicle"]);
+            var sItemLoc = _matchPropName(aItemProps, ["locid", "locationid", "locationname", "location"]);
+            var sItemMat = _matchPropName(aItemProps, ["schedmat", "material", "ticketmaterial", "product", "commodity"]);
+            var sItemQty = _matchPropName(aItemProps, ["schedqty", "scheduledquantity", "ticketquantity", "quantity", "qty"]);
+            var sItemUom = _matchPropName(aItemProps, ["scheduom", "uom", "ticketuom", "unit"]);
+            var sItemPostDate = _matchPropName(aItemProps, ["postingdate", "ticketpostingdate", "scheddate"]);
+            var sItemStartDate = _matchPropName(aItemProps, ["startdate", "ticketstartdatetime", "ticketdate"]);
+            var sItemEndDate = _matchPropName(aItemProps, ["enddate", "ticketenddatetime"]);
+
+            // ── Date Serialization Helper ─────────────────────────────────────────────
+            // SAP Gateway rejects raw JS Date objects (/Date(...)/ format) for properties
+            // declared as Edm.Date or Edm.String. We inspect the property's Edm type
+            // from the live metadata and serialize accordingly.
+            //
+            //  Edm.DateTime → keep as JS Date (OData v2 model handles /Date(...)/ serialisation)
+            //  Edm.Date / Edm.String / anything else → format as 'YYYY-MM-DD'
+            function _getEdmType(aProperties, sPropName) {
+                if (!aProperties || !sPropName) { return null; }
+                for (var pi = 0; pi < aProperties.length; pi++) {
+                    if (aProperties[pi].name === sPropName) {
+                        return aProperties[pi].type || null;  // e.g. 'Edm.DateTime', 'Edm.Date', 'Edm.String'
+                    }
+                }
+                return null;
+            }
+
+            function _formatTicketDate(dVal, sPropName, aProperties) {
+                if (!dVal || !(dVal instanceof Date) || isNaN(dVal.getTime())) { return null; }
+                var sEdmType = _getEdmType(aProperties, sPropName);
+                if (sEdmType && sEdmType.toLowerCase() === "edm.datetime") {
+                    // Keep JS Date — OData v2 model serialises to /Date(...)/ which Gateway accepts
+                    return dVal;
+                }
+                // Edm.Date, Edm.String, Edm.DateTimeOffset plain form, or unknown → 'YYYY-MM-DD'
+                var y = dVal.getFullYear();
+                var mo = String(dVal.getMonth() + 1).padStart(2, "0");
+                var d = String(dVal.getDate()).padStart(2, "0");
+                return y + "-" + mo + "-" + d;
+            }
+
+            // 3. Build Items Payload
+            var aPayloadItems = aItems.map(function (it) {
+                var oRowItem = {};
+                if (aItemProps.length > 0) {
+                    if (sItemNomNo) { oRowItem[sItemNomNo] = it.nomno; }
+                    if (sItemNomItem) { oRowItem[sItemNomItem] = it.nomitem; }
+                    if (sItemTicketNo) { oRowItem[sItemTicketNo] = sTicketNo; }
+                    if (sItemVehicle && sVehicleNo) { oRowItem[sItemVehicle] = sVehicleNo; }
+                    if (sItemLoc) { oRowItem[sItemLoc] = (it._raw && it._raw.Locationid) || it.locationName; }
+                    if (sItemMat) { oRowItem[sItemMat] = (it._raw && it._raw.Commodity) || it.schedmat; }
+                    if (sItemQty) { oRowItem[sItemQty] = String(parseFloat(it.schedqty)); }
+                    if (sItemUom) { oRowItem[sItemUom] = it.scheduom; }
+                    if (sItemPostDate) { oRowItem[sItemPostDate] = _formatTicketDate(it.postingDate, sItemPostDate, aItemProps); }
+                    if (sItemStartDate) { oRowItem[sItemStartDate] = _formatTicketDate(it.startDate, sItemStartDate, aItemProps); }
+                    if (sItemEndDate) { oRowItem[sItemEndDate] = _formatTicketDate(it.endDate, sItemEndDate, aItemProps); }
+                } else {
+                    // Fallback when no schema metadata is available: send dates as 'YYYY-MM-DD'
+                    oRowItem = {
+                        nomno: it.nomno,
+                        nomitem: it.nomitem,
+                        ticketno: sTicketNo,
+                        vehicleno: sVehicleNo,
+                        locid: (it._raw && it._raw.Locationid) || it.locationName,
+                        schedmat: (it._raw && it._raw.Commodity) || it.schedmat,
+                        schedqty: String(parseFloat(it.schedqty)),
+                        scheduom: it.scheduom,
+                        postingdate: _formatTicketDate(it.postingDate, null, []),
+                        startdate: _formatTicketDate(it.startDate, null, []),
+                        enddate: _formatTicketDate(it.endDate, null, [])
+                    };
+                }
+                return oRowItem;
+            });
+
+            // 4. Build Header Payload
+            var oPayload = {};
+            if (aHeaderProps.length > 0) {
+                if (sPropTicketNo) {
+                    oPayload[sPropTicketNo] = sTicketNo;
+                }
+                if (sPropVehicle && sVehicleNo) {
+                    oPayload[sPropVehicle] = sVehicleNo;
+                }
+                if (sNavPropName) {
+                    oPayload[sNavPropName] = aPayloadItems;
+                }
+            } else {
+                oPayload = {
+                    ticketno: sTicketNo,
+                    vehicleno: sVehicleNo,
+                    to_items: aPayloadItems
+                };
+            }
+
+            jQuery.sap.log.info("[CreateTicket] bHasTicketCreateService:", bHasTicketCreateService, "sEntitySetName:", sEntitySetName, "Payload:", JSON.stringify(oPayload));
+            console.log("[CreateTicket] Detected Ticket Metadata:", oTicketMeta);
+            console.log("[CreateTicket] Payload to send:", oPayload);
+
+            if (bHasTicketCreateService) {
+                oODataModel.create("/" + sEntitySetName, oPayload, {
+                    success: function (oData) {
+                        if (that._oCreateTicketDialog) {
+                            that._oCreateTicketDialog.setBusy(false);
+                            that._oCreateTicketDialog.close();
+                        }
+                        MessageToast.show("Ticket " + sTicketNo + " created successfully.");
+                        that._afterTicketCreationSuccess();
+                    },
+                    error: function (oError) {
+                        if (that._oCreateTicketDialog) {
+                            that._oCreateTicketDialog.setBusy(false);
+                        }
+                        var sErrMsg = that._extractODataError(oError);
+                        console.error("[CreateTicket Error]", oError);
+                        MessageBox.error("Failed to create ticket:\n" + sErrMsg, {
+                            title: "Error"
+                        });
+                    }
+                });
+            } else {
+                // =====================================================================
+                // TODO STUB: Backend Create-Ticket Service Integration
+                // The OData service does not yet expose a TicketCreate entity set.
+                // Replace this stub with oODataModel.create("/TicketCreate", oPayload, ...)
+                // once the backend endpoint is configured.
+                // =====================================================================
+                jQuery.sap.log.info("[CreateTicket TODO Stub] Ticket payload:", JSON.stringify(oPayload, null, 2));
+
+                setTimeout(function () {
+                    if (that._oCreateTicketDialog) {
+                        that._oCreateTicketDialog.setBusy(false);
+                        that._oCreateTicketDialog.close();
+                    }
+                    MessageToast.show("Ticket " + sTicketNo + " created successfully.");
+                    that._afterTicketCreationSuccess();
+                }, 600);
+            }
+        },
+
+        _findEntitySetAndType: function (sEntitySetName) {
+            var oODataModel = (this.getOwnerComponent() && this.getOwnerComponent().getModel()) || this.getView().getModel();
+            var oMetadata = oODataModel && oODataModel.getServiceMetadata && oODataModel.getServiceMetadata();
+            if (!oMetadata || !oMetadata.dataServices || !oMetadata.dataServices.schema) {
+                return null;
+            }
+
+            var oFoundSet = null;
+            var oFoundType = null;
+            var aSchemas = oMetadata.dataServices.schema;
+
+            for (var i = 0; i < aSchemas.length; i++) {
+                var aContainers = aSchemas[i].entityContainer || [];
+                for (var c = 0; c < aContainers.length; c++) {
+                    var aSets = aContainers[c].entitySet || [];
+                    for (var s = 0; s < aSets.length; s++) {
+                        if (aSets[s].name.toLowerCase() === sEntitySetName.toLowerCase()) {
+                            oFoundSet = aSets[s];
+                            break;
+                        }
+                    }
+                    if (oFoundSet) { break; }
+                }
+                if (oFoundSet) { break; }
+            }
+
+            if (!oFoundSet) {
+                return null;
+            }
+
+            var sTargetType = oFoundSet.entityType || "";
+            var sUnqualified = sTargetType.indexOf(".") !== -1
+                ? sTargetType.substring(sTargetType.lastIndexOf(".") + 1)
+                : sTargetType;
+
+            for (var j = 0; j < aSchemas.length; j++) {
+                var aTypes = aSchemas[j].entityType || [];
+                for (var t = 0; t < aTypes.length; t++) {
+                    if (aTypes[t].name === sUnqualified || aTypes[t].name === sTargetType) {
+                        oFoundType = aTypes[t];
+                        break;
+                    }
+                }
+                if (oFoundType) { break; }
+            }
+
+            return {
+                entitySet: oFoundSet,
+                entityType: oFoundType,
+                schemas: aSchemas
+            };
+        },
+
+        /**
+         * Parses an SAP OData v2 error object returned by oODataModel.create/update/delete
+         * and returns a clean, human-readable message string.
+         *
+         * SAP Gateway error bodies look like:
+         *   { error: { message: { value: "..." }, innererror: { errordetails: [...] } } }
+         *
+         * @param  {object} oError  The error argument from the OData model error callback
+         * @returns {string}        Human-readable error message
+         */
+        _extractODataError: function (oError) {
+            if (!oError) {
+                return "An unknown error occurred.";
+            }
+
+            // 1. Try to parse the response body (JSON)
+            var sBody = (oError.responseText) || (oError.response && oError.response.body) || "";
+            if (sBody) {
+                try {
+                    var oBody = JSON.parse(sBody);
+                    var oErr = oBody && oBody.error;
+                    if (oErr) {
+                        // Primary message
+                        var sMsg = (oErr.message && oErr.message.value) || "";
+
+                        // Inner error details (SAP Gateway enriches these)
+                        var aDetails = (oErr.innererror && oErr.innererror.errordetails) || [];
+                        var aDetailMsgs = aDetails
+                            .filter(function (d) { return d && d.message; })
+                            .map(function (d) { return d.message; });
+
+                        if (aDetailMsgs.length > 0) {
+                            sMsg = sMsg
+                                ? (sMsg + "\n\n" + aDetailMsgs.join("\n"))
+                                : aDetailMsgs.join("\n");
+                        }
+
+                        if (sMsg) {
+                            return sMsg;
+                        }
+                    }
+                } catch (e) {
+                    // Not JSON — fall through to plain-text extraction
+                }
+            }
+
+            // 2. Plain-text response body
+            if (sBody) {
+                return sBody;
+            }
+
+            // 3. statusText from the HTTP response
+            var sStatus = (oError.response && oError.response.statusText) || oError.statusText || "";
+            if (sStatus) {
+                return sStatus;
+            }
+
+            // 4. Message property directly on the error object
+            if (oError.message) {
+                return oError.message;
+            }
+
+            return "An unknown error occurred while communicating with the server.";
+        },
+
+        _afterTicketCreationSuccess: function () {
+            // Deselect rows on the nomination table
+            var oTable = this.byId("MainPnlFra015--NomPnl2Tbl062") || this.byId("NomPnl2Tbl062");
+            if (oTable && typeof oTable.removeSelections === "function") {
+                oTable.removeSelections(true);
+            }
+
+            // Refresh nomination list
+            if (typeof this._applyNominationFilters === "function") {
+                this._applyNominationFilters();
+            } else if (typeof this.onNominationRefresh === "function") {
+                this.onNominationRefresh();
+            }
+
+            // Refresh ticket list if available
+            if (typeof this._applyTicketFilters === "function") {
+                this._applyTicketFilters();
+            }
+        },
+
+        navToUploadTicket: function () {
+
+            if (!this._oTicketUploadDialog) {
+
+                // Create FileUploader
+                var oFileUploader = new FileUploader({
+                    width: "100%",
+                    placeholder: "Choose an Excel or CSV file...",
+                    buttonText: "Browse",
+                    fileType: ["xlsx", "xls", "csv"],
+                    change: this.onTicketFileChange.bind(this)
+                });
+
+                // Create VBox
+                var oVBox = new sap.m.VBox({
+                    items: [
+                        new sap.m.Label({
+                            text: "Select Ticket File"
+                        }),
+                        oFileUploader
+                    ]
+                });
+
+                // Correct way to add CSS class
+                oVBox.addStyleClass("sapUiMediumMargin");
+
+                // Create Dialog
+                this._oTicketUploadDialog = new Dialog({
+                    title: "Upload Ticket File",
+                    contentWidth: "500px",
+
+                    content: [
+                        oVBox
+                    ],
+
+                    beginButton: new sap.m.Button({
+                        text: "Upload",
+                        type: "Emphasized",
+                        press: this.onTicketUploadConfirm.bind(this)
+                    }),
+
+                    endButton: new sap.m.Button({
+                        text: "Cancel",
+                        press: function () {
+                            this._oTicketUploadDialog.close();
+                        }.bind(this)
+                    })
+                });
+
+                this.getView().addDependent(
+                    this._oTicketUploadDialog
+                );
+            }
+
+            this._oTicketUploadDialog.open();
+        },
+
+        onTicketFileChange: function (oEvent) {
+
+            var aFiles = oEvent.getParameter("files");
+
+            if (aFiles && aFiles.length > 0) {
+
+                this._oSelectedTicketFile = aFiles[0];
+
+                console.log(
+                    "Selected Ticket File:",
+                    this._oSelectedTicketFile.name
+                );
+
+                MessageToast.show(
+                    "File selected: " +
+                    this._oSelectedTicketFile.name
+                );
+            }
+        },
+
+        onTicketUploadConfirm: function () {
+
+            if (!this._oSelectedTicketFile) {
+
+                MessageToast.show(
+                    "Please select a file first."
+                );
+
+                return;
+            }
+
+            var oFile = this._oSelectedTicketFile;
+
+            console.log(
+                "Uploading Ticket File:",
+                oFile.name
+            );
+
+            /*
+            * FILE PROCESSING WILL COME HERE
+            *
+            * For example:
+            * Excel -> read rows
+            * -> validate data
+            * -> send data to OData
+            */
+
+            MessageToast.show(
+                "File selected: " + oFile.name
+            );
+
+            this._oTicketUploadDialog.close();
+
+            this._oSelectedTicketFile = null;
+        },
 
 
         _navigateToIntent: function (sSemanticObject, sAction) {

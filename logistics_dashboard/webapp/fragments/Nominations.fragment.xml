@@ -138,89 +138,72 @@
                     <Column id="NomPnl2Col063"      ><header><Text id="NomPnl2Txt064"       text="Deal Number"/></header></Column>
                     <Column id="NomPnl2Col065"          ><header><Text id="NomPnl2Txt066"           text="Nomination Key"/></header></Column>
                     <Column id="NomPnl2Col067"         ><header><Text id="NomPnl2Txt068"          text="Nomination Item"/></header></Column>
-                    <Column id="NomPnl2Col069"         ><header><Text id="NomPnl2Txt070"          text="Commodity"/></header></Column>
-                    <Column id="NomPnl2Col071"          ><header><Text id="NomPnl2Txt072"           text="Status"/></header></Column>
+                    <Column id="NomPnl2Col067E"         ><header><Text id="NomPnl2Txt068E"          text="TransactionType"/></header></Column>    
+                    <Column id="NomPnl2Col099"    ><header><Text id="NomPnl2Txt100"     text="Counterparty"/></header></Column>
+                    <Column id="NomPnl2Col099e"    ><header><Text id="NomPnl2Txt100e"     text="BusinessPatnerName"/></header></Column>
                     <Column id="NomPnl2Col073"          ><header><Text id="NomPnl2Txt074"           text="Ticket"/></header></Column>
                     <Column id="NomPnl2Col075"          ><header><Text id="NomPnl2Txt076"           text="Ticket Item"/></header></Column>
-                    <Column id="NomPnl2Col077"          ><header><Text id="NomPnl2Txt078"           text="Ticket Version"/></header></Column>
-                    <Column id="NomPnl2Col079"          ><header><Text id="NomPnl2Txt080"           text="Ticket Start Number"/></header></Column>
-
-
+                    <Column id="NomPnl2Col075E"          ><header><Text id="NomPnl2Txt076e"           text="ScheduleMonth"/></header></Column>    
+                    <Column id="NomPnl2Col069"         ><header><Text id="NomPnl2Txt070"          text="Commodity"/></header></Column>
+                    <Column id="NomPnl2Col069E"         ><header><Text id="NomPnl2Txt070E"          text="CommodityName"/></header></Column>
+                    <Column id="NomPnl2Col101"       ><header><Text id="NomPnl2Txt102"        text="Contract Number"/></header></Column>
+                    <Column id="NomPnl2Col101E"       ><header><Text id="NomPnl2Txt102E"        text="Contract Number"/></header></Column>
+                    <Column id="NomPnl2Col071"          ><header><Text id="NomPnl2Txt072"           text="Status"/></header></Column>
+                    <Column id="NomPnl2Col071E"          ><header><Text id="NomPnl2Txt072E"           text="Status Discription"/></header></Column>
                     <Column id="NomPnl2Col081"    ><header><Text id="NomPnl2Txt082"     text="Schedule Date"/></header></Column>
-                    <Column id="NomPnl2Col083"      ><header><Text id="NomPnl2Txt084"       text="Loaction ID"/></header></Column>
+
+                    <Column id="NomPnl2Col081E"    ><header><Text id="NomPnl2Txt082E"     text="Contract Patner"/></header></Column>
+                     <Column id="NomPnl2Col083"      ><header><Text id="NomPnl2Txt084"       text="Loaction ID"/></header></Column>
                     <Column id="NomPnl2Col085"        ><header><Text id="NomPnl2Txt086"         text="Loaction"/></header></Column>
-                    <!-- <Column id="NomPnl2Col087"    ><header><Text id="NomPnl2Txt088"     text="MarketZone ID"/></header></Column> -->
-                    <!-- <Column id="NomPnl2Col089"      ><header><Text id="NomPnl2Txt090"       text="Market Zone"/></header></Column> -->
-                    <Column id="NomPnl2Col091"      ><header><Text id="NomPnl2Txt092"       text="Planned Schedule Qty"/></header></Column>
+
+                    <Column id="NomPnl2Col091"      ><header><Text id="NomPnl2Txt092"       text=" Schedule Qty"/></header></Column>
                     <Column id="NomPnl2Col093"             ><header><Text id="NomPnl2Txt094"              text="Actualized Qunatity"/></header></Column>
-                 
-                     <Column id="NomPnl2Col097"        ><header><Text id="NomPnl2Txt098"         text="Scheduled Material"/></header></Column>
-                        <Column id="NomPnl2Col095"         ><header><Text id="NomPnl2Txt096"          text="Carrier/Pipline"/></header></Column>
-                    <Column id="NomPnl2Col099"    ><header><Text id="NomPnl2Txt100"     text="Counterparty"/></header></Column>
-                    <Column id="NomPnl2Col101"       ><header><Text id="NomPnl2Txt102"        text="Contractt Number"/></header></Column>
+                    <Column id="NomPnl2Col091F"      ><header><Text id="NomPnl2Txt092F"       text="UOM"/></header></Column>
+                    <Column id="NomPnl2Col091G"      ><header><Text id="NomPnl2Txt092G"       text="AUOM"/></header></Column>
+                    <Column id="NomPnl2Col091D"      ><header><Text id="NomPnl2Txt092d"       text="Demand Product"/></header></Column>
+                    <Column id="NomPnl2Col091S"      ><header><Text id="NomPnl2Txt092s"       text="Scheduled product"/></header></Column>
+
+                    <Column id="NomPnl2Col095"         ><header><Text id="NomPnl2Txt096"          text="Carrier"/></header></Column>
+                    <Column id="NomPnl2Col095E"         ><header><Text id="NomPnl2Txt096E"          text="CarrierName"/></header></Column>                    
                 </columns>
-                <items>
-                    <ColumnListItem id="NomPnl2ClL103" type="Inactive">
-                      <cells>
-
-    <Text id="_IDGenText68" text="{NomDetailsData>DealNumber}"/>
-
-    <Text id="_IDGenText69" text="{NomDetailsData>NominationKey}"/>
-
-    <Text id="_IDGenText110" text="{NomDetailsData>NominationItem}"/>
-
-    <Text id="_IDGenText132" text="{NomDetailsData>CommodityName}"/>
-
-    <ObjectStatus id="_IDGenObjectStatus3"
-        text="{NomDetailsData>StatusDescription}"
-        state="{= ${NomDetailsData>StatusDescription} === 'Confirmed'
-            ? 'Success'
-            : ${NomDetailsData>StatusDescription} === 'Pending'
-            ? 'Warning'
-            : 'None'}"/>
-
-    <Text id="_IDGenText149" text="{NomDetailsData>TicketKey}"/>
-
-    <Text id="_IDGenText150" text="{NomDetailsData>TicketItem}"/>
-
-    <!-- Ticket Version not available -->
-    <Text id="_IDGenText151" text="-"/>
-
-    <!-- Ticket Start Number not available -->
-    <Text id="_IDGenText152" text="-"/>
-
-    <Text id="_IDGenText153"  text="{
+<items>
+        <ColumnListItem id="_IDGenColumnListItem1">
+            <cells>
+    <Text id="_IDGenText69" text="{NomDetailsData>DealNumber}" />
+    <Text id="_IDGenText109" text="{NomDetailsData>NominationKey}" />
+    <Text id="_IDGenText110" text="{NomDetailsData>NominationItem}" />
+    <Text id="_IDGenText132" text="{NomDetailsData>TransactionType}" />
+    <Text id="_IDGenText149" text="{NomDetailsData>CounterParty}" />
+    <Text id="_IDGenText150" text="{NomDetailsData>BusinessPartnerName}" />
+    <Text id="_IDGenText151" text="{NomDetailsData>TicketKey}" />
+    <Text id="_IDGenText152" text="{NomDetailsData>TicketItem}" />
+    <Text id="_IDGenText153" text="{NomDetailsData>SchedMonth}" />
+    <Text id="_IDGenText154" text="{NomDetailsData>Commodity}" />
+    <Text id="_IDGenText155" text="{NomDetailsData>CommodityName}" />
+    <Text id="_IDGenText156" text="{NomDetailsData>ContractNumber}" />
+    <Text id="_IDGenText157" text="{NomDetailsData>ContractItem}" />
+    <Text id="_IDGenText158" text="{NomDetailsData>Status}" />
+    <Text id="_IDGenText159" text="{NomDetailsData>StatusDescription}" />
+      <Text id="_IDGenText160" text="{
                 path: 'NomDetailsData>ScheduleDate',
                 type: 'sap.ui.model.type.Date', 
                 formatOptions: {
                       pattern: 'yyyy/MMM/dd' 
                       }
-                      }"/>
-
-    <Text id="_IDGenText154" text="{NomDetailsData>Locationid}"/>
-
-    <Text id="_IDGenText155" text="{NomDetailsData>LocationName}"/>
-
-    <!-- MarketZone ID not available -->
-    <Text id="_IDGenText156" text="-"/>
-
-    <!-- Market Zone not available -->
-    <Text id="_IDGenText157" text="-"/>
-
-    <Text id="_IDGenText158" text="{NomDetailsData>ScheduledQuantity}"/>
-
-    <Text id="_IDGenText159" text="{NomDetailsData>ActualScheduleQuantity}"/>
-
-    <Text id="_IDGenText160" text="{NomDetailsData>ScheduleProduct}"/>
-
-    <Text id="_IDGenText161" text="{NomDetailsData>CarrierName}"/>
-
-    <Text id="_IDGenText162" text="{NomDetailsData>BusinessPartnerName}"/>
-
-    <Text id="_IDGenText163" text="{NomDetailsData>ContractNumber}"/>
-
+                      }" />
+    <Text id="_IDGenText161" text="{NomDetailsData>ContractPartner}" />
+    <Text id="_IDGenText162" text="{NomDetailsData>Locationid}" />
+    <Text id="_IDGenText163" text="{NomDetailsData>LocationName}" />
+    <Text id="_IDGenText209" text="{NomDetailsData>ScheduledQuantity}" />
+    <Text id="_IDGenText210" text="{NomDetailsData>ActualScheduleQuantity}" />
+    <Text id="_IDGenText211" text="{NomDetailsData>Uom}" />
+    <Text id="_IDGenText212" text="{NomDetailsData>AUom}" />
+    <Text id="_IDGenText213" text="{NomDetailsData>DemandProduct}" />
+    <Text id="_IDGenText214" text="{NomDetailsData>ScheduleProduct}" />
+    <Text id="_IDGenText215" text="{NomDetailsData>Carrier}" />
+    <Text id="_IDGenText216" text="{NomDetailsData>CarrierName}" />
 </cells>
-</ColumnListItem>
+        </ColumnListItem>
     </items>
       </Table>
         </ScrollContainer>

@@ -995,3 +995,274 @@ body.fullScreenLock {
     top: 0;
     right: 0;
   } */
+
+/* ============================================================
+   CREATE NOMINATIONS DIALOG — Modern Enterprise Theme
+   ============================================================ */
+.nom-create-dialog {
+    border-radius: 12px !important;
+}
+
+.nom-create-dialog .sapMDialogTitle {
+    color: var(--gl-navy, #1B1464) !important;
+    font-weight: 700 !important;
+    font-size: 1.15rem !important;
+    letter-spacing: 0.2px !important;
+}
+
+.nom-dlg-container {
+    background-color: #ffffff !important;
+    padding: 16px 20px 20px 20px !important;
+}
+
+.nom-scroll-container:focus,
+.nom-scroll-container:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.nom-dlg-wrapper {
+    gap: 12px !important;
+}
+
+/* ── Header Summary Strip (KPI Ribbon) ── */
+.nom-dlg-header-strip {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    justify-content: space-between !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    padding: 12px 20px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    margin-bottom: 6px !important;
+}
+
+.nom-dlg-header-field {
+    flex: 1 1 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    padding: 2px 14px !important;
+    border-right: 1px solid #e2e8f0 !important;
+}
+
+.nom-dlg-header-field:first-child {
+    padding-left: 4px !important;
+}
+
+.nom-dlg-header-field-last,
+.nom-dlg-header-field:last-child {
+    border-right: none !important;
+    padding-right: 4px !important;
+}
+
+.nom-dlg-header-label {
+    font-size: 0.72rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.6px !important;
+    color: #64748b !important;
+    margin-bottom: 4px !important;
+}
+
+.nom-dlg-header-value {
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    line-height: 1.3 !important;
+}
+
+.nom-dlg-header-qty {
+    color: var(--gl-orange-dark, #E07A0C) !important;
+    font-size: 1.05rem !important;
+}
+
+/* ── Origin & Destination Two Tiles Row ── */
+.nom-tiles-row {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 18px !important;
+    width: 100% !important;
+    margin: 8px 0 !important;
+    box-sizing: border-box !important;
+}
+
+.nom-tile-panel {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
+    background: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 10px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+    overflow: hidden !important;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease !important;
+}
+
+.nom-tile-panel:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07) !important;
+}
+
+/* Panel Headers */
+.nom-origin-panel {
+    border-top: 3px solid var(--gl-navy, #1B1464) !important;
+}
+
+.nom-origin-panel .sapMPanelHdr {
+    background: #f8fafc !important;
+    color: var(--gl-navy, #1B1464) !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    letter-spacing: 0.3px !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 10px 16px !important;
+    height: auto !important;
+    line-height: 1.4 !important;
+}
+
+.nom-destination-panel {
+    border-top: 3px solid var(--gl-orange, #F7941D) !important;
+}
+
+.nom-destination-panel .sapMPanelHdr {
+    background: #f8fafc !important;
+    color: var(--gl-orange-dark, #E07A0C) !important;
+    font-weight: 700 !important;
+    font-size: 0.95rem !important;
+    letter-spacing: 0.3px !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+    padding: 10px 16px !important;
+    height: auto !important;
+    line-height: 1.4 !important;
+}
+
+.nom-tile-panel .sapMPanelContent {
+    padding: 10px 16px !important;
+}
+
+.nom-tile-content {
+    width: 100% !important;
+}
+
+/* Tile Property-Value Rows */
+.nom-tile-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    padding: 7px 4px !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    min-height: 34px !important;
+    box-sizing: border-box !important;
+}
+
+.nom-tile-row:last-child {
+    border-bottom: none !important;
+}
+
+.nom-tile-row:hover {
+    background-color: #fafbfc !important;
+    border-radius: 4px !important;
+}
+
+.nom-tile-label {
+    width: 175px !important;
+    min-width: 175px !important;
+    max-width: 175px !important;
+    flex-shrink: 0 !important;
+    color: #64748b !important;
+    font-size: 0.825rem !important;
+    font-weight: 500 !important;
+    margin: 0 !important;
+    text-align: left !important;
+}
+
+.nom-tile-value {
+    flex: 1 1 auto !important;
+    color: #1e293b !important;
+    font-size: 0.875rem !important;
+    font-weight: 600 !important;
+    text-align: left !important;
+    word-break: break-word !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+.nom-tile-value-highlight {
+    color: var(--gl-navy, #1B1464) !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.2px !important;
+}
+
+/* ── Controls Row (Match Qty & No of Nominations) ── */
+.nom-ctrl-row {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 10px 24px !important;
+    margin: 6px 0 12px 0 !important;
+    gap: 36px !important;
+}
+
+.nom-ctrl-cell {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 12px !important;
+}
+
+.nom-ctrl-label {
+    font-size: 0.84rem !important;
+    font-weight: 600 !important;
+    color: #334155 !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+}
+
+.nom-editable-input .sapMInputBaseInner {
+    border-radius: 6px !important;
+    border-color: #cbd5e1 !important;
+    font-weight: 600 !important;
+    font-size: 0.875rem !important;
+    background-color: #ffffff !important;
+}
+
+.nom-editable-input .sapMInputBaseInner:focus {
+    border-color: var(--gl-navy-light, #2A2080) !important;
+    box-shadow: 0 0 0 2px rgba(27, 20, 100, 0.12) !important;
+}
+
+/* ── Schedule Table ── */
+.nom-schedule-table {
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+}
+
+.nom-schedule-table .sapUiTableColHdrCnt {
+    background: #f1f5f9 !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+}
+
+.nom-schedule-table .sapUiTableColHdr {
+    background: #f1f5f9 !important;
+}
+
+.nom-schedule-table .sapUiTableColHdr .sapMLabel {
+    color: var(--gl-navy, #1B1464) !important;
+    font-weight: 700 !important;
+    font-size: 0.825rem !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.3px !important;
+}
+
+.nom-schedule-table .sapUiTableRowHdr,
+.nom-schedule-table .sapUiTableTr {
+    border-bottom: 1px solid #f1f5f9 !important;
+}
+

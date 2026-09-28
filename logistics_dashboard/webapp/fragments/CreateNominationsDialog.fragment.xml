@@ -23,7 +23,7 @@
                 <ScrollContainer id="_IDGenScrollContainer"
                     vertical="true"
                     horizontal="false"
-                    focusable="true"
+                    focusable="false"
                     class="nom-scroll-container">
                     <FlexBox id="_IDGenFlexBox5"
                         direction="Column"
@@ -35,72 +35,72 @@
                             wrap="NoWrap"
                             class="nom-dlg-header-strip">
                             <FlexBox id="_IDGenFlexBox7"
-                                alignItems="Center"
+                                direction="Column"
                                 class="nom-dlg-header-field">
                                 <Label id="_IDGenLabel"
                                     text="Commodity"
                                     design="Bold"
-                                    class="nom-lbl-bold nom-lbl-fix"
+                                    class="nom-dlg-header-label"
                                 />
                                 <Text id="_IDGenText16"
                                     text="{nomDialogModel>/Commodity}"
-                                    class="nom-plain-text"
+                                    class="nom-dlg-header-value"
                                 />
                             </FlexBox>
                             <FlexBox id="_IDGenFlexBox8" 
-                                alignItems="Center"
+                                direction="Column"
                                 class="nom-dlg-header-field"
                             >
                                 <Label id="_IDGenLabel25"
                                     text="Week ID"
                                     design="Bold"
-                                    class="nom-lbl-bold nom-lbl-fix"
+                                    class="nom-dlg-header-label"
                                 />
                                 <Text id="_IDGenText17"
                                     text="{nomDialogModel>/WeekID}"
-                                    class="nom-plain-text"
+                                    class="nom-dlg-header-value"
                                 />
                             </FlexBox>
                             <FlexBox id="_IDGenFlexBox9E"
-                                alignItems="Center"
+                                direction="Column"
                                 class="nom-dlg-header-field"
                             >
                                 <Label id="_IDGenLabel26"
                                     text="MoT"
                                     design="Bold"
-                                    class="nom-lbl-bold nom-lbl-fix"
+                                    class="nom-dlg-header-label"
                                 />
                                 <Text id="_IDGenText127"
                                     text="{nomDialogModel>/ModeOfTransportLabel}"
-                                    class="nom-plain-text"
+                                    class="nom-dlg-header-value"
                                 />
                             </FlexBox>
                             <FlexBox id="_IDGenFlexBox10"
-                                alignItems="Center"
+                                direction="Column"
                                 class="nom-dlg-header-field"
                             >
                                 <Label id="_IDGenLabel27"
                                     text="Schedule Date"
                                     design="Bold"
-                                    class="nom-lbl-bold nom-lbl-fix"
+                                    class="nom-dlg-header-label"
                                 />
                                 <Text id="_IDGenText128"
                                     text="{= ${nomDialogModel>/PurchSchedDateDisplay} || ${nomDialogModel>/SalesSchedDateDisplay} }"
-                                    class="nom-plain-text"
+                                    class="nom-dlg-header-value"
                                 />
                             </FlexBox>
                             <FlexBox id="_IDGenFlexBox11"
-                                alignItems="Center"
-                                class="nom-dlg-header-field"
+                                direction="Column"
+                                class="nom-dlg-header-field nom-dlg-header-field-last"
                             >
                                 <Label id="_IDGenLabel28"
                                     text="Planned / Match Qty"
                                     design="Bold"
-                                    class="nom-lbl-bold nom-lbl-fix"
+                                    class="nom-dlg-header-label"
                                 />
                                 <Text id="_IDGenText196"
                                     text="{nomDialogModel>/MatchQtyFormatted}"
-                                    class="nom-plain-text"
+                                    class="nom-dlg-header-value nom-dlg-header-qty"
                                 />
                             </FlexBox>
                         </FlexBox>
@@ -129,11 +129,12 @@
                                         >
                                             <Label id="_IDGenLabel29"
                                                 text="Deal Number"
-                                                class="nom-tile-label nom-lbl-fix"
+                                                width="175px"
+                                                class="nom-tile-label"
                                             />
                                             <Text id="_IDGenText197"
                                                 text="{nomDialogModel>/OriginDealNumber}"
-                                                class="nom-tile-value nom-tile-value-highlight nom-plain-text"
+                                                class="nom-tile-value nom-tile-value-highlight"
                                             />
                                         </FlexBox>
                                         <FlexBox id="_IDGenFlexBox15"
@@ -142,11 +143,12 @@
                                         >
                                             <Label id="_IDGenLabel30"
                                                 text="Location / Origin"
-                                                class="nom-tile-label nom-lbl-fix"
+                                                width="175px"
+                                                class="nom-tile-label"
                                             />
                                             <Text id="_IDGenText198"
                                                 text="{nomDialogModel>/OriginLocation}"
-                                                class="nom-tile-value nom-plain-text"
+                                                class="nom-tile-value"
                                             />
                                         </FlexBox>
                                         <FlexBox id="_IDGenFlexBox16"
@@ -155,11 +157,12 @@
                                         >
                                             <Label id="_IDGenLabel31"
                                                 text="Quantity"
-                                                class="nom-tile-label nom-lbl-fix"
+                                                width="175px"
+                                                class="nom-tile-label"
                                             />
                                             <Text id="_IDGenText199"
                                                 text="{nomDialogModel>/OriginQty}"
-                                                class="nom-tile-value nom-plain-text"
+                                                class="nom-tile-value"
                                             />
                                         </FlexBox>
                                         <FlexBox id="_IDGenFlexBox17"
@@ -168,11 +171,12 @@
                                         >
                                             <Label id="_IDGenLabel32"
                                                 text="Planned / Match Quantity"
-                                                class="nom-tile-label nom-lbl-fix"
+                                                width="175px"
+                                                class="nom-tile-label"
                                             />
                                             <Text id="_IDGenText200"
                                                 text="{nomDialogModel>/MatchQtyFormatted}"
-                                                class="nom-tile-value nom-plain-text"
+                                                class="nom-tile-value"
                                             />
                                         </FlexBox>
                                         <FlexBox id="_IDGenFlexBox18"
@@ -181,11 +185,12 @@
                                         >
                                             <Label id="_IDGenLabel33"
                                                 text="Delivery Date"
-                                                class="nom-tile-label nom-lbl-fix"
+                                                width="175px"
+                                                class="nom-tile-label"
                                             />
                                             <Text id="_IDGenText201"
                                                 text="{nomDialogModel>/PurchSchedDateDisplay}"
-                                                class="nom-tile-value nom-plain-text"
+                                                class="nom-tile-value"
                                             />
                                         </FlexBox>
                                         <FlexBox id="_IDGenFlexBox19"
@@ -194,11 +199,12 @@
                                         >
                                             <Label id="_IDGenLabel34"
                                                 text="Supplier"
-                                                class="nom-tile-label nom-lbl-fix"
+                                                width="175px"
+                                                class="nom-tile-label"
                                             />
                                             <Text id="_IDGenText202"
                                                 text="{nomDialogModel>/OriginPartner}"
-                                                class="nom-tile-value nom-plain-text"
+                                                class="nom-tile-value"
                                             />
                                         </FlexBox>
                                     </FlexBox>
@@ -224,11 +230,12 @@
                                         >
                                             <Label id="_IDGenLabel35"
                                                 text="Deal Number"
-                                                class="nom-tile-label nom-lbl-fix"
+                                                width="175px"
+                                                class="nom-tile-label"
                                             />
                                             <Text id="_IDGenText203"
                                                 text="{nomDialogModel>/DestinationDealNumber}"
-                                                class="nom-tile-value nom-tile-value-highlight nom-plain-text"
+                                                class="nom-tile-value nom-tile-value-highlight"
                                             />
                                         </FlexBox>
                                         <FlexBox id="_IDGenFlexBox22"
@@ -237,11 +244,12 @@
                                         >
                                             <Label id="_IDGenLabel36"
                                                 text="Location / Destination"
-                                                class="nom-tile-label nom-lbl-fix"
+                                                width="175px"
+                                                class="nom-tile-label"
                                             />
                                             <Text id="_IDGenText204"
                                                 text="{nomDialogModel>/DestinationLocation}"
-                                                class="nom-tile-value nom-plain-text"
+                                                class="nom-tile-value"
                                             />
                                         </FlexBox>
                                         <FlexBox id="_IDGenFlexBox23"
@@ -250,11 +258,12 @@
                                         >
                                             <Label id="_IDGenLabel37"
                                                 text="Quantity"
-                                                class="nom-tile-label nom-lbl-fix"
+                                                width="175px"
+                                                class="nom-tile-label"
                                             />
                                             <Text id="_IDGenText205"
                                                 text="{nomDialogModel>/DestinationQty}"
-                                                class="nom-tile-value nom-plain-text"
+                                                class="nom-tile-value"
                                             />
                                         </FlexBox>
                                         <FlexBox id="_IDGenFlexBox24"
@@ -263,11 +272,12 @@
                                         >
                                             <Label id="_IDGenLabel38"
                                                 text="Planned / Match Quantity"
-                                                class="nom-tile-label nom-lbl-fix"
+                                                width="175px"
+                                                class="nom-tile-label"
                                             />
                                             <Text id="_IDGenText206"
                                                 text="{nomDialogModel>/MatchQtyFormatted}"
-                                                class="nom-tile-value nom-plain-text"
+                                                class="nom-tile-value"
                                             />
                                         </FlexBox>
                                         <FlexBox id="_IDGenFlexBox25"
@@ -276,11 +286,12 @@
                                         >
                                             <Label id="_IDGenLabel39"
                                                 text="Due Date"
-                                                class="nom-tile-label nom-lbl-fix"
+                                                width="175px"
+                                                class="nom-tile-label"
                                             />
                                             <Text id="_IDGenText207"
                                                 text="{nomDialogModel>/SalesSchedDateDisplay}"
-                                                class="nom-tile-value nom-plain-text"
+                                                class="nom-tile-value"
                                             />
                                         </FlexBox>
                                         <FlexBox id="_IDGenFlexBox26"
@@ -289,11 +300,12 @@
                                         >
                                             <Label id="_IDGenLabel40"
                                                 text="Customer"
-                                                class="nom-tile-label nom-lbl-fix"
+                                                width="175px"
+                                                class="nom-tile-label"
                                             />
                                             <Text id="_IDGenText208"
                                                 text="{nomDialogModel>/DestinationPartner}"
-                                                class="nom-tile-value nom-plain-text"
+                                                class="nom-tile-value"
                                             />
                                         </FlexBox>
                                     </FlexBox>
@@ -303,21 +315,20 @@
 
                         <!-- ── Editable controls row (Match Qty + No of Nominations only) ── -->
                         <FlexBox id="_IDGenFlexBox27"
-                            alignItems="End"
+                            alignItems="Center"
                             justifyContent="Center"
                             wrap="Wrap"
                             class="nom-ctrl-row"
                         >
                             <!-- Match Qty -->
                             <FlexBox id="_IDGenFlexBox28"
-                                direction="Column"
                                 alignItems="Center"
                                 class="nom-ctrl-cell"
                             >
                                 <Label id="_IDGenLabel41"
-                                    text="Match Qty"
+                                    text="Match Qty:"
                                     design="Bold"
-                                    class="nom-ctrl-label nom-lbl-fix"
+                                    class="nom-ctrl-label"
                                 />
                                 <Input
                                     id="dlgEditMatchQty"
@@ -332,14 +343,13 @@
 
                             <!-- No of Nominations -->
                             <FlexBox id="_IDGenFlexBox29"
-                                direction="Column"
                                 alignItems="Center"
                                 class="nom-ctrl-cell"
                             >
                                 <Label id="_IDGenLabel42"
-                                    text="No of Nominations"
+                                    text="No of Nominations:"
                                     design="Bold"
-                                    class="nom-ctrl-label nom-lbl-fix"
+                                    class="nom-ctrl-label"
                                 />
                                 <StepInput
                                     id="dlgNoOfRows"

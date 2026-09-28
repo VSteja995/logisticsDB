@@ -1,0 +1,295 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+
+    <!--
+        REDESIGNED: Instead of a wide 9-column table that causes a horizontal
+        scrollbar, each nomination item is rendered as a card with two rows:
+
+        ROW 1 — Read-only reference info (Nomination Key, Item, Location, Material, UOM)
+        ROW 2 — Editable fields         (Sched Qty, Posting Date, Start Date, End Date)
+
+        This fits comfortably in the dialog width without any scrollbar.
+        No HBox or VBox anywhere — FlexBox only throughout.
+    -->
+    <Dialog id="_IDGenDialog1"
+        title="Create Ticket"
+        contentWidth="780px"
+        contentHeight="auto"
+        resizable="true"
+        draggable="true"
+        stretch="false"
+    >
+        <content>
+            <FlexBox id="_IDGenFlexBox9"
+                direction="Column"
+                class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop"
+            >
+
+                <!-- ══════════════════════ Header fields: Ticket No + Vehicle No ══ -->
+                <FlexBox id="_IDGenFlexBox30"
+                    alignItems="Center"
+                    wrap="Wrap"
+                    class="sapUiSmallMarginBottom"
+                >
+                    <FlexBox id="_IDGenFlexBox31" direction="Column" class="sapUiMediumMarginEnd">
+                        <Label id="_IDGenLabel50" text="Ext Ticket No" required="true" class="sapUiTinyMarginBottom"/>
+                        <Input id="_IDGenInput5"
+                            value="{ticketModel>/ticketNo}"
+                            placeholder="Enter Ticket No..."
+                            width="16rem"
+                        />
+                    </FlexBox>
+
+                    <FlexBox id="_IDGenFlexBox32" direction="Column">
+                        <Label id="_IDGenLabel51" text="Vehicle No" class="sapUiTinyMarginBottom"/>
+                        <Input id="_IDGenInput6"
+                            value="{ticketModel>/vehicleNo}"
+                            placeholder="Vehicle No (optional)"
+                            width="16rem"
+                        />
+                    </FlexBox>
+                </FlexBox>
+
+                <!-- Divider -->
+                <core:HTML id="_IDGenHTML" content="&lt;hr style='border:none;border-top:1px solid #e5e5e5;margin:0.5rem 0 0.75rem 0'/&gt;"/>
+
+                <!-- Section title -->
+                <Title id="_IDGenTitle"
+                    text="Nomination Line Items ({ticketModel>/itemCount})"
+                    level="H4"
+                    class="sapUiSmallMarginBottom"
+                />
+
+                <!-- ══════════════════════════════════ Item cards ══
+                     Each selected nomination row renders as one card.
+                     Card Row 1: read-only reference fields
+                     Card Row 2: editable quantity + date fields
+                ══════════════════════════════════════════════════ -->
+                <List id="_IDGenList"
+                    items="{ticketModel>/items}"
+                    mode="None"
+                    showSeparators="Inner"
+                    width="100%"
+                    noDataText="No nomination rows were selected."
+                >
+                    <CustomListItem id="_IDGenCustomListItem">
+                        <FlexBox id="_IDGenFlexBox33"
+                            direction="Column"
+                            class="sapUiSmallMargin"
+                        >
+
+                            <!-- ── Row 1: Read-only reference info ── -->
+                            <FlexBox id="_IDGenFlexBox34"
+                                wrap="Wrap"
+                                alignItems="Start"
+                                class="sapUiTinyMarginBottom"
+                            >
+                                <!-- Nomination Key -->
+                                <FlexBox id="_IDGenFlexBox35"
+                                    direction="Column"
+                                    class="sapUiMediumMarginEnd sapUiTinyMarginBottom"
+                                >
+                                    <Label id="_IDGenLabel52"
+                                        text="Nomination Key"
+                                        class="sapUiTinyMarginBottom"
+                                        design="Bold"
+                                    />
+                                    <Text id="_IDGenText68"
+                                        text="{ticketModel>nomno}"
+                                        wrapping="false"
+                                        tooltip="{ticketModel>nomno}"
+                                       
+                                    />
+                                </FlexBox>
+
+                                <!-- Item -->
+                                <FlexBox id="_IDGenFlexBox36"
+                                    direction="Column"
+                                    class="sapUiMediumMarginEnd sapUiTinyMarginBottom"
+                                >
+                                    <Label id="_IDGenLabel53"
+                                        text="Item"
+                                        class="sapUiTinyMarginBottom"
+                                        design="Bold"
+                                    />
+                                    <Text id="_IDGenText217"
+                                        text="{ticketModel>nomitem}"
+                                        wrapping="false"
+                                       
+                                    />
+                                </FlexBox>
+
+                                <!-- Location -->
+                                <FlexBox id="_IDGenFlexBox37"
+                                    direction="Column"
+                                    class="sapUiMediumMarginEnd sapUiTinyMarginBottom"
+                                >
+                                    <Label id="_IDGenLabel54"
+                                        text="Location"
+                                        class="sapUiTinyMarginBottom"
+                                        design="Bold"
+                                    />
+                                    <Text id="_IDGenText218"
+                                        text="{ticketModel>locationName}"
+                                        wrapping="false"
+                                        tooltip="{ticketModel>locationName}"
+                                    />
+                                </FlexBox>
+
+                                <!-- Material -->
+                                <FlexBox id="_IDGenFlexBox38"
+                                    direction="Column"
+                                    class="sapUiMediumMarginEnd sapUiTinyMarginBottom"
+                                >
+                                    <Label id="_IDGenLabel55"
+                                        text="Material"
+                                        class="sapUiTinyMarginBottom"
+                                        design="Bold"
+                                    />
+                                    <Text id="_IDGenText219"
+                                        text="{ticketModel>schedmat}"
+                                        wrapping="false"
+                                        tooltip="{ticketModel>schedmat}"
+                                    />
+                                </FlexBox>
+
+                                <!-- UOM -->
+                                <FlexBox id="_IDGenFlexBox39"
+                                    direction="Column"
+                                    class="sapUiTinyMarginBottom"
+                                >
+                                    <Label id="_IDGenLabel56"
+                                        text="UOM"
+                                        class="sapUiTinyMarginBottom"
+                                        design="Bold"
+                                    />
+                                    <Text id="_IDGenText220"
+                                        text="{ticketModel>scheduom}"
+                                        wrapping="false"
+                                    />
+                                </FlexBox>
+                            </FlexBox>
+
+                            <!-- Thin inner divider between info row and edit row -->
+                            <!-- <core:HTML content="&lt;hr style='border:none;border-top:1px dashed #e0e0e0;margin:0.4rem 0'/&gt;"/> -->
+
+                            <!-- ── Row 2: Editable fields ── -->
+                            <FlexBox id="_IDGenFlexBox40"
+                                wrap="Wrap"
+                                alignItems="End"
+                                class="sapUiTinyMarginTop"
+                            >
+                                <!-- Scheduled Quantity -->
+                                <FlexBox id="_IDGenFlexBox41"
+                                    direction="Column"
+                                    class="sapUiMediumMarginEnd sapUiTinyMarginBottom"
+                                >
+                                    <Label id="_IDGenLabel57"
+                                        text="Sched Qty"
+                                        required="true"
+                                        class="sapUiTinyMarginBottom"
+                                    />
+                                    <Input id="_IDGenInput7"
+                                        value="{ticketModel>schedqty}"
+                                        type="Number"
+                                        textAlign="End"
+                                        width="9rem"
+                                        placeholder="0.000"
+                                    />
+                                </FlexBox>
+
+                                <!--
+                                    Posting Date
+                                    Default  = nomination ScheduleDate
+                                    Max      = schedDate (ceiling)
+                                    Change   → syncs End Date (rule 3)
+                                -->
+                                <FlexBox id="_IDGenFlexBox42"
+                                    direction="Column"
+                                    class="sapUiMediumMarginEnd sapUiTinyMarginBottom"
+                                >
+                                    <Label id="_IDGenLabel58"
+                                        text="Posting Date"
+                                        required="true"
+                                        class="sapUiTinyMarginBottom"
+                                    />
+                                    <DatePicker id="_IDGenDatePicker1"
+                                        dateValue="{ticketModel>postingDate}"
+                                        displayFormat="MM/dd/yyyy"
+                                        change="onPostingDateChange"
+                                        width="11rem"
+                                        valueState="None"
+                                        placeholder="MM/dd/yyyy"
+                                    />
+                                </FlexBox>
+
+                                <!--
+                                    Start Date
+                                    Default  = nomination ScheduleDate
+                                    Max      = endDate (rule 4)
+                                -->
+                                <FlexBox id="_IDGenFlexBox43"
+                                    direction="Column"
+                                    class="sapUiMediumMarginEnd sapUiTinyMarginBottom"
+                                >
+                                    <Label id="_IDGenLabel59"
+                                        text="Start Date"
+                                        required="true"
+                                        class="sapUiTinyMarginBottom"
+                                    />
+                                    <DatePicker id="_IDGenDatePicker2"
+                                        dateValue="{ticketModel>startDate}"
+                                        displayFormat="MM/dd/yyyy"
+                                        change="onStartDateChange"
+                                        width="11rem"
+                                        valueState="None"
+                                        placeholder="MM/dd/yyyy"
+                                    />
+                                </FlexBox>
+
+                                <!--
+                                    End Date
+                                    Default  = nomination ScheduleDate
+                                    Max      = schedDate (ceiling)
+                                    Change   → syncs Posting Date (rule 3)
+                                -->
+                                <FlexBox id="_IDGenFlexBox44"
+                                    direction="Column"
+                                    class="sapUiTinyMarginBottom"
+                                >
+                                    <Label id="_IDGenLabel60"
+                                        text="End Date"
+                                        required="true"
+                                        class="sapUiTinyMarginBottom"
+                                    />
+                                    <DatePicker id="_IDGenDatePicker3"
+                                        dateValue="{ticketModel>endDate}"
+                                        displayFormat="MM/dd/yyyy"
+                                        change="onEndDateChange"
+                                        width="11rem"
+                                        valueState="None"
+                                        placeholder="MM/dd/yyyy"
+                                    />
+                                </FlexBox>
+                            </FlexBox>
+
+                        </FlexBox>
+                    </CustomListItem>
+                </List>
+
+                
+
+            </FlexBox>
+        </content>
+
+        <beginButton>
+            <Button id="_IDGenButton4" text="Submit Ticket" type="Emphasized" icon="sap-icon://action"  press="onSubmitTicket"      />
+        </beginButton>
+        <endButton>
+            <Button id="_IDGenButton5" text="Cancel"        type="Default"    icon="sap-icon://decline" press="onCloseTicketDialog" />
+        </endButton>
+
+    </Dialog>
+
+</core:FragmentDefinition>
