@@ -1,38 +1,18 @@
 /* ============================================================
-   GENSLOGIQUES BRAND THEME — Logistics Dashboard
-   Brand Colors: Orange #F7941D | Navy #1B1464
+   SAP HORIZON THEME — Logistics Dashboard
+   All colours delegate to SAP Horizon CSS variables where
+   possible.  Hard-coded fallbacks match the Horizon Morning
+   (light) palette so nothing is invisible.
    ============================================================ */
-
-/* ─── CSS Custom Properties (Brand Tokens) ─── */
-:root {
-    --gl-orange: #F7941D; 
-    --gl-orange-dark: #E07A0C;
-    --gl-orange-light: #FDB850;
-    --gl-orange-tint: #FFF7ED;
-    --gl-navy: #1B1464;
-    --gl-navy-light: #2A2080;
-    --gl-navy-tint: #E8E6F0;
-    --gl-white: #FFFFFF;
-    --gl-light-gray: #F5F5F5;
-    --gl-border-gray: #E0E0E0;
-    --gl-text-dark: #1A1A2E;
-    --gl-text-muted: #5A5A6E;
-    --gl-shadow-sm: 0 2px 8px rgba(27, 20, 100, 0.08);
-    --gl-shadow-md: 0 4px 16px rgba(27, 20, 100, 0.12);
-    --gl-shadow-lg: 0 8px 32px rgba(27, 20, 100, 0.16);
-    --gl-radius: 10px;
-    --gl-radius-sm: 6px;
-    --gl-transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
 
 /* ─── Logo Emblem ─── */
 .c_logo {
-    background-color: var(--gl-white) !important;
+    background-color: var(--sapBaseColor, #fff) !important;
     border-radius: 50% !important;
     padding: 6px !important;
-    border: 4px solid var(--gl-white) !important;
+    border: 4px solid var(--sapBaseColor, #fff) !important;
     box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.60),
-                0 6px 24px rgba(0, 0, 0, 0.30) !important;
+                0 6px 24px rgba(0, 0, 0, 0.25) !important;
     display: block !important;
     width: 96px !important;
     height: 96px !important;
@@ -42,80 +22,77 @@
 
 .c_logo:hover {
     box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.85),
-                0 8px 28px rgba(0, 0, 0, 0.35) !important;
+                0 8px 28px rgba(0, 0, 0, 0.30) !important;
     transform: scale(1.05);
 }
-  /* ─── Global Resets & Unified Scrolling ─── */
-  html, body, .sapUiBody {
-      height: 100%;
-      margin: 0;
-      padding: 0;
-      overflow: hidden !important;
-      font-family: 'Inter', 'Segoe UI', -apple-system, sans-serif !important;
-      background-color: var(--gl-light-gray) !important;
-  }
-  
-  .sapMPage,
-  .sapMPageBgStandard {
-      height: 100% !important;
-      overflow-y: auto !important;
-      overflow-x: hidden !important;
-      background-color: var(--gl-light-gray) !important;
-      box-sizing: border-box !important;
-  }
 
-  #DlPnl1Pnl001 .sapMPanelContent {
+/* ─── Global Resets & Unified Scrolling ─── */
+html, body, .sapUiBody {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden !important;
+    /* Horizon uses the "72" font family */
+    font-family: var(--sapFontFamily, "72", "72full", Arial, Helvetica, sans-serif) !important;
+    background-color: var(--sapBackgroundColor, #f5f6f7) !important;
+}
+
+.sapMPage,
+.sapMPageBgStandard {
+    height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    background-color: var(--sapBackgroundColor, #f5f6f7) !important;
+    box-sizing: border-box !important;
+}
+
+#DlPnl1Pnl001 .sapMPanelContent {
     height: auto !important;
 }
-/* Stop the O/E Schedule GridContainer from stretching its single row
-   to fill all available vertical space */
+
+/* Stop the O/E Schedule GridContainer from stretching */
 #DlPnl1Grd018 {
     align-content: start !important;
 }
 
-/* If other GridContainers in the app have the same issue, use the class instead */
 .sapFGridContainer {
     align-content: start !important;
 }
-/* Remove default Page content-area left/right padding so panels reach edges */
+
+/* Remove default Page content-area left/right padding */
 .sapMPageInner {
     padding-left: 0 !important;
     padding-right: 0 !important;
 }
 
-/* .sapUiNoScroll overflow-y override removed:
-   Setting overflow-y: hidden on panels clips DateRangeSelection / MultiComboBox
-   picker popups, making them invisible and impossible to interact with. */
-
-/* ─── Page Shell ─── */
+/* ─── Page Shell Header ─── */
 .sapMPage>.sapMPageHeader .sapMBar {
-    background: var(--gl-navy) !important;
-    color: var(--gl-white) !important;
+    background: var(--sapShellColor, #1d2d3e) !important;
+    color: var(--sapShell_TextColor, #fff) !important;
 }
 
 .sapMPage>.sapMPageHeader .sapMBarChild,
 .sapMPage>.sapMPageHeader .sapMTitle {
-    color: var(--gl-white) !important;
+    color: var(--sapShell_TextColor, #fff) !important;
 }
 
 /* ============================================================
-   HEADER BANNER (Gradient Hero)
+   HEADER BANNER
+   Uses the Horizon shell gradient — dark blue-grey tones
    ============================================================ */
 .headerBanner {
-    background: linear-gradient(165deg, var(--gl-orange) 0%, var(--gl-orange-dark) 60%, var(--gl-navy) 75%) !important;
+    background: var(--sapShellColor, #1d2d3e) !important;
     padding: 1.25rem 1.5rem !important;
-    border-radius: 0 0 var(--gl-radius) var(--gl-radius) !important;
-    box-shadow: var(--gl-shadow-md) !important;
+    border-radius: 0 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
     position: relative;
     overflow: hidden;
-    /* Override sapUiLargeMarginEnd — banner must reach full page width */
     margin-right: 0 !important;
     margin-left: 0 !important;
     width: 100% !important;
     box-sizing: border-box !important;
 }
 
-/* Decorative gradient overlay */
 .headerBanner::before {
     content: '';
     position: absolute;
@@ -123,28 +100,28 @@
     right: -20%;
     width: 60%;
     height: 200%;
-    background: radial-gradient(ellipse, rgba(247, 148, 29, 0.15) 0%, transparent 70%);
+    background: radial-gradient(ellipse, rgba(255,255,255,0.04) 0%, transparent 70%);
     pointer-events: none;
 }
 
 .headerTitle {
-    color: var(--gl-white) !important;
+    color: var(--sapShell_TextColor, #fff) !important;
     font-weight: 700 !important;
     font-size: 1.35rem !important;
     letter-spacing: 0.02em;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 .headerSubtitle {
-    color: rgba(255, 255, 255, 0.85) !important;
+    /* Follow the shell text colour (like .headerTitle) so it stays readable on light or dark shells */
+    color: var(--sapShell_TextColor, #fff) !important;
+    opacity: 0.8;
     font-size: 0.875rem !important;
     font-weight: 400 !important;
-    letter-spacing: 0.01em;
     margin-top: 0.15rem !important;
 }
 
 /* ============================================================
-   ICON TAB BAR (Brand Orange Active Indicator)
+   ICON TAB BAR — Horizon Active Indicator
    ============================================================ */
 .brandIconTabBar {
     width: auto;
@@ -152,21 +129,19 @@
 
 /* Tab bar background */
 .brandIconTabBar .sapMITBHead {
-    background-color: var(--gl-white) !important;
-    border-bottom: 1px solid var(--gl-border-gray) !important;
+    background-color: var(--sapBaseColor, #fff) !important;
+    border-bottom: 1px solid var(--sapGroup_ContentBorderColor, #d9d9d9) !important;
 }
 
 /* Tab filter text */
 .brandIconTabBar .sapMITBFilter .sapMITBText {
-    color: var(--gl-text-muted) !important;
+    color: var(--sapContent_LabelColor, #5b738b) !important;
     font-weight: 500 !important;
-    transition: var(--gl-transition);
 }
 
 /* Tab filter icons */
 .brandIconTabBar .sapMITBFilter .sapUiIcon {
-    color: var(--gl-text-muted) !important;
-    transition: var(--gl-transition);
+    color: var(--sapContent_LabelColor, #5b738b) !important;
 }
 
 /* Reset default borders and backgrounds on tab filters */
@@ -180,58 +155,56 @@
     display: none !important;
 }
 
-/* Selected tab */
+/* Selected tab — Horizon uses the brand/accent colour */
 .brandIconTabBar .sapMITBSelected {
-    border-bottom: 2px solid var(--gl-orange) !important;
+    border-bottom: 2px solid var(--sapSelectedColor, #0070f2) !important;
 }
 
 .brandIconTabBar .sapMITBSelected .sapMITBText {
-    color: var(--gl-orange) !important;
+    color: var(--sapSelectedColor, #0070f2) !important;
     font-weight: 600 !important;
 }
 
 .brandIconTabBar .sapMITBSelected .sapUiIcon {
-    color: var(--gl-orange) !important;
+    color: var(--sapSelectedColor, #0070f2) !important;
 }
 
 /* Hover state */
 .brandIconTabBar .sapMITBFilter:hover .sapMITBText {
-    color: var(--gl-orange-dark) !important;
+    color: var(--sapContent_HoverTextColor, #0064d9) !important;
 }
 
 .brandIconTabBar .sapMITBFilter:hover .sapUiIcon {
-    color: var(--gl-orange-dark) !important;
+    color: var(--sapContent_HoverTextColor, #0064d9) !important;
 }
 
 /* ============================================================
    FILTER CONTAINERS
    ============================================================ */
 .filterContainer {
-    background-color: var(--gl-white) !important;
-    border: 1px solid var(--gl-border-gray) !important;
-    border-left: 3px solid var(--gl-orange) !important;
-    border-radius: var(--gl-radius-sm) !important;
+    background-color: var(--sapBaseColor, #fff) !important;
+    border: 1px solid var(--sapGroup_ContentBorderColor, #d9d9d9) !important;
+    border-left: 3px solid var(--sapSelectedColor, #0070f2) !important;
+    border-radius: 6px !important;
     padding: 0.5rem 0.75rem !important;
     display: flex;
     align-items: center;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
-    transition: var(--gl-transition);
 }
 
 .filterContainer:hover {
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
-    border-left-color: var(--gl-navy) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+    border-left-color: var(--sapContent_HoverBorderColor, #0064d9) !important;
 }
 
 .filterText {
     font-weight: 700 !important;
-    color: var(--gl-navy) !important;
+    color: var(--sapTextColor, #1d2d3e) !important;
     font-size: 0.95rem !important;
 }
 
-/* Filter labels */
 .filterContainer .sapMLabel {
-    color: var(--gl-navy) !important;
+    color: var(--sapTextColor, #1d2d3e) !important;
     font-weight: 600 !important;
 }
 
@@ -239,19 +212,18 @@
    TABLE CONTAINER
    ============================================================ */
 .TableContainer {
-    background-color: var(--gl-white) !important;
-    border: 1px solid var(--gl-border-gray) !important;
-    border-radius: var(--gl-radius-sm) !important;
+    background-color: var(--sapBaseColor, #fff) !important;
+    border: 1px solid var(--sapGroup_ContentBorderColor, #d9d9d9) !important;
+    border-radius: 6px !important;
     display: flex;
     align-items: center;
-    box-shadow: var(--gl-shadow-sm) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
 }
 
 /* ============================================================
-   TABLES (Deals, Nominations, Tickets) — Sticky Headers & Alignment
+   TABLES (Deals, Nominations, Tickets) — Sticky Headers
    ============================================================ */
 
-/* Sticky column headers across all tables inside scroll containers */
 .sapUiScrollCnt thead th,
 .sapUiScrollCnt .sapMListTblHeaderCell,
 .sapUiScrollCnt .sapMListTblSelCol,
@@ -261,10 +233,10 @@
     position: sticky !important;
     top: 0 !important;
     z-index: 3 !important;
-    background-color: var(--gl-navy) !important;
+    background-color: var(--sapList_HeaderBackground, #f5f6f7) !important;
 }
 
-/* Align cell text consistently */
+/* Align cell text */
 #DlPnl2Tbl051 .sapMListTblCell,
 #NomPnl2Tbl062 .sapMListTblCell,
 #NomPnl3Tbl137 .sapMListTblCell {
@@ -280,7 +252,6 @@
     text-align: left !important;
 }
 
-/* Ensure text doesn't overflow column width */
 #DlPnl2Tbl051 .sapMText,
 #NomPnl2Tbl062 .sapMText,
 #NomPnl3Tbl137 .sapMText {
@@ -288,38 +259,69 @@
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
 #DlPnl1Grd018.sapFGridContainer {
-    align-content: start !important;  /* don't stretch the row track(s) to fill leftover height */
-    align-items: start !important;    /* don't stretch each item to fill its row track */
+    align-content: start !important;
+    align-items: start !important;
 }
 
 /* ============================================================
-   DYNAMIC COLUMN WIDTHS — prevent vertical text wrapping
-   Forces header & cell text onto a single line so columns
-   auto-size to content when fixedLayout="false"
+   DYNAMIC COLUMN WIDTHS
    ============================================================ */
 
-/* Force the inner HTML table to auto-size to its content */
 .sapUiScrollCnt .sapMList > .sapMListTbl {
     table-layout: auto !important;
     width: auto !important;
     min-width: 100% !important;
 }
 
-/* Prevent text wrapping in headers — columns size to header text */
 .sapMListTblHeaderCell .sapMText,
 .sapMListTblHeaderCell .sapMLabel {
     white-space: nowrap !important;
 }
 
-/* Prevent text wrapping in body cells */
 .sapMListTblCell .sapMText {
     white-space: nowrap !important;
 }
 
-/* Give each column a sensible minimum width based on content */
 .sapMListTblHeaderCell {
     min-width: 6rem !important;
+}
+
+/* ============================================================
+   ALL TABLE HEADERS — Horizon themed
+   ============================================================ */
+.sapMListTblHeaderCell {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 3 !important;
+    background-color: var(--sapList_HeaderBackground, #f5f6f7) !important;
+    color: var(--sapList_HeaderTextColor, #1d2d3e) !important;
+    font-weight: 600 !important;
+    font-size: 0.825rem !important;
+    border-bottom: 2px solid var(--sapList_HeaderBorderColor, #d9d9d9) !important;
+}
+
+/* Header text uses list header text colour — always readable */
+.sapMListTblHeaderCell .sapMText {
+    color: var(--sapList_HeaderTextColor, #1d2d3e) !important;
+}
+
+/* Alternating row — very subtle Horizon tint */
+.sapMListTblRow:nth-child(even) {
+    background-color: var(--sapList_AlternatingBackground, #f5f6f7) !important;
+}
+
+/* Row hover */
+.sapMListTblRow:hover {
+    background-color: var(--sapList_Hover_Background, #e8f0fe) !important;
+    transition: background-color 0.2s ease;
+}
+
+/* Checkbox accent */
+.sapMCb .sapMCbBg.sapMCbMarkChecked::before {
+    background-color: var(--sapSelectedColor, #0070f2) !important;
+    border-color: var(--sapSelectedColor, #0070f2) !important;
 }
 
 /* ============================================================
@@ -327,22 +329,21 @@
    ============================================================ */
 
 .cardTable {
-    border: 1px solid var(--gl-orange-light) !important;
-    border-top: 3px solid var(--gl-orange) !important;
-    border-radius: var(--gl-radius-sm) !important;
-    box-shadow: var(--gl-shadow-sm) !important;
-    transition: var(--gl-transition);
+    border: 1px solid var(--sapGroup_ContentBorderColor, #d9d9d9) !important;
+    border-top: 3px solid var(--sapSelectedColor, #0070f2) !important;
+    border-radius: 6px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+    transition: box-shadow 0.25s ease, transform 0.25s ease;
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
 }
 
 .cardTable:hover {
-    box-shadow: var(--gl-shadow-md) !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10) !important;
     transform: translateY(-2px);
 }
 
-/* ── cardTable: identical padding + left align on header and body cells ── */
 .cardTable .sapMListTblHeaderCell,
 .cardTable .sapMListTblCell {
     vertical-align: middle !important;
@@ -351,7 +352,6 @@
     box-sizing: border-box !important;
 }
 
-/* Override UI5 center-align helpers if theme applies them */
 .cardTable .sapMListTblHeaderCell.sapMListTblCellCCenter,
 .cardTable .sapMListTblCell.sapMListTblCellCCenter,
 .cardTable .sapMListTblHeaderCell.sapMListTblCellCenter,
@@ -359,7 +359,6 @@
     text-align: center !important;
 }
 
-/* Header inner wrappers — left align, no extra offset */
 .cardTable .sapMListTblHeaderCell .sapMColumnHeader,
 .cardTable .sapMListTblHeaderCell .sapMColumnHeaderSpan,
 .cardTable .sapMListTblHeaderCell .sapMColumnHeaderContent,
@@ -374,7 +373,6 @@
     box-sizing: border-box !important;
 }
 
-/* Header + body text share the same left edge */
 .cardTable .sapMListTblHeaderCell .sapMText,
 .cardTable .sapMListTblHeaderCell .sapMLabel,
 .cardTable .sapMListTblHeaderCell .sapMColumnHeaderText,
@@ -387,39 +385,38 @@
     box-sizing: border-box !important;
 }
 
+/* Card table header text — must be readable against header background */
 .cardTable .sapMListTblHeaderCell .sapMText,
 .cardTable .sapMListTblHeaderCell .sapMLabel,
 .cardTable .sapMListTblHeaderCell .sapMColumnHeaderText {
-    color: var(--gl-white) !important;
+    color: var(--sapList_HeaderTextColor, #1d2d3e) !important;
 }
 
-/* Sticky card table header — stays at top while rows scroll */
 .cardTable .sapMListTblHeaderCell {
     position: sticky !important;
     top: 0 !important;
     z-index: 2 !important;
-    background-color: var(--gl-navy) !important;
-    color: var(--gl-white) !important;
+    background-color: var(--sapList_HeaderBackground, #f5f6f7) !important;
+    color: var(--sapList_HeaderTextColor, #1d2d3e) !important;
     font-weight: 600 !important;
     font-size: 0.8rem !important;
 }
 
-/* Card table body rows */
+/* Card table alternating rows */
 .cardTable .sapMListTblRow:nth-child(even) {
-    background-color: var(--gl-orange-tint) !important;
+    background-color: var(--sapList_AlternatingBackground, #f5f6f7) !important;
 }
 
 .cardTable .sapMListTblRow:hover {
-    background-color: rgba(247, 148, 29, 0.08) !important;
+    background-color: var(--sapList_Hover_Background, #e8f0fe) !important;
 }
 
 /* ============================================================
    KPI CARDS (Planning Summary)
    ============================================================ */
-/* Base card style */
 .kpiCard {
-    background-color: #ffffff;
-    border: 1px solid #dcdcdc;
+    background-color: var(--sapBaseColor, #fff);
+    border: 1px solid var(--sapGroup_ContentBorderColor, #d9d9d9);
     border-radius: 8px;
     padding: 1rem;
     min-width: 240px;
@@ -430,40 +427,38 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* Specific Border Colors */
 .kpiCard.green-border {
-    border: 0.5px solid #2b7d2b;
-    background-color: #f1f8f1;
+    border: 0.5px solid var(--sapPositiveColor, #2b7d2b);
+    background-color: var(--sapSuccessBackground, #f1f8f1);
 }
 
 .kpiCard.red-border {
-    border: 0.5px solid #bb0000;
-    background-color: #fff1f1;
+    border: 0.5px solid var(--sapNegativeColor, #bb0000);
+    background-color: var(--sapErrorBackground, #fff1f1);
 }
 
 .kpiCard.blue-border {
-    border: 0.5px solid #0070f2;
-    background-color: #f1f7ff;
+    border: 0.5px solid var(--sapInformativeColor, #0070f2);
+    background-color: var(--sapInformativeBackground, #f1f7ff);
 }
 
-/* Text Styling */
 .kpiLabel {
     font-size: 0.875rem;
-    color: #666;
+    color: var(--sapContent_LabelColor, #5b738b);
 }
 
 .kpiValue {
     font-size: 1.5rem;
     font-weight: bold;
     margin: 0.5rem 0;
+    color: var(--sapTextColor, #1d2d3e);
 }
 
 .kpiSubtext {
     font-size: 0.875rem;
-    color: #333;
+    color: var(--sapTextColor, #1d2d3e);
 }
 
-/* Icon Positioning (Top Right) */
 .kpiIcon {
     position: absolute;
     top: 1rem;
@@ -471,19 +466,19 @@
 }
 
 /* ============================================================
-   PANELS — Navy Headings
+   PANELS — Horizon styling
    ============================================================ */
 .sapMPanel>.sapMPanelHdr {
-    color: var(--gl-navy) !important;
+    color: var(--sapTextColor, #1d2d3e) !important;
     font-weight: 700 !important;
     font-size: 1rem !important;
 }
 
 .sapMPanel {
-    background-color: var(--gl-white) !important;
-    border-radius: var(--gl-radius) !important;
-    box-shadow: var(--gl-shadow-sm) !important;
-    border: 1px solid var(--gl-border-gray) !important;
+    background-color: var(--sapBaseColor, #fff) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+    border: 1px solid var(--sapGroup_ContentBorderColor, #d9d9d9) !important;
     position: relative;
     z-index: 1;
     overflow: visible !important;
@@ -497,135 +492,99 @@
 }
 
 .sapMTitle {
-    color: var(--gl-navy) !important;
+    color: var(--sapTextColor, #1d2d3e) !important;
     font-weight: 700 !important;
 }
 
 /* ============================================================
-   BUTTONS — Brand Styled
+   BUTTONS — Horizon styled
    ============================================================ */
 
-/* Emphasized buttons → Orange */
+/* Emphasized buttons → Horizon brand blue */
 .sapMBtnEmphasized .sapMBtnInner {
-    background-color: var(--gl-orange) !important;
-    border-color: var(--gl-orange) !important;
-    color: var(--gl-white) !important;
-    border-radius: var(--gl-radius-sm) !important;
+    background-color: var(--sapButton_Emphasized_Background, #0070f2) !important;
+    border-color: var(--sapButton_Emphasized_BorderColor, #0070f2) !important;
+    color: var(--sapButton_Emphasized_TextColor, #fff) !important;
+    border-radius: 6px !important;
     font-weight: 600 !important;
-    box-shadow: 0 2px 8px rgba(247, 148, 29, 0.3) !important;
-    transition: var(--gl-transition);
+    box-shadow: 0 2px 8px rgba(0, 112, 242, 0.25) !important;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .sapMBtnEmphasized .sapMBtnInner:hover {
-    background-color: var(--gl-orange-dark) !important;
-    box-shadow: 0 4px 16px rgba(247, 148, 29, 0.4) !important;
+    background-color: var(--sapButton_Emphasized_Hover_Background, #0064d9) !important;
+    box-shadow: 0 4px 16px rgba(0, 112, 242, 0.35) !important;
     transform: translateY(-1px);
 }
 
 .sapMBtnEmphasized .sapMBtnIcon {
-    color: var(--gl-white) !important;
+    color: var(--sapButton_Emphasized_TextColor, #fff) !important;
 }
 
 /* Ghost buttons */
 .sapMBtnGhost .sapMBtnInner {
-    border-color: var(--gl-navy) !important;
-    color: var(--gl-navy) !important;
-    border-radius: var(--gl-radius-sm) !important;
-    transition: var(--gl-transition);
+    border-color: var(--sapButton_BorderColor, #0070f2) !important;
+    color: var(--sapButton_TextColor, #0070f2) !important;
+    border-radius: 6px !important;
+    transition: background-color 0.2s ease;
 }
 
 .sapMBtnGhost .sapMBtnInner:hover {
-    background-color: var(--gl-navy-tint) !important;
+    background-color: var(--sapButton_Hover_Background, #e8f0fe) !important;
 }
 
 /* Default / Transparent buttons */
 .sapMBtnDefault .sapMBtnInner {
-    border-color: var(--gl-border-gray) !important;
-    border-radius: var(--gl-radius-sm) !important;
-    transition: var(--gl-transition);
+    border-color: var(--sapButton_BorderColor, #c8cbce) !important;
+    border-radius: 6px !important;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .sapMBtnDefault .sapMBtnInner:hover {
-    border-color: var(--gl-orange) !important;
-    background-color: var(--gl-orange-tint) !important;
+    border-color: var(--sapButton_Hover_BorderColor, #0070f2) !important;
+    background-color: var(--sapButton_Hover_Background, #e8f0fe) !important;
 }
 
 /* Accept buttons */
 .sapMBtnAccept .sapMBtnInner {
-    border-radius: var(--gl-radius-sm) !important;
+    border-radius: 6px !important;
     font-weight: 600 !important;
 }
 
 /* ============================================================
-   TABLES — Brand Styled Headers & Row Hover
-   ============================================================ */
-.sapMListTblHeaderCell {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 3 !important;
-    background-color: var(--gl-navy) !important;
-    color: var(--gl-white) !important;
-    font-weight: 600 !important;
-    font-size: 0.825rem !important;
-    border-bottom: 2px solid var(--gl-orange) !important;
-}
-
-.sapMListTblHeaderCell .sapMText {
-    color: var(--gl-white) !important;
-}
-
-/* Alternating row colors */
-.sapMListTblRow:nth-child(even) {
-    background-color: var(--gl-orange-tint) !important;
-}
-
-/* Row hover */
-.sapMListTblRow:hover {
-    background-color: rgba(247, 148, 29, 0.06) !important;
-    transition: var(--gl-transition);
-}
-
-/* Row selection checkbox accent */
-.sapMCb .sapMCbBg.sapMCbMarkChecked::before {
-    background-color: var(--gl-orange) !important;
-    border-color: var(--gl-orange) !important;
-}
-
-/* ============================================================
-   SPLITTER SECTION HEADERS (Planning Details Quadrants)
+   SPLITTER SECTION HEADERS
    ============================================================ */
 .splitterSectionHeader {
-    background: linear-gradient(90deg, var(--gl-navy) 0%, var(--gl-navy-light) 100%) !important;
-    border-radius: var(--gl-radius-sm) var(--gl-radius-sm) 0 0 !important;
+    background: var(--sapGroup_TitleBackground, #f5f6f7) !important;
+    border-radius: 6px 6px 0 0 !important;
     padding: 0.25rem 0.5rem !important;
+    border-bottom: 1px solid var(--sapGroup_ContentBorderColor, #d9d9d9) !important;
 }
 
 .splitterSectionHeader .sapMTitle {
-    color: var(--gl-white) !important;
+    color: var(--sapTextColor, #1d2d3e) !important;
     font-weight: 600 !important;
     font-size: 0.95rem !important;
 }
 
 .splitterSectionHeader .sapMBtnTransparent .sapMBtnIcon {
-    color: rgba(255, 255, 255, 0.85) !important;
+    color: var(--sapContent_IconColor, #5b738b) !important;
 }
 
 .splitterSectionHeader .sapMBtnTransparent:hover .sapMBtnIcon {
-    color: var(--gl-orange-light) !important;
+    color: var(--sapContent_HoverTextColor, #0064d9) !important;
 }
 
 .splitterSection {
-    border: 1px solid var(--gl-border-gray) !important;
-    border-radius: var(--gl-radius-sm) !important;
-    background-color: var(--gl-white) !important;
+    border: 1px solid var(--sapGroup_ContentBorderColor, #d9d9d9) !important;
+    border-radius: 6px !important;
+    background-color: var(--sapBaseColor, #fff) !important;
     overflow: hidden;
-    /* Fill the splitter area and use flex so ScrollContainer stretches */
     display: flex !important;
     flex-direction: column !important;
     height: 100% !important;
 }
 
-/* Make the ScrollContainer inside each splitter section fill remaining height */
 .splitterSection > .sapUiScrollCnt {
     flex: 1 1 0 !important;
     min-height: 0 !important;
@@ -646,54 +605,54 @@
    ============================================================ */
 .sapMSegBBtn.sapMSegBBtnSel {
     background-color: transparent !important;
-    color: var(--gl-orange) !important;
-    border-color: var(--gl-orange) !important;
+    color: var(--sapSelectedColor, #0070f2) !important;
+    border-color: var(--sapSelectedColor, #0070f2) !important;
     box-shadow: none !important;
 }
 
 .sapMSegBBtn.sapMSegBBtnSel .sapUiIcon {
-    color: var(--gl-orange) !important;
+    color: var(--sapSelectedColor, #0070f2) !important;
 }
 
 .sapMSegBBtn {
-    transition: var(--gl-transition);
+    transition: background-color 0.2s ease;
     box-shadow: none !important;
 }
 
 .sapMSegBBtn:hover {
-    background-color: var(--gl-orange-tint) !important;
+    background-color: var(--sapButton_Hover_Background, #e8f0fe) !important;
 }
 
 /* ============================================================
    SEARCH FIELD
    ============================================================ */
 .sapMSF .sapMSFB:hover {
-    color: var(--gl-orange) !important;
+    color: var(--sapSelectedColor, #0070f2) !important;
 }
 
 .sapMSF .sapMSFF:focus-within {
-    border-color: var(--gl-orange) !important;
-    box-shadow: 0 0 0 2px rgba(247, 148, 29, 0.2) !important;
+    border-color: var(--sapField_Focus_BorderColor, #0070f2) !important;
+    box-shadow: 0 0 0 2px rgba(0, 112, 242, 0.18) !important;
 }
 
 /* ============================================================
    DATE RANGE & INPUT FOCUS
    ============================================================ */
 .sapMInputFocused .sapMInputBaseInner {
-    border-color: var(--gl-orange) !important;
-    box-shadow: 0 0 0 2px rgba(247, 148, 29, 0.15) !important;
+    border-color: var(--sapField_Focus_BorderColor, #0070f2) !important;
+    box-shadow: 0 0 0 2px rgba(0, 112, 242, 0.15) !important;
 }
 
 /* ============================================================
-   NUMERIC CONTENT & INFO CARDS (Bottom KPI Panels)
+   NUMERIC CONTENT & INFO CARDS
    ============================================================ */
 .sapMNC .sapMNCValueScr .sapMNCValue {
-    color: var(--gl-navy) !important;
+    color: var(--sapTextColor, #1d2d3e) !important;
     font-weight: 700 !important;
 }
 
 /* ============================================================
-   SCROLLBAR STYLING
+   SCROLLBAR STYLING — neutral Horizon tones
    ============================================================ */
 ::-webkit-scrollbar {
     width: 8px;
@@ -701,58 +660,44 @@
 }
 
 ::-webkit-scrollbar-track {
-    background: var(--gl-light-gray);
+    background: var(--sapScrollBar_TrackColor, #f5f6f7);
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, var(--gl-orange-light), var(--gl-orange));
+    background: var(--sapScrollBar_FaceColor, #c8cbce);
     border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--gl-orange-dark);
+    background: var(--sapScrollBar_Hover_FaceColor, #9ea4a9);
 }
 
 /* ============================================================
    FULL SCREEN CLASS
    ============================================================ */
 .fullScreenSection {
-    /* Fixed positioning to overlay entire viewport */
     position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
-    
-    /* Full viewport dimensions */
     width: 100vw !important;
     height: 100vh !important;
-    
-    /* Ensure it sits on top of everything */
     z-index: 2147483647 !important;
-    
-    /* Background color to hide content underneath */
-    background-color: #ffffff !important;
-    
-    /* Flexbox layout: Toolbar at top, Table fills rest */
+    background-color: var(--sapBaseColor, #fff) !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: flex-start !important;
     align-items: stretch !important;
-    
-    /* Flush layout with no surrounding blank gap */
     margin: 0 !important;
     padding: 0 !important;
     box-sizing: border-box !important;
-    
-    /* Prevent overflow to show content behind */
     overflow: hidden !important;
     animation: none !important;
     transform: none !important;
 }
 
-/* Ensure enclosing panel is elevated and does not trap or isolate stacking context */
 .sapMPanel:has(.fullScreenSection),
 .parentPanelFullScreen {
     position: relative !important;
@@ -761,7 +706,6 @@
     transform: none !important;
 }
 
-/* Keep the toolbar (header with title + close button) fixed at top */
 .fullScreenSection > .sapMTB,
 .fullScreenSection > .sapMBar,
 .fullScreenSection > header {
@@ -771,17 +715,15 @@
     padding: 0 !important;
 }
 
-/* Let the ScrollContainer fill all remaining vertical space */
 .fullScreenSection > .sapUiScrollCnt {
     flex: 1 1 auto !important;
     min-height: 0 !important;
-    height: 0 !important;       /* flex will stretch it to fill */
+    height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: auto !important;
 }
 
-/* Fallback for any other direct non-toolbar child (e.g. sap.m.Table without ScrollContainer) */
 .fullScreenSection > .sapMTable,
 .fullScreenSection > .sapMList {
     flex: 1 1 auto !important;
@@ -791,14 +733,13 @@
     overflow: auto !important;
 }
 
-/* Receiver div inside the ScrollContainer must fill parent */
 .fullScreenSection .sapUiScrollCntRcv {
     height: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
 }
 
-/* Suppress ALL UI5 sticky-offset transforms — the blank gap culprit */
+/* Suppress ALL UI5 sticky-offset transforms */
 .fullScreenSection .sapMListTblHeader,
 .fullScreenSection .sapMListTblHeaderCell,
 .fullScreenSection .sapMTableStickyHeader,
@@ -823,7 +764,7 @@
     width: 100vw !important;
     height: 100vh !important;
     z-index: 2147483647 !important;
-    background-color: #ffffff !important;
+    background-color: var(--sapBaseColor, #fff) !important;
     display: flex !important;
     flex-direction: column !important;
     margin: 0 !important;
@@ -851,7 +792,6 @@
     overflow: hidden !important;
 }
 
-/* The VBox wrapping toolbar + table */
 .dealsTableFullScreen .dealsFlexBody {
     display: flex !important;
     flex-direction: column !important;
@@ -867,7 +807,6 @@
     flex: 0 0 auto !important;
 }
 
-/* The ScrollContainer itself */
 .dealsTableFullScreen .dealsTableWrapper,
 .dealsTableFullScreen > .sapMPanelContent > .dealsTableWrapper {
     flex: 1 1 auto !important;
@@ -875,7 +814,7 @@
     min-height: 0 !important;
     overflow: auto !important;
 }
-/* Lock body scroll when full screen is active */
+
 body.fullScreenLock {
     overflow: hidden !important;
 }
@@ -884,45 +823,37 @@ body.fullScreenLock {
    ANIMATIONS & MICRO-INTERACTIONS
    ============================================================ */
 
-/* Fade-in for panels (without trapping fixed children) */
 .sapMPanel:not(.parentPanelFullScreen):not(.dealsTableFullScreen):not(:has(.fullScreenSection)) {
     animation: glFadeInUp 0.3s ease-out;
 }
 
 @keyframes glFadeInUp {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
-    }
+    from { opacity: 0; }
+    to   { opacity: 1; }
 }
 
-.planclass{
-
+.planclass {
     z-index: auto;
 }
 
-/* Bottom info-card panels hover */
 .sapMPanel:hover {
-    box-shadow: var(--gl-shadow-md) !important;
-    transition: var(--gl-transition);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10) !important;
+    transition: box-shadow 0.25s ease;
 }
 
 /* ============================================================
-   OBJECT STATUS — Brand Colors
+   OBJECT STATUS — Horizon semantic colours
    ============================================================ */
 .sapMObjStatusSuccess .sapMObjStatusText {
-    color: #1a7a1a !important;
+    color: var(--sapPositiveColor, #2b7d2b) !important;
 }
 
 .sapMObjStatusWarning .sapMObjStatusText {
-    color: var(--gl-orange-dark) !important;
+    color: var(--sapCriticalColor, #e76500) !important;
 }
 
 /* ============================================================
-   DIALOGS & MESSAGEBOX — Solid Background & Stacking Fix
+   DIALOGS & MESSAGEBOX
    ============================================================ */
 .sapMDialog,
 .sapMDialogSection,
@@ -932,86 +863,77 @@ body.fullScreenLock {
 .sapMDialog .sapMIBar.sapMFooter-CTX,
 .sapMDialogFooter,
 .sapMMessageBox {
-    background-color: #ffffff !important;
+    background-color: var(--sapBaseColor, #fff) !important;
 }
 
 .sapMDialog {
-    border-radius: var(--gl-radius-md, 8px) !important;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.22) !important;
     overflow: hidden !important;
 }
 
 .sapMDialog > footer,
 .sapMDialog .sapMIBar.sapMFooter-CTX,
 .sapMDialogFooter {
-    border-top: 1px solid var(--gl-border-gray, #e5e7eb) !important;
+    border-top: 1px solid var(--sapGroup_ContentBorderColor, #d9d9d9) !important;
 }
 
 .sapMDialog-BaseClass {
-    background-color: #ffffff !important;
+    background-color: var(--sapBaseColor, #fff) !important;
 }
 
-/* Ensure Dialog buttons are clearly visible and styled */
+/* Dialog default buttons */
 .sapMDialog footer .sapMBtnDefault .sapMBtnInner,
 .sapMDialogFooter .sapMBtnDefault .sapMBtnInner {
-    background-color: #f3f4f6 !important;
-    border-color: #d1d5db !important;
-    color: var(--gl-navy) !important;
+    background-color: var(--sapButton_Background, #fff) !important;
+    border-color: var(--sapButton_BorderColor, #c8cbce) !important;
+    color: var(--sapButton_TextColor, #1d2d3e) !important;
 }
 
 .sapMDialog footer .sapMBtnDefault .sapMBtnInner:hover,
 .sapMDialogFooter .sapMBtnDefault .sapMBtnInner:hover {
-    background-color: var(--gl-orange-tint) !important;
-    border-color: var(--gl-orange) !important;
+    background-color: var(--sapButton_Hover_Background, #e8f0fe) !important;
+    border-color: var(--sapButton_Hover_BorderColor, #0070f2) !important;
 }
 
 /* ============================================================
    AVATAR ICONS (KPI Bottom Cards)
    ============================================================ */
 .sapFAvatarSuccess {
-    background-color: rgba(43, 125, 43, 0.1) !important;
+    background-color: var(--sapSuccessBackground, rgba(43, 125, 43, 0.10)) !important;
 }
 
 .sapFAvatarWarning {
-    background-color: rgba(247, 148, 29, 0.1) !important;
+    background-color: var(--sapWarningBackground, rgba(231, 101, 0, 0.10)) !important;
 }
 
 /* ============================================================
    SPLITTER BAR STYLING
    ============================================================ */
 .sapUiLoSplitterBar {
-    background-color: var(--gl-border-gray) !important;
+    background-color: var(--sapGroup_ContentBorderColor, #d9d9d9) !important;
 }
 
 .sapUiLoSplitterBar:hover {
-    background-color: var(--gl-orange-light) !important;
+    background-color: var(--sapSelectedColor, #0070f2) !important;
 }
-/* ============================================================
-   KPI CARDS NOMINATION TAB
-   ============================================================ */
-/* 
-   .top-right-container {
-    position: absolute;
-    top: 0;
-    right: 0;
-  } */
 
 /* ============================================================
-   CREATE NOMINATIONS DIALOG — Modern Enterprise Theme
+   CREATE NOMINATIONS DIALOG — Horizon Enterprise Theme
    ============================================================ */
 .nom-create-dialog {
     border-radius: 12px !important;
 }
 
 .nom-create-dialog .sapMDialogTitle {
-    color: var(--gl-navy, #1B1464) !important;
+    color: var(--sapTextColor, #1d2d3e) !important;
     font-weight: 700 !important;
     font-size: 1.15rem !important;
     letter-spacing: 0.2px !important;
 }
 
 .nom-dlg-container {
-    background-color: #ffffff !important;
+    background-color: var(--sapBaseColor, #fff) !important;
     padding: 16px 20px 20px 20px !important;
 }
 
@@ -1031,8 +953,8 @@ body.fullScreenLock {
     flex-direction: row !important;
     align-items: stretch !important;
     justify-content: space-between !important;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
-    border: 1px solid #e2e8f0 !important;
+    background: var(--sapGroup_TitleBackground, #f5f6f7) !important;
+    border: 1px solid var(--sapGroup_ContentBorderColor, #d9d9d9) !important;
     border-radius: 10px !important;
     padding: 12px 20px !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
@@ -1045,7 +967,7 @@ body.fullScreenLock {
     flex-direction: column !important;
     justify-content: center !important;
     padding: 2px 14px !important;
-    border-right: 1px solid #e2e8f0 !important;
+    border-right: 1px solid var(--sapGroup_ContentBorderColor, #d9d9d9) !important;
 }
 
 .nom-dlg-header-field:first-child {
@@ -1063,19 +985,20 @@ body.fullScreenLock {
     font-weight: 600 !important;
     text-transform: uppercase !important;
     letter-spacing: 0.6px !important;
-    color: #64748b !important;
+    color: var(--sapContent_LabelColor, #5b738b) !important;
     margin-bottom: 4px !important;
 }
 
 .nom-dlg-header-value {
     font-size: 0.95rem !important;
     font-weight: 700 !important;
-    color: #1e293b !important;
+    color: var(--sapTextColor, #1d2d3e) !important;
     line-height: 1.3 !important;
 }
 
+/* Quantity highlight — Horizon informative colour */
 .nom-dlg-header-qty {
-    color: var(--gl-orange-dark, #E07A0C) !important;
+    color: var(--sapInformativeColor, #0070f2) !important;
     font-size: 1.05rem !important;
 }
 
@@ -1092,8 +1015,8 @@ body.fullScreenLock {
 .nom-tile-panel {
     flex: 1 1 0 !important;
     min-width: 0 !important;
-    background: #ffffff !important;
-    border: 1px solid #e2e8f0 !important;
+    background: var(--sapBaseColor, #fff) !important;
+    border: 1px solid var(--sapGroup_ContentBorderColor, #d9d9d9) !important;
     border-radius: 10px !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
     overflow: hidden !important;
@@ -1101,37 +1024,37 @@ body.fullScreenLock {
 }
 
 .nom-tile-panel:hover {
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07) !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
 }
 
-/* Panel Headers */
+/* Panel Headers — Origin uses neutral accent, Destination uses informative */
 .nom-origin-panel {
-    border-top: 3px solid var(--gl-navy, #1B1464) !important;
+    border-top: 3px solid var(--sapSuccessColor, #2b7d2b) !important;
 }
 
 .nom-origin-panel .sapMPanelHdr {
-    background: #f8fafc !important;
-    color: var(--gl-navy, #1B1464) !important;
+    background: var(--sapGroup_TitleBackground, #f5f6f7) !important;
+    color: var(--sapTextColor, #1d2d3e) !important;
     font-weight: 700 !important;
     font-size: 0.95rem !important;
     letter-spacing: 0.3px !important;
-    border-bottom: 1px solid #e2e8f0 !important;
+    border-bottom: 1px solid var(--sapGroup_ContentBorderColor, #d9d9d9) !important;
     padding: 10px 16px !important;
     height: auto !important;
     line-height: 1.4 !important;
 }
 
 .nom-destination-panel {
-    border-top: 3px solid var(--gl-orange, #F7941D) !important;
+    border-top: 3px solid var(--sapInformativeColor, #0070f2) !important;
 }
 
 .nom-destination-panel .sapMPanelHdr {
-    background: #f8fafc !important;
-    color: var(--gl-orange-dark, #E07A0C) !important;
+    background: var(--sapGroup_TitleBackground, #f5f6f7) !important;
+    color: var(--sapTextColor, #1d2d3e) !important;
     font-weight: 700 !important;
     font-size: 0.95rem !important;
     letter-spacing: 0.3px !important;
-    border-bottom: 1px solid #e2e8f0 !important;
+    border-bottom: 1px solid var(--sapGroup_ContentBorderColor, #d9d9d9) !important;
     padding: 10px 16px !important;
     height: auto !important;
     line-height: 1.4 !important;
@@ -1151,7 +1074,7 @@ body.fullScreenLock {
     flex-direction: row !important;
     align-items: center !important;
     padding: 7px 4px !important;
-    border-bottom: 1px solid #f1f5f9 !important;
+    border-bottom: 1px solid var(--sapList_BorderColor, #e8eaed) !important;
     min-height: 34px !important;
     box-sizing: border-box !important;
 }
@@ -1161,7 +1084,7 @@ body.fullScreenLock {
 }
 
 .nom-tile-row:hover {
-    background-color: #fafbfc !important;
+    background-color: var(--sapList_Hover_Background, #e8f0fe) !important;
     border-radius: 4px !important;
 }
 
@@ -1170,7 +1093,7 @@ body.fullScreenLock {
     min-width: 175px !important;
     max-width: 175px !important;
     flex-shrink: 0 !important;
-    color: #64748b !important;
+    color: var(--sapContent_LabelColor, #5b738b) !important;
     font-size: 0.825rem !important;
     font-weight: 500 !important;
     margin: 0 !important;
@@ -1179,7 +1102,7 @@ body.fullScreenLock {
 
 .nom-tile-value {
     flex: 1 1 auto !important;
-    color: #1e293b !important;
+    color: var(--sapTextColor, #1d2d3e) !important;
     font-size: 0.875rem !important;
     font-weight: 600 !important;
     text-align: left !important;
@@ -1189,7 +1112,7 @@ body.fullScreenLock {
 }
 
 .nom-tile-value-highlight {
-    color: var(--gl-navy, #1B1464) !important;
+    color: var(--sapTextColor, #1d2d3e) !important;
     font-weight: 700 !important;
     letter-spacing: 0.2px !important;
 }
@@ -1200,8 +1123,8 @@ body.fullScreenLock {
     flex-direction: row !important;
     align-items: center !important;
     justify-content: center !important;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%) !important;
-    border: 1px solid #e2e8f0 !important;
+    background: var(--sapGroup_TitleBackground, #f5f6f7) !important;
+    border: 1px solid var(--sapGroup_ContentBorderColor, #d9d9d9) !important;
     border-radius: 8px !important;
     padding: 10px 24px !important;
     margin: 6px 0 12px 0 !important;
@@ -1218,43 +1141,44 @@ body.fullScreenLock {
 .nom-ctrl-label {
     font-size: 0.84rem !important;
     font-weight: 600 !important;
-    color: #334155 !important;
+    color: var(--sapTextColor, #1d2d3e) !important;
     margin: 0 !important;
     white-space: nowrap !important;
 }
 
 .nom-editable-input .sapMInputBaseInner {
     border-radius: 6px !important;
-    border-color: #cbd5e1 !important;
+    border-color: var(--sapField_BorderColor, #c8cbce) !important;
     font-weight: 600 !important;
     font-size: 0.875rem !important;
-    background-color: #ffffff !important;
+    background-color: var(--sapField_Background, #fff) !important;
 }
 
 .nom-editable-input .sapMInputBaseInner:focus {
-    border-color: var(--gl-navy-light, #2A2080) !important;
-    box-shadow: 0 0 0 2px rgba(27, 20, 100, 0.12) !important;
+    border-color: var(--sapField_Focus_BorderColor, #0070f2) !important;
+    box-shadow: 0 0 0 2px rgba(0, 112, 242, 0.15) !important;
 }
 
 /* ── Schedule Table ── */
 .nom-schedule-table {
-    border: 1px solid #e2e8f0 !important;
+    border: 1px solid var(--sapGroup_ContentBorderColor, #d9d9d9) !important;
     border-radius: 8px !important;
     overflow: hidden !important;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
 }
 
 .nom-schedule-table .sapUiTableColHdrCnt {
-    background: #f1f5f9 !important;
-    border-bottom: 2px solid #e2e8f0 !important;
+    background: var(--sapList_HeaderBackground, #f5f6f7) !important;
+    border-bottom: 2px solid var(--sapList_HeaderBorderColor, #d9d9d9) !important;
 }
 
 .nom-schedule-table .sapUiTableColHdr {
-    background: #f1f5f9 !important;
+    background: var(--sapList_HeaderBackground, #f5f6f7) !important;
 }
 
+/* Column header labels — must be readable against the light header background */
 .nom-schedule-table .sapUiTableColHdr .sapMLabel {
-    color: var(--gl-navy, #1B1464) !important;
+    color: var(--sapList_HeaderTextColor, #1d2d3e) !important;
     font-weight: 700 !important;
     font-size: 0.825rem !important;
     text-transform: uppercase !important;
@@ -1263,6 +1187,5 @@ body.fullScreenLock {
 
 .nom-schedule-table .sapUiTableRowHdr,
 .nom-schedule-table .sapUiTableTr {
-    border-bottom: 1px solid #f1f5f9 !important;
+    border-bottom: 1px solid var(--sapList_BorderColor, #e8eaed) !important;
 }
-

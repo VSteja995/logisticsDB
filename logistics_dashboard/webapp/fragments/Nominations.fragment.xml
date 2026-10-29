@@ -135,8 +135,8 @@
                noDataText="No data"
                items="{NomDetailsData>/NomDetailsSet}" sticky="ColumnHeaders,HeaderToolbar" >
                 <columns>
-                    <Column id="NomPnl2Col063"      ><header><Text id="NomPnl2Txt064"       text="Deal Number"/></header></Column>
                     <Column id="NomPnl2Col065"          ><header><Text id="NomPnl2Txt066"           text="Nomination Key"/></header></Column>
+                    <Column id="NomPnl2Col063"      ><header><Text id="NomPnl2Txt064"       text="Deal Number"/></header></Column>             
                     <Column id="NomPnl2Col067"         ><header><Text id="NomPnl2Txt068"          text="Nomination Item"/></header></Column>
                     <Column id="NomPnl2Col067E"         ><header><Text id="NomPnl2Txt068E"          text="TransactionType"/></header></Column>    
                     <Column id="NomPnl2Col099"    ><header><Text id="NomPnl2Txt100"     text="Counterparty"/></header></Column>
@@ -169,8 +169,8 @@
 <items>
         <ColumnListItem id="_IDGenColumnListItem1">
             <cells>
-    <Text id="_IDGenText69" text="{NomDetailsData>DealNumber}" />
     <Text id="_IDGenText109" text="{NomDetailsData>NominationKey}" />
+    <Text id="_IDGenText69" text="{NomDetailsData>DealNumber}" />
     <Text id="_IDGenText110" text="{NomDetailsData>NominationItem}" />
     <Text id="_IDGenText132" text="{NomDetailsData>TransactionType}" />
     <Text id="_IDGenText149" text="{NomDetailsData>CounterParty}" />
