@@ -52,7 +52,8 @@
         "sap.ui.core": {},
         "sap.f": {},
         "sap.ui.layout": {},
-        "sap.ui.table": {}
+        "sap.ui.table": {},
+        "sap.ui.unified": {}
       }
     },
     "contentDensities": {
@@ -71,9 +72,8 @@
         "type": "sap.ui.model.odata.v2.ODataModel",
         "preload": true,
         "settings": {
-          "synchronizationMode": "None",
-          "operationMode": "Server",
-          "autoExpandSelect": true
+          "defaultOperationMode": "Server",
+          "useBatch": true
         }
       }
     },
@@ -93,7 +93,6 @@
         "type": "View",
         "viewType": "XML",
         "path": "genslogiques.logisticsdashboard.view",
-        "async": true,
         "viewPath": "genslogiques.logisticsdashboard.view"
       },
       "routes": [
@@ -115,8 +114,7 @@
     "rootView": {
       "viewName": "genslogiques.logisticsdashboard.view.App",
       "type": "XML",
-      "id": "App",
-      "async": true
+      "id": "App"
     }
   }
 }

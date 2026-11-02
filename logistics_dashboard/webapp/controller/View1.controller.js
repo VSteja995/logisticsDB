@@ -8,8 +8,16 @@ sap.ui.define([
     "sap/ui/model/FilterOperator",
     "sap/ui/core/Fragment",
     "sap/m/Dialog",
-    "sap/ui/unified/FileUploader"
-], function (Controller, JSONModel, LayoutHelper, MessageToast, MessageBox, Filter, FilterOperator, Fragment, Dialog, FileUploader) {
+    "sap/ui/unified/FileUploader",
+    "sap/m/SelectDialog",
+    "sap/m/StandardListItem",
+    "sap/m/VBox",
+    "sap/m/Label",
+    "sap/m/Button",
+    "sap/ui/core/Element",
+    "sap/base/Log"
+], function (Controller, JSONModel, LayoutHelper, MessageToast, MessageBox, Filter, FilterOperator, Fragment, Dialog, FileUploader,
+    SelectDialog, StandardListItem, VBox, Label, Button, Element, Log) {
     "use strict";
 
     // ── Pure Date & Type Utility Helpers ─────────────────────────────────────
@@ -65,11 +73,6 @@ sap.ui.define([
     // Dynamic MOT description map - populated from actual data
     var _motDescMap = {};
 
-    function _motLabel(sCode) {
-        if (!sCode) { return ""; }
-        return _motDescMap[sCode] || sCode;
-    }
-
     function _motDisplay(sCode) {
         if (!sCode) { return ""; }
         var sDesc = _motDescMap[sCode] || "";
@@ -82,36 +85,20 @@ sap.ui.define([
         return (d.getUTCMonth() + 1) + "/" + d.getUTCDate() + "/" + d.getUTCFullYear();
     }
 
-    function _fmtMonth(vDate) {
-        var d = _parseDate(vDate);
-        if (!d) { return ""; }
-        return String(d.getUTCMonth() + 1).padStart(2, "0");
-    }
-
     function _fmtQty(n, sUOM) {
         return parseFloat(n || 0).toLocaleString("en-US") + (sUOM ? " " + sUOM : "");
-    }
-
-    function _toODataTimestamp(sDateString) {
-        if (!sDateString) return null;
-        var oDate = new Date(sDateString);
-        if (isNaN(oDate.getTime())) return null;
-        var nTimestamp = oDate.getTime();
-        return "/Date(" + nTimestamp + ")/";
     }
 
     return Controller.extend("genslogiques.logisticsdashboard.controller.View1", {
 
         // ── Lifecycle ────────────────────────────────────────────────────────────
+        onExit() {
+            // Dialogs are view dependents and get destroyed with the view;
+            // only the global full-screen scroll lock on <body> needs cleanup.
+            document.body.classList.remove("fullScreenLock");
+        },
+
         onInit() {
-            this._oCrossNav = null;
-            if (sap.ushell && sap.ushell.Container) {
-                this._oCrossNav = sap.ushell.Container.getService("CrossApplicationNavigation");
-            }
-           
-                
-            
-                
             // ── Separate filter state per tab ─────────────────────────────────
             this._oDealFilterState = {
                 fromDate: null,
@@ -230,246 +217,6 @@ this._oNomFilterState = {
 
         },
 
-        onAfterRendering: function () {
- 
-            // =====================================================
-            // Deals Overview default filters
-            // =====================================================
-         
-            if (!this._bDefaultDealsInitialized) {
-         
-                this._bDefaultDealsInitialized = true;
-         
-                this._initializeDefaultDealsFilters();
-            }
-
-            // =====================================================
-            // Logistics Planning default filters
-            // =====================================================
-         
-            if (!this._bDefaultPlanningInitialized) {
-         
-                this._bDefaultPlanningInitialized = true;
-         
-                this._initializeDefaultPlanningFilters();
-            }
-        },
-
-        _initializeDefaultDealsFilters: function () {
- 
-            // =====================================================
-            // 1. Calculate default date range
-            // =====================================================
-         
-            var dToday = new Date();
-         
-            var dFromDate = new Date(dToday);
-         
-            dFromDate.setMonth(
-                dFromDate.getMonth() - 1
-            );
-         
-            // =====================================================
-            // 2. Store default filter values
-            // =====================================================
-         
-            this._oDealFilterState.fromDate = dFromDate;
-            this._oDealFilterState.toDate = dToday;
-         
-            // Mode: All
-            this._oDealFilterState.motKey = " ";
-         
-            // No commodity filter
-            this._oDealFilterState.commodityKeys = [];
-
-            // =====================================================
-            // 3. Get controls from DealsOverview fragment
-            // =====================================================
-         
-            var oDateRange = this.byId(
-                "MainPnlFra011--DlPnl1DRS005"
-            );
-         
-            var oMode = this.byId(
-                "MainPnlFra011--DlPnl1SgB007"
-            );
-         
-         
-            // =====================================================
-            // 4. Set Date Range
-            // =====================================================
-         
-            if (oDateRange) {
-         
-                oDateRange.setDateValue(dFromDate);
-                oDateRange.setSecondDateValue(dToday);
-         
-                console.log(
-                    "Default Date Range set:",
-                    dFromDate,
-                    dToday
-                );
-         
-            } else {
-         
-                console.error(
-                    "DateRangeSelection not found"
-                );
-         
-                return;
-            }
-      
-            // =====================================================
-            // 5. Set Mode = All
-            // =====================================================
-         
-            if (oMode) {
-         
-                oMode.setSelectedKey("All");
-         
-                console.log(
-                    "Default Mode set: All"
-                );
-         
-            } else {
-         
-                console.error(
-                    "SegmentedButton not found"
-                );
-         
-                return;
-            }
-         
-         
-            // =====================================================
-            // 6. Load Deals data using default filters
-            // =====================================================
-         
-            var oModel = this.getView().getModel();
-         
-            if (!oModel) {
-         
-                console.error(
-                    "OData model not available"
-                );
-         
-                return;
-            }
-
-            // Wait until OData metadata is available
-            oModel.metadataLoaded().then(function () {
-         
-                console.log(
-                    "Loading Deals data with default filters..."
-                );
-         
-                this._applyDealsFilters(
-                    dFromDate,
-                    dToday
-                );
-         
-            }.bind(this));
-         
-        },
-         
-        _initializeDefaultPlanningFilters: function () {
-         
-            // =====================================================
-            // 1. Calculate default date range
-            //    From = today - 1 month
-            //    To   = today
-            // =====================================================
-         
-            var dToday = new Date();
-         
-            var dFromDate = new Date(dToday);
-         
-            dFromDate.setMonth(
-                dFromDate.getMonth() - 1
-            );
-         
-         
-            // =====================================================
-            // 2. Store default date range in filter state
-            // =====================================================
-         
-            this._oPosFilterState.fromDate = dFromDate;
-            this._oPosFilterState.toDate = dToday;
-         
-            // No commodity selected initially
-            this._oPosFilterState.commodityKeys = [];
-         
-         
-            // =====================================================
-            // 3. Get Logistics Planning DateRangeSelection
-            // =====================================================
-         
-            var oDateRange = this.byId(
-                "MainPnlFra013--dateDrs"
-            );
-         
-            var oDateRange2 = this.byId(
-                "MainPnlFra013--monthDrs"
-            );
-            // =====================================================
-            // 4. Set default date range in UI
-            // =====================================================
-         
-            if (oDateRange) {
-         
-                oDateRange.setDateValue(dFromDate);
-         
-                oDateRange.setSecondDateValue(dToday);
-         
-                console.log(
-                    "Default Logistics Date Range set:",
-                    dFromDate,
-                    dToday
-                );
-         
-            } else {
-         
-                console.error(
-                    "Logistics DateRangeSelection not found"
-                );
-         
-                return;
-            }
-                 
-            // =====================================================
-            // 5. Get OData model
-            // =====================================================
-         
-            var oModel = this.getView().getModel();
-         
-            if (!oModel) {
-         
-                console.error(
-                    "OData model not available"
-                );
-         
-                return;
-            }
-         
-         
-            // =====================================================
-            // 6. Wait for metadata and load default data
-            // =====================================================
-         
-            oModel.metadataLoaded().then(function () {
-         
-                console.log(
-                    "Loading default Logistics Planning data..."
-                );
-         
-                this._applyPositionFilters(
-                    dFromDate,
-                    dToday
-                );
-         
-            }.bind(this));
-        },
-
   onAfterRendering: function () {
 
     // =====================================================
@@ -560,17 +307,11 @@ if (!this._bDefaultNominationInitialized) {
         oDateRange.setDateValue(dFromDate);
         oDateRange.setSecondDateValue(dToday);
 
-        console.log(
-            "Default Date Range set:",
-            dFromDate,
-            dToday
-        );
+        Log.debug("Default Date Range set:", [dFromDate, dToday].join(" "));
 
     } else {
 
-        console.error(
-            "DateRangeSelection not found"
-        );
+        Log.error("DateRangeSelection not found");
 
         return;
     }
@@ -584,15 +325,11 @@ if (!this._bDefaultNominationInitialized) {
 
         oMode.setSelectedKey("All");
 
-        console.log(
-            "Default Mode set: All"
-        );
+        Log.debug("Default Mode set: All");
 
     } else {
 
-        console.error(
-            "SegmentedButton not found"
-        );
+        Log.error("SegmentedButton not found");
 
         return;
     }
@@ -606,9 +343,7 @@ if (!this._bDefaultNominationInitialized) {
 
     if (!oModel) {
 
-        console.error(
-            "OData model not available"
-        );
+        Log.error("OData model not available");
 
         return;
     }
@@ -617,9 +352,7 @@ if (!this._bDefaultNominationInitialized) {
     // Wait until OData metadata is available
     oModel.metadataLoaded().then(function () {
 
-        console.log(
-            "Loading Deals data with default filters..."
-        );
+        Log.debug("Loading Deals data with default filters...");
 
         this._applyDealsFilters(
             dFromDate,
@@ -682,24 +415,18 @@ _initializeDefaultPlanningFilters: function () {
 
         oDateRange.setSecondDateValue(dToday);
 
-        console.log(
-            "Default Logistics Date Range set:",
-            dFromDate,
-            dToday
-        );
+        Log.debug("Default Logistics Date Range set:", [dFromDate, dToday].join(" "));
 
     } else {
 
-        console.error(
-            "Logistics DateRangeSelection not found"
-        );
+        Log.error("Logistics DateRangeSelection not found");
 
         return;
     }
 
     if (oMode) {
         oMode.setSelectedKey("All");
-        console.log("Default Logistics Mode set: All");
+        Log.debug("Default Logistics Mode set: All");
     }
 
 
@@ -711,9 +438,7 @@ _initializeDefaultPlanningFilters: function () {
 
     if (!oModel) {
 
-        console.error(
-            "OData model not available"
-        );
+        Log.error("OData model not available");
 
         return;
     }
@@ -725,9 +450,7 @@ _initializeDefaultPlanningFilters: function () {
 
     oModel.metadataLoaded().then(function () {
 
-        console.log(
-            "Loading default Logistics Planning data..."
-        );
+        Log.debug("Loading default Logistics Planning data...");
 
         this._applyPositionFilters(
             dFromDate,
@@ -740,7 +463,6 @@ _initializeDefaultPlanningFilters: function () {
 
 _initializeDefaultNominationFilters: function () {
 
-       console.log("===== NOMINATION DEFAULT INITIALIZATION STARTED =====");
     // =====================================================
     // 1. Calculate default date range
     // From = today - 1 month
@@ -783,17 +505,11 @@ _initializeDefaultNominationFilters: function () {
 
         oDateRange.setSecondDateValue(dToday);
 
-        console.log(
-            "Default Nomination Date Range set:",
-            dFromDate,
-            dToday
-        );
+        Log.debug("Default Nomination Date Range set:", [dFromDate, dToday].join(" "));
 
     } else {
 
-        console.error(
-            "Nomination DateRangeSelection not found"
-        );
+        Log.error("Nomination DateRangeSelection not found");
 
         return;
     }
@@ -807,9 +523,7 @@ _initializeDefaultNominationFilters: function () {
 
     if (!oModel) {
 
-        console.error(
-            "OData model not available"
-        );
+        Log.error("OData model not available");
 
         return;
     }
@@ -821,9 +535,7 @@ _initializeDefaultNominationFilters: function () {
 
 oModel.metadataLoaded().then(function () {
 
-    console.log(
-        "Loading Nomination Details with default filters..."
-    );
+    Log.debug("Loading Nomination Details with default filters...");
 
     // Load dropdown values
     this._loadNominationDropdownData();
@@ -848,7 +560,7 @@ _loadNominationDropdownData: function () {
     var oModel = this.getView().getModel();
 
     if (!oModel) {
-        console.error("OData model not available.");
+        Log.error("OData model not available.");
         return;
     }
 
@@ -886,10 +598,7 @@ _loadNominationDropdownData: function () {
 
         error: function (oError) {
 
-            console.error(
-                "Error loading UniqNomCmdty:",
-                oError
-            );
+            Log.error("Error loading UniqNomCmdty:", oError);
 
         }.bind(this)
     });
@@ -921,19 +630,13 @@ _loadNominationDropdownData: function () {
                 );
             }
 
-            console.log(
-                "Nomination Location:",
-                aResults
-            );
+            Log.debug("Nomination Location:", aResults);
 
         }.bind(this),
 
         error: function (oError) {
 
-            console.error(
-                "Error loading UniqNomLoc:",
-                oError
-            );
+            Log.error("Error loading UniqNomLoc:", oError);
 
         }.bind(this)
     });
@@ -965,19 +668,13 @@ _loadNominationDropdownData: function () {
                 );
             }
 
-            console.log(
-                "Nomination Status:",
-                aResults
-            );
+            Log.debug("Nomination Status:", aResults);
 
         }.bind(this),
 
         error: function (oError) {
 
-            console.error(
-                "Error loading UniqNomStat:",
-                oError
-            );
+            Log.error("Error loading UniqNomStat:", oError);
 
         }.bind(this)
     });
@@ -1040,7 +737,6 @@ _loadNominationDropdownData: function () {
 
 onNominationRefresh: function () {
 
-    console.log("===== NOMINATION REFRESH STARTED =====");
 
     // =====================================================
     // 1. Calculate the ORIGINAL default date range
@@ -1193,20 +889,12 @@ onNominationRefresh: function () {
     );
 
 
-    console.log(
-        "Nomination filters reset to default:",
-        dFromDate,
-        dToday
-    );
+    Log.debug("Nomination filters reset to default:", [dFromDate, dToday].join(" "));
 
-    console.log(
-        "===== NOMINATION REFRESH COMPLETED ====="
-    );
 },
 
 onTicketRefresh: function () {
 
-    console.log("===== TICKET REFRESH STARTED =====");
 
     // =====================================================
     // 1. Calculate INITIAL / DEFAULT date range
@@ -1275,19 +963,13 @@ onTicketRefresh: function () {
     );
 
 
-    console.log(
-        "Ticket Details refreshed with default date range:",
-        dFromDate,
-        dToday
-    );
+    Log.debug("Ticket Details refreshed with default date range:", [dFromDate, dToday].join(" "));
 
-    console.log("===== TICKET REFRESH COMPLETED =====");
 },
 
 
 onDealsRefresh: function () {
 
-    console.log("===== DEALS REFRESH STARTED =====");
 
     // =====================================================
     // 1. Calculate INITIAL / DEFAULT date range
@@ -1435,17 +1117,13 @@ onDealsRefresh: function () {
     );
 
 
-    console.log(
-        "Deals refreshed with default filters:",
-        {
+    Log.debug("Deals refreshed with default filters:", {
             fromDate: dFromDate,
             toDate: dToday,
             mode: "All",
             commodity: []
-        }
-    );
+        });
 
-    console.log("===== DEALS REFRESH COMPLETED =====");
 },
 
 
@@ -1497,11 +1175,7 @@ onDealsRefresh: function () {
         dToDate;
 
 
-    console.log(
-        "Nomination Date Range Changed:",
-        dFromDate,
-        dToDate
-    );
+    Log.debug("Nomination Date Range Changed:", [dFromDate, dToDate].join(" "));
 
 
     // =====================================================
@@ -1752,10 +1426,7 @@ _filterNominationTable: function () {
     );
 
 
-    console.log(
-        "Filtered Nomination records:",
-        aFilteredResults.length
-    );
+    Log.debug("Filtered Nomination records:", aFilteredResults.length);
 },
 
 
@@ -1806,11 +1477,7 @@ onNominationSearch: function (oEvent) {
     this._filterNominationTable();
 
 
-    console.log(
-        "Nomination Search:",
-        "Deal ID =", sDealId,
-        "Nomination ID =", sNominationId
-    );
+    Log.debug("Nomination Search:", ["Deal ID =", sDealId, "Nomination ID =", sNominationId].join(" "));
 },
 
 onNominationDropdownChange: function (oEvent) {
@@ -1873,11 +1540,7 @@ onNominationDropdownChange: function (oEvent) {
     this._filterNominationTable();
 
 
-    console.log(
-        "Nomination Dropdown Changed:",
-        sSelectedKey,
-        this._oNomFilterState
-    );
+    Log.debug("Nomination Dropdown Changed:", [sSelectedKey, this._oNomFilterState].join(" "));
 },
     
 
@@ -1943,10 +1606,7 @@ _readAllODataPages: function (sPath) {
 
             if (oVisitedPages[sRequestPath]) {
 
-                console.error(
-                    "Duplicate OData page detected:",
-                    sRequestPath
-                );
+                Log.error("Duplicate OData page detected:", sRequestPath);
 
                 // Stop pagination and return records
                 // already loaded
@@ -1958,10 +1618,7 @@ _readAllODataPages: function (sPath) {
             // Mark page as visited
             oVisitedPages[sRequestPath] = true;
 
-            console.log(
-                "Reading OData page:",
-                sRequestPath
-            );
+            Log.debug("Reading OData page:", sRequestPath);
 
             // ============================================
             // Read page
@@ -1981,12 +1638,7 @@ _readAllODataPages: function (sPath) {
                             aPageResults
                         );
 
-                    console.log(
-                        "Current page:",
-                        aPageResults.length,
-                        "| Total loaded:",
-                        aAllResults.length
-                    );
+                    Log.debug("Current page:", [aPageResults.length, "| Total loaded:", aAllResults.length].join(" "));
 
                     // ====================================
                     // Next page
@@ -1994,19 +1646,13 @@ _readAllODataPages: function (sPath) {
 
                     if (oData && oData.__next) {
 
-                        console.log(
-                            "Backend returned __next:",
-                            oData.__next
-                        );
+                        Log.debug("Backend returned __next:", oData.__next);
 
                         readPage(oData.__next);
 
                     } else {
 
-                        console.log(
-                            "All OData pages loaded. Total:",
-                            aAllResults.length
-                        );
+                        Log.debug("All OData pages loaded. Total:", aAllResults.length);
 
                         resolve(aAllResults);
                     }
@@ -2014,10 +1660,7 @@ _readAllODataPages: function (sPath) {
 
                 error: function (oError) {
 
-                    console.error(
-                        "Error while loading OData page:",
-                        oError
-                    );
+                    Log.error("Error while loading OData page:", oError);
 
                     reject(oError);
                 }
@@ -2157,10 +1800,7 @@ this._readAllODataPages(ddKeyPath)
 
    .then(function (aResults) {
 
-    console.log(
-        "Total DealDetail records received:",
-        aResults.length
-    );
+    Log.debug("Total DealDetail records received:", aResults.length);
 
 
     // =====================================================
@@ -2184,7 +1824,7 @@ this._readAllODataPages(ddKeyPath)
 // 2. Apply MoT filter
 // =====================================================
 
-console.log("Selected MoT Key for this request:", sMotKey);
+Log.debug("Selected MoT Key for this request:", sMotKey);
 
 if (sMotKey === "01") {
     // Truck = Road / Truck / 01
@@ -2200,10 +1840,7 @@ if (sMotKey === "01") {
     });
 }
 
-console.log(
-    "DealDetail records after MoT filter:",
-    aResults.length
-);
+Log.debug("DealDetail records after MoT filter:", aResults.length);
 
 
     // =====================================================
@@ -2211,12 +1848,7 @@ console.log(
     // =====================================================
    if (iRequestId !== this._iDealsRequestId) {
 
-        console.log(
-            "Ignoring old Deals response. Request:",
-            iRequestId,
-            "Latest:",
-            this._iDealsRequestId
-        );
+        Log.debug("Ignoring old Deals response. Request:", [iRequestId, "Latest:", this._iDealsRequestId].join(" "));
 
         return;
     }
@@ -2248,10 +1880,7 @@ console.log(
 
     .catch(function (oError) {
 
-        console.error(
-            "Error loading DealDetail:",
-            oError
-        );
+        Log.error("Error loading DealDetail:", oError);
 
         checkDone();
 
@@ -2310,7 +1939,6 @@ onMatchPosRefresh: function () {
       
 onMonthRefresh: function () {
 
-    console.log("===== MONTHLY PLANNING SUMMARY REFRESH STARTED =====");
 
     var oView = this.getView();
 
@@ -2382,25 +2010,18 @@ onMonthRefresh: function () {
     );
 
 
-    console.log(
-        "Monthly Planning Summary refreshed:",
-        {
+    Log.debug("Monthly Planning Summary refreshed:", {
             fromDate: dFrom,
             toDate: dTo,
             mode: this._oPosFilterState.motKey,
             commodity: this._oPosFilterState.commodityKeys
-        }
-    );
+        });
 
-    console.log(
-        "===== MONTHLY PLANNING SUMMARY REFRESH COMPLETED ====="
-    );
 },
 
 
 onPlanningDetailRefresh: function () {
 
-    console.log("===== PLANNING DETAIL REFRESH STARTED =====");
 
     var oView = this.getView();
 
@@ -2497,19 +2118,13 @@ if (oMonthModel) {
     );
 
 
-    console.log(
-        "Planning Detail refreshed with current filters:",
-        {
+    Log.debug("Planning Detail refreshed with current filters:", {
             fromDate: dFrom,
             toDate: dTo,
             mode: this._oPosFilterState.motKey,
             commodity: this._oPosFilterState.commodityKeys
-        }
-    );
+        });
 
-    console.log(
-        "===== PLANNING DETAIL REFRESH COMPLETED ====="
-    );
 },
 
 
@@ -2687,20 +2302,17 @@ var PosSmryKeyPath = oModel.createKey("/PositionsSummary", {
     p_ToDate:   sFormattedTo
 }) + "/Set";
 
-console.log("PositionsSummary OData Path:", PosSmryKeyPath);
+Log.debug("PositionsSummary OData Path:", PosSmryKeyPath);
 
 oModel.read(PosSmryKeyPath, {
 
     success: function (oData) {
 
-        console.log("PositionsSummary Backend Response:", oData);
+        Log.debug("PositionsSummary Backend Response:", oData);
 
         var aResults = filterByCmdtyAndMot(oData);
 
-        console.log(
-            "PositionsSummary records received:",
-            aResults.length
-        );
+        Log.debug("PositionsSummary records received:", aResults.length);
 
         // IMPORTANT:
         // XML table is bound to PosSmryData>/PosSmrySet
@@ -2715,16 +2327,11 @@ oModel.read(PosSmryKeyPath, {
 
             oJM.refresh(true);
 
-            console.log(
-                "Monthly Planning Summary model updated:",
-                aResults
-            );
+            Log.debug("Monthly Planning Summary model updated:", aResults);
 
         } else {
 
-            console.error(
-                "PosSmryData JSONModel not found"
-            );
+            Log.error("PosSmryData JSONModel not found");
 
         }
 
@@ -2733,10 +2340,7 @@ oModel.read(PosSmryKeyPath, {
 
     error: function (oError) {
 
-        console.error(
-            "Error loading PositionsSummary:",
-            oError
-        );
+        Log.error("Error loading PositionsSummary:", oError);
 
         checkDone();
 
@@ -2746,17 +2350,6 @@ oModel.read(PosSmryKeyPath, {
     }
 });
             // 5. MatchPos
-            // oModel.read("/MatchConfirm", {
-            //     success: function (oData) {
-            //         var aResults = filterByCmdtyAndMot(oData);
-            //         var oJM = oView.getModel("MatchPosData");
-            //         if (oJM) { oJM.setProperty("/MatchPosSet", aResults); }
-            //         checkDone();
-            //     },
-            //     error: function () { checkDone(); MessageToast.show("Error loading MatchPosData."); }
-            // });
-
-
            oModel.read("/MatchConfirm", {
     success: function (oData) {
 
@@ -2844,15 +2437,9 @@ _applyNominationFilters: function (dFrom, dTo) {
     var sFormattedTo = this._formatODataDate(dTo);
 
 
-    console.log(
-        "Nomination From Date:",
-        sFormattedFrom
-    );
+    Log.debug("Nomination From Date:", sFormattedFrom);
 
-    console.log(
-        "Nomination To Date:",
-        sFormattedTo
-    );
+    Log.debug("Nomination To Date:", sFormattedTo);
 
 
     // =====================================================
@@ -2867,10 +2454,7 @@ _applyNominationFilters: function (dFrom, dTo) {
         }
     ) + "/Set";
 
-    console.log(
-        "Nomination OData Path:",
-        sNomKeyPath
-    );
+    Log.debug("Nomination OData Path:", sNomKeyPath);
 
 
     // =====================================================
@@ -2881,10 +2465,7 @@ _applyNominationFilters: function (dFrom, dTo) {
 
         success: function (oData) {
 
-            console.log(
-                "Nomination OData Response:",
-                oData
-            );
+            Log.debug("Nomination OData Response:", oData);
 
 
             var aResults =
@@ -2893,10 +2474,7 @@ _applyNominationFilters: function (dFrom, dTo) {
                     : [];
 
 
-            console.log(
-                "Nomination records received:",
-                aResults.length
-            );
+            Log.debug("Nomination records received:", aResults.length);
 
 
             // =================================================
@@ -2926,10 +2504,7 @@ if (oNomModel) {
 
         error: function (oError) {
 
-            console.error(
-                "Error loading Nomination Details:",
-                oError
-            );
+            Log.error("Error loading Nomination Details:", oError);
 
             oView.setBusy(false);
 
@@ -2947,9 +2522,7 @@ _applyTicketFilters: function (dFrom, dTo) {
     var oView = this.getView();
 
     if (!oModel) {
-        console.error(
-            "OData model not available for Ticket Details"
-        );
+        Log.error("OData model not available for Ticket Details");
         return;
     }
 
@@ -2964,15 +2537,9 @@ _applyTicketFilters: function (dFrom, dTo) {
         this._formatODataDate(dTo);
 
 
-    console.log(
-        "Ticket From Date:",
-        sFormattedFrom
-    );
+    Log.debug("Ticket From Date:", sFormattedFrom);
 
-    console.log(
-        "Ticket To Date:",
-        sFormattedTo
-    );
+    Log.debug("Ticket To Date:", sFormattedTo);
 
 
     // =====================================================
@@ -2987,10 +2554,7 @@ _applyTicketFilters: function (dFrom, dTo) {
         }
     ) + "/Set";
 
-    console.log(
-        "Ticket OData Path:",
-        sTicketKeyPath
-    );
+    Log.debug("Ticket OData Path:", sTicketKeyPath);
 
 
     // =====================================================
@@ -3001,10 +2565,7 @@ _applyTicketFilters: function (dFrom, dTo) {
 
         success: function (oData) {
 
-            console.log(
-                "Ticket OData Response:",
-                oData
-            );
+            Log.debug("Ticket OData Response:", oData);
 
 
             var aResults =
@@ -3013,10 +2574,7 @@ _applyTicketFilters: function (dFrom, dTo) {
                     : [];
 
 
-            console.log(
-                "Ticket records received:",
-                aResults.length
-            );
+            Log.debug("Ticket records received:", aResults.length);
 
 
             // =================================================
@@ -3038,19 +2596,14 @@ _applyTicketFilters: function (dFrom, dTo) {
 
             } else {
 
-                console.error(
-                    "TicketDetailsData model not found"
-                );
+                Log.error("TicketDetailsData model not found");
             }
 
         }.bind(this),
 
         error: function (oError) {
 
-            console.error(
-                "Error loading Ticket Details:",
-                oError
-            );
+            Log.error("Error loading Ticket Details:", oError);
 
         }.bind(this)
 
@@ -3489,18 +3042,6 @@ _applyTicketFilters: function (dFrom, dTo) {
 
                  oView.setBusy(true);
 
-                //  if (aPayloads.length === 1) {
-                //      oModel.create("/MatchConfirm", aPayloads[0], {
-                //          success: function (oData) {
-                //              oView.setBusy(false);
-                //              MessageBox.success("Match confirmed successfully.", {
-                //                  title: "Match Confirmed",
-                //                  onClose: function () {
-                //                      this._onMatchSaveSuccess();
-                //                  }.bind(this)
-                //              });
-                //          }.bind(this),
-
                 if (aPayloads.length === 1) {
     oModel.create("/MatchConfirm", aPayloads[0], {
         success: function (oData) {
@@ -3580,38 +3121,6 @@ _applyTicketFilters: function (dFrom, dTo) {
                  }
              },
 
-             _extractODataError: function (oError) {
-                 if (!oError) {
-                     return "Unknown error occurred.";
-                 }
-                 try {
-                     if (oError.responseText) {
-                         var oParsed = JSON.parse(oError.responseText);
-                         if (oParsed.error && oParsed.error.message && oParsed.error.message.value) {
-                             return oParsed.error.message.value;
-                         }
-                         if (oParsed.error && oParsed.error.innererror && Array.isArray(oParsed.error.innererror.errordetails) && oParsed.error.innererror.errordetails.length > 0) {
-                             return oParsed.error.innererror.errordetails.map(function (d) { return d.message; }).join("; ");
-                         }
-                     }
-                 } catch (e) {
-                     // Not JSON, check for XML or raw response
-                     if (typeof oError.responseText === "string") {
-                         var mXml = /<message[^>]*>([^<]+)<\/message>/i.exec(oError.responseText);
-                         if (mXml && mXml[1]) {
-                             return mXml[1];
-                         }
-                     }
-                 }
-                 if (oError.message) {
-                     return oError.message;
-                 }
-                 if (oError.statusText) {
-                     return oError.statusText;
-                 }
-                 return "An unknown error occurred while communicating with the backend.";
-             },
-
              _parseBatchErrors: function (oData) {
                  var aErrors = [];
                  if (!oData || !oData.__batchResponses) {
@@ -3655,7 +3164,7 @@ _applyTicketFilters: function (dFrom, dTo) {
                              oBinding.refresh(true);
                          }
                      } catch (e) {
-                         console.warn("Could not refresh invTbl binding:", e);
+                         Log.warning("Could not refresh invTbl binding:", e);
                      }
                  }
              },
@@ -4070,7 +3579,7 @@ if (dFrom && dTo) {
                     that.getView().getModel("CarrierVHDModel").setProperty("/results", aResults);
 
                     if (!that._oCarrierVHD) {
-                        that._oCarrierVHD = new sap.m.SelectDialog({
+                        that._oCarrierVHD = new SelectDialog({
                             title: "Select Carrier",
                             noDataText: "No carriers found",
                             search: that._onCarrierVHDSearch.bind(that),
@@ -4081,7 +3590,7 @@ if (dFrom && dTo) {
                     }
                     that._oCarrierVHD.bindAggregation("items", {
                         path: "CarrierVHDModel>/results",
-                        template: new sap.m.StandardListItem({
+                        template: new StandardListItem({
                             title: "{CarrierVHDModel>PartnerName}",
                             description: "{CarrierVHDModel>Supplier}"
                         }),
@@ -4140,7 +3649,7 @@ if (dFrom && dTo) {
                     that.getView().getModel("ShipperVHDModel").setProperty("/results", aResults);
 
                     if (!that._oShipperVHD) {
-                        that._oShipperVHD = new sap.m.SelectDialog({
+                        that._oShipperVHD = new SelectDialog({
                             title: "Select Shipper",
                             noDataText: "No Shippers found",
                             search: that._onShipperVHDSearch.bind(that),
@@ -4151,7 +3660,7 @@ if (dFrom && dTo) {
                     }
                     that._oShipperVHD.bindAggregation("items", {
                         path: "ShipperVHDModel>/results",
-                        template: new sap.m.StandardListItem({
+                        template: new StandardListItem({
                             title: "{ShipperVHDModel>PartnerName}",
                             description: "{ShipperVHDModel>Supplier}"
                         }),
@@ -4210,7 +3719,7 @@ if (dFrom && dTo) {
                     that.getView().getModel("VehicleVHDModel").setProperty("/results", aResults);
 
                     if (!that._oVehicleVHD) {
-                        that._oVehicleVHD = new sap.m.SelectDialog({
+                        that._oVehicleVHD = new SelectDialog({
                             title: "Select Vehicle",
                             noDataText: "No vehicles found",
                             search: that._onVehicleVHDSearch.bind(that),
@@ -4221,7 +3730,7 @@ if (dFrom && dTo) {
                     }
                     that._oVehicleVHD.bindAggregation("items", {
                         path: "VehicleVHDModel>/results",
-                        template: new sap.m.StandardListItem({
+                        template: new StandardListItem({
                             title: "{VehicleVHDModel>VehicleDesc}",
                             description: "{VehicleVHDModel>VehicleID}"
                         }),
@@ -4271,7 +3780,7 @@ if (dFrom && dTo) {
             if (!oTable && oEvent && typeof oEvent.getSource === "function") {
                 var oBtn = oEvent.getSource();
                 var sPrefix = oBtn.getId().split("--")[0] + "--";
-                oTable = this.byId(sPrefix + "matchTbl") || (sap.ui.getCore && sap.ui.getCore().byId(sPrefix + "matchTbl"));
+                oTable = this.byId(sPrefix + "matchTbl") || Element.getElementById(sPrefix + "matchTbl");
             }
             if (!oTable) {
                 var aControls = this.getView().findAggregatedObjects(true, function (oControl) {
@@ -4389,7 +3898,7 @@ if (dFrom && dTo) {
                     that._oNomDialog = oDialog;
                     return oDialog;
                 }).catch(function (oErr) {
-                    console.error("Error loading CreateNominationsDialog fragment:", oErr);
+                    Log.error("Error loading CreateNominationsDialog fragment:", oErr);
                     MessageBox.error("Failed to load Nomination dialog: " + (oErr && oErr.message ? oErr.message : oErr));
                     that._pNomDialog = null;
                 });
@@ -4659,17 +4168,6 @@ if (dFrom && dTo) {
             });
         },
 
-        _generateWorkingDays: function (oStartDate, nCount) {
-            var aDays = [], oCur = new Date(oStartDate);
-            oCur.setUTCHours(0, 0, 0, 0);
-            while (aDays.length < nCount) {
-                var nDow = oCur.getUTCDay();
-                if (nDow !== 0 && nDow !== 6) { aDays.push(new Date(oCur)); }
-                oCur.setUTCDate(oCur.getUTCDate() + 1);
-            }
-            return aDays;
-        },
-
         _getNextWorkingDay: function (oDate) {
             var oNext = new Date(oDate);
             oNext.setUTCDate(oNext.getUTCDate() + 1);
@@ -4792,70 +4290,6 @@ if (dFrom && dTo) {
             oModel.setProperty(sPath + "/TotalScheduleQtyFormatted", nTotal > 0 ? nTotal.toLocaleString("en-US") + (sUOM ? " " + sUOM : "") : "");
         },
 
-        onNomRowNomCountChange: function (oEvent) {
-            var oCtx = oEvent.getSource().getBindingContext("nomDialogModel");
-            var oModel = this.getView().getModel("nomDialogModel");
-            if (!oCtx || !oModel) { return; }
-            var sPath = oCtx.getPath(), oRow = oModel.getProperty(sPath);
-            var nQty = parseFloat(oRow.ScheduleQty) || 0;
-            var nNoms = parseInt(oEvent.getParameter("value") || 1, 10) || 1;
-            var sUOM = oModel.getProperty("/_uom") || "";
-            var nTotal = parseFloat((nQty * nNoms).toFixed(3));
-            oModel.setProperty(sPath + "/TotalScheduleQty", nTotal);
-            oModel.setProperty(sPath + "/TotalScheduleQtyFormatted", nTotal > 0 ? nTotal.toLocaleString("en-US") + (sUOM ? " " + sUOM : "") : "");
-        },
-
-        onAddNominationRow: function () {
-            var oModel = this.getView().getModel("nomDialogModel");
-            if (!oModel) { return; }
-
-            var aRows = oModel.getProperty("/scheduleRows") || [];
-            var oStart = oModel.getProperty("/_purchStartDate") || new Date();
-            var nMatchQty = parseFloat(oModel.getProperty("/EditMatchQty")) || 0;
-            var nPurchQty = parseFloat(oModel.getProperty("/_purchQty")) || 0;
-            var nEffPurchQty = nPurchQty > 0 ? nPurchQty : nMatchQty;
-            var sUOM = oModel.getProperty("/_uom") || "";
-
-            var nCur = aRows.length;
-            var oLast = nCur > 0
-                ? new Date(aRows[nCur - 1].ScheduleDate + "T00:00:00Z")
-                : oStart;
-            var oNext = this._getNextWorkingDay(oLast);
-            var nNew = nCur + 1;
-
-            var nMatchPer = nNew > 0 ? parseFloat((nMatchQty / nNew).toFixed(3)) : 0;
-            var nPurchPer = nNew > 0 ? parseFloat((nEffPurchQty / nNew).toFixed(3)) : 0;
-
-            // Re-spread existing rows
-            aRows.forEach(function (r) {
-                r.ScheduleQty = String(nMatchPer);
-                r.PurchScheduleQty = String(nPurchPer);
-                r.TotalScheduleQty = nMatchPer;
-                r.TotalScheduleQtyFormatted = nMatchPer > 0
-                    ? nMatchPer.toLocaleString("en-US") + (sUOM ? " " + sUOM : "") : "";
-            });
-
-            // Append new row
-            var sY = oNext.getUTCFullYear();
-            var sMo = String(oNext.getUTCMonth() + 1).padStart(2, "0");
-            var sD = String(oNext.getUTCDate()).padStart(2, "0");
-            aRows.push({
-                ScheduleDate: sY + "-" + sMo + "-" + sD,
-                ScheduleQty: String(nMatchPer),
-                PurchScheduleQty: String(nPurchPer),
-                NoOfNominations: 1,
-                TotalScheduleQty: nMatchPer,
-                TotalScheduleQtyFormatted: nMatchPer > 0
-                    ? nMatchPer.toLocaleString("en-US") + (sUOM ? " " + sUOM : "") : "",
-                MoT: "", CarrierName: "", CarrierCode: "",
-                ShipperName: "", ShipperCode: "", VehicleId: "", VehicleDesc: ""
-            });
-
-            oModel.setProperty("/NoOfRows", nNew);
-            oModel.setProperty("/scheduleRows", aRows);
-            MessageToast.show("New row added. Total rows: " + nNew);
-        },
-
         onRemoveNominationRow: function (oEvent) {
             var oCtx = oEvent.getSource().getBindingContext("nomDialogModel");
             if (!oCtx) { return; }
@@ -4936,7 +4370,7 @@ if (dFrom && dTo) {
             var aPayloads = this._buildNominationPayload(oModel, aRows);
             if (!aPayloads || !aPayloads.length) { return; }
 
-            jQuery.sap.log.info(
+            Log.info(
                 "[NomCreate] " + aPayloads.length + " nomination(s) to submit. First payload preview:\n" +
                 JSON.stringify({
                     mot: aPayloads[0].mot,
@@ -4983,7 +4417,7 @@ if (dFrom && dTo) {
                                 }
                             }
                         } catch (e) {
-                            console.error("SAP Message Parse Error", e);
+                            Log.error("SAP Message Parse Error", e);
                             sMessageText = "1 nomination created successfully.";
                         }
 
@@ -5083,7 +4517,7 @@ if (dFrom && dTo) {
                         var nOk = aPayloads.length - nFailed;
                         oODataModel.resetChanges();
 
-                        jQuery.sap.log.error("[NomCreate Batch] " + nFailed + " changeset(s) failed:\n\u2022 " + aErrors.join("\n\u2022 "));
+                        Log.error("[NomCreate Batch] " + nFailed + " changeset(s) failed:\n\u2022 " + aErrors.join("\n\u2022 "));
                         MessageBox.error(
                             nFailed + " of " + aPayloads.length + " nomination(s) failed to save" +
                             (nOk > 0 ? " (" + nOk + " succeeded)" : "") + ":\n\n\u2022 " +
@@ -5137,7 +4571,7 @@ if (dFrom && dTo) {
                     oODataModel.setDeferredGroups([]);
                     oODataModel.resetChanges();
                     var sDetail = that._extractODataError(oError);
-                    jQuery.sap.log.error("[NomCreate Batch] HTTP " + (oError && oError.statusCode ? oError.statusCode : "?") + " — " + sDetail);
+                    Log.error("[NomCreate Batch] HTTP " + (oError && oError.statusCode ? oError.statusCode : "?") + " — " + sDetail);
                     MessageBox.error(
                         "Failed to submit " + aPayloads.length + " nominations.\n\n" + sDetail,
                         { title: "Submit Error" }
@@ -5330,7 +4764,7 @@ if (dFrom && dTo) {
 
             if (aSkipped.length) {
                 MessageToast.show(aSkipped.length + " row(s) skipped — check console for details.");
-                aSkipped.forEach(function (s) { jQuery.sap.log.warning("[NomPayload] " + s); });
+                aSkipped.forEach(function (s) { Log.warning("[NomPayload] " + s); });
             }
 
             if (!aPayloads.length) {
@@ -5361,12 +4795,6 @@ if (dFrom && dTo) {
         },
 
         navToCreateTicket: function () {
-            /* PREVIOUS IMPLEMENTATION:
-            this._navigateToIntent(
-                "Ticket",
-                "create"
-            );
-            */
             var oView = this.getView();
             var that = this;
 
@@ -5393,10 +4821,11 @@ if (dFrom && dTo) {
                 var oSchedDate = _parseDate(oRow.ScheduleDate) || new Date();
 
                 aItems.push({
-                    nomno: oRow.NominationKey || "",
+                    nomtk: oRow.NominationKey || "",
                     nomitem: oRow.NominationItem || "",
                     locationName: oRow.LocationName || oRow.Locationid || "",
-                    schedmat: oRow.ScheduleProduct || oRow.DemandProduct || oRow.CommodityName || oRow.Commodity || "",
+                    // Scheduled material = product, not commodity
+                    schedmat: oRow.ScheduleProduct || oRow.DemandProduct || "",
                     scheduom: oRow.Uom || oRow.AUom || "",
                     schedqty: oRow.ScheduledQuantity != null ? String(oRow.ScheduledQuantity) : (oRow.ActualScheduleQuantity != null ? String(oRow.ActualScheduleQuantity) : ""),
                     postingDate: new Date(oSchedDate.getTime()),
@@ -5412,17 +4841,17 @@ if (dFrom && dTo) {
                 return;
             }
 
-            var sVehicle = "";
+            var sCarrier = "";
             for (var i = 0; i < aItems.length; i++) {
-                if (aItems[i]._raw && (aItems[i]._raw.Carrier || aItems[i]._raw.VehicleId)) {
-                    sVehicle = aItems[i]._raw.Carrier || aItems[i]._raw.VehicleId;
+                if (aItems[i]._raw && aItems[i]._raw.Carrier) {
+                    sCarrier = aItems[i]._raw.Carrier;
                     break;
                 }
             }
 
             var oTicketData = {
                 ticketNo: "",
-                vehicleNo: sVehicle,
+                carrier: sCarrier,
                 itemCount: aItems.length,
                 items: aItems
             };
@@ -5446,7 +4875,7 @@ if (dFrom && dTo) {
                     that._oCreateTicketDialog = oDialog;
                     return oDialog;
                 }).catch(function (oErr) {
-                    console.error("Error loading CreateTicketDialog fragment:", oErr);
+                    Log.error("Error loading CreateTicketDialog fragment:", oErr);
                     MessageBox.error("Failed to load Create Ticket dialog: " + (oErr && oErr.message ? oErr.message : oErr));
                     that._pCreateTicketDialog = null;
                 });
@@ -5455,7 +4884,7 @@ if (dFrom && dTo) {
             this._pCreateTicketDialog.then(function (oDialog) {
                 if (oDialog) {
                     // Reset valueState on Ticket No input if present
-                    var oExtInput = that.byId(oView.getId() + "--_IDGenInput5") || sap.ui.getCore().byId(oView.getId() + "--_IDGenInput5");
+                    var oExtInput = that.byId(oView.getId() + "--_IDGenInput5") || Element.getElementById(oView.getId() + "--_IDGenInput5");
                     if (oExtInput && typeof oExtInput.setValueState === "function") {
                         oExtInput.setValueState("None");
                         oExtInput.setValueStateText("");
@@ -5463,10 +4892,6 @@ if (dFrom && dTo) {
                     oDialog.open();
                 }
             });
-        },
-
-        onCreateTicket: function () {
-            return this.navToCreateTicket();
         },
 
         onCloseTicketDialog: function () {
@@ -5593,11 +5018,11 @@ if (dFrom && dTo) {
             if (!oModel) { return; }
 
             var sTicketNo = String(oModel.getProperty("/ticketNo") || "").trim();
-            var sVehicleNo = String(oModel.getProperty("/vehicleNo") || "").trim();
+            var sCarrier = String(oModel.getProperty("/carrier") || "").trim();
             var aItems = oModel.getProperty("/items") || [];
 
             // 1. Validate Ext Ticket No
-            var oTicketInput = this.byId(oView.getId() + "--_IDGenInput5") || sap.ui.getCore().byId(oView.getId() + "--_IDGenInput5");
+            var oTicketInput = this.byId(oView.getId() + "--_IDGenInput5") || Element.getElementById(oView.getId() + "--_IDGenInput5");
             if (!sTicketNo) {
                 if (oTicketInput && typeof oTicketInput.setValueState === "function") {
                     oTicketInput.setValueState("Error");
@@ -5623,7 +5048,7 @@ if (dFrom && dTo) {
             var aErrors = [];
 
             aItems.forEach(function (oRow, idx) {
-                var sPrefix = "Item " + (idx + 1) + " (" + (oRow.nomno || "") + "/" + (oRow.nomitem || "") + "): ";
+                var sPrefix = "Item " + (idx + 1) + " (" + (oRow.nomtk || "") + "/" + (oRow.nomitem || "") + "): ";
 
                 var nQty = parseFloat(oRow.schedqty);
                 if (isNaN(nQty) || nQty <= 0) {
@@ -5721,16 +5146,19 @@ if (dFrom && dTo) {
             var aItemProps = (oItemEntityType && oItemEntityType.property) ? oItemEntityType.property : [];
 
             // Dynamically resolve header property names from schema
-            var sPropTicketNo = _matchPropName(aHeaderProps, ["ticketno", "ticket_no", "ticketextnumber", "extticket", "extticketno", "ticketkey", "ticket_key", "ticket"]);
-            var sPropVehicle = _matchPropName(aHeaderProps, ["vehicleno", "vehicle_no", "vehicleid", "vehicle_id", "vehicle", "carrier"]);
+            // Ext. Ticket No goes to Ticketnr — never to TicketKey (backend-generated key)
+            var sPropTicketNo = _matchPropName(aHeaderProps, ["ticketnr", "ticket_nr", "ticketno", "ticket_no", "ticketextnumber", "extticket", "extticketno"]);
+            // Carrier goes to the Carrier property — never to Vehicleno (OIG_VHLNMR)
+            var sPropCarrier = _matchPropName(aHeaderProps, ["carrier", "carrierid", "carrier_id", "tdlnr"]);
 
             // Dynamically resolve item property names from schema
-            var sItemNomNo = _matchPropName(aItemProps, ["nomno", "nominationkey", "nomdocnumber", "nom_key"]);
+            // Nomination key goes to Nomtk (OIJ_NOMTK) — never to Nomno (OIJ_NOMNR, nomination number)
+            var sItemNomTk = _matchPropName(aItemProps, ["nomtk", "nom_tk", "nominationkey", "nom_key"]);
             var sItemNomItem = _matchPropName(aItemProps, ["nomitem", "nominationitem", "nomdocitem", "nom_item"]);
-            var sItemTicketNo = _matchPropName(aItemProps, ["ticketno", "ticketextnumber", "extticket", "ticketkey", "ticket"]);
-            var sItemVehicle = _matchPropName(aItemProps, ["vehicleno", "vehicleid", "vehicle"]);
+            var sItemTicketNo = _matchPropName(aItemProps, ["ticketnr", "ticket_nr", "ticketno", "ticketextnumber", "extticket"]);
+            var sItemCarrier = _matchPropName(aItemProps, ["carrier", "carrierid", "carrier_id", "tdlnr"]);
             var sItemLoc = _matchPropName(aItemProps, ["locid", "locationid", "locationname", "location"]);
-            var sItemMat = _matchPropName(aItemProps, ["schedmat", "material", "ticketmaterial", "product", "commodity"]);
+            var sItemMat = _matchPropName(aItemProps, ["schedmat", "material", "ticketmaterial", "product"]);
             var sItemQty = _matchPropName(aItemProps, ["schedqty", "scheduledquantity", "ticketquantity", "quantity", "qty"]);
             var sItemUom = _matchPropName(aItemProps, ["scheduom", "uom", "ticketuom", "unit"]);
             var sItemPostDate = _matchPropName(aItemProps, ["postingdate", "ticketpostingdate", "scheddate"]);
@@ -5772,12 +5200,12 @@ if (dFrom && dTo) {
             var aPayloadItems = aItems.map(function (it) {
                 var oRowItem = {};
                 if (aItemProps.length > 0) {
-                    if (sItemNomNo) { oRowItem[sItemNomNo] = it.nomno; }
+                    if (sItemNomTk) { oRowItem[sItemNomTk] = it.nomtk; }
                     if (sItemNomItem) { oRowItem[sItemNomItem] = it.nomitem; }
                     if (sItemTicketNo) { oRowItem[sItemTicketNo] = sTicketNo; }
-                    if (sItemVehicle && sVehicleNo) { oRowItem[sItemVehicle] = sVehicleNo; }
+                    if (sItemCarrier && sCarrier) { oRowItem[sItemCarrier] = sCarrier; }
                     if (sItemLoc) { oRowItem[sItemLoc] = (it._raw && it._raw.Locationid) || it.locationName; }
-                    if (sItemMat) { oRowItem[sItemMat] = (it._raw && it._raw.Commodity) || it.schedmat; }
+                    if (sItemMat && it.schedmat) { oRowItem[sItemMat] = it.schedmat; }
                     if (sItemQty) { oRowItem[sItemQty] = String(parseFloat(it.schedqty)); }
                     if (sItemUom) { oRowItem[sItemUom] = it.scheduom; }
                     if (sItemPostDate) { oRowItem[sItemPostDate] = _formatTicketDate(it.postingDate, sItemPostDate, aItemProps); }
@@ -5786,12 +5214,12 @@ if (dFrom && dTo) {
                 } else {
                     // Fallback when no schema metadata is available: send dates as 'YYYY-MM-DD'
                     oRowItem = {
-                        nomno: it.nomno,
+                        nomtk: it.nomtk,
                         nomitem: it.nomitem,
-                        ticketno: sTicketNo,
-                        vehicleno: sVehicleNo,
+                        ticketnr: sTicketNo,
+                        carrier: sCarrier,
                         locid: (it._raw && it._raw.Locationid) || it.locationName,
-                        schedmat: (it._raw && it._raw.Commodity) || it.schedmat,
+                        schedmat: it.schedmat,
                         schedqty: String(parseFloat(it.schedqty)),
                         scheduom: it.scheduom,
                         postingdate: _formatTicketDate(it.postingDate, null, []),
@@ -5808,23 +5236,23 @@ if (dFrom && dTo) {
                 if (sPropTicketNo) {
                     oPayload[sPropTicketNo] = sTicketNo;
                 }
-                if (sPropVehicle && sVehicleNo) {
-                    oPayload[sPropVehicle] = sVehicleNo;
+                if (sPropCarrier && sCarrier) {
+                    oPayload[sPropCarrier] = sCarrier;
                 }
                 if (sNavPropName) {
                     oPayload[sNavPropName] = aPayloadItems;
                 }
             } else {
                 oPayload = {
-                    ticketno: sTicketNo,
-                    vehicleno: sVehicleNo,
+                    ticketnr: sTicketNo,
+                    carrier: sCarrier,
                     to_items: aPayloadItems
                 };
             }
 
-            jQuery.sap.log.info("[CreateTicket] bHasTicketCreateService:", bHasTicketCreateService, "sEntitySetName:", sEntitySetName, "Payload:", JSON.stringify(oPayload));
-            console.log("[CreateTicket] Detected Ticket Metadata:", oTicketMeta);
-            console.log("[CreateTicket] Payload to send:", oPayload);
+            Log.info("[CreateTicket] bHasTicketCreateService: " + bHasTicketCreateService + ", sEntitySetName: " + sEntitySetName, JSON.stringify(oPayload));
+            Log.debug("[CreateTicket] Detected Ticket Metadata:", oTicketMeta);
+            Log.debug("[CreateTicket] Payload to send:", oPayload);
 
             if (bHasTicketCreateService) {
                 oODataModel.create("/" + sEntitySetName, oPayload, {
@@ -5841,7 +5269,7 @@ if (dFrom && dTo) {
                             that._oCreateTicketDialog.setBusy(false);
                         }
                         var sErrMsg = that._extractODataError(oError);
-                        console.error("[CreateTicket Error]", oError);
+                        Log.error("[CreateTicket Error]", oError);
                         MessageBox.error("Failed to create ticket:\n" + sErrMsg, {
                             title: "Error"
                         });
@@ -5854,7 +5282,7 @@ if (dFrom && dTo) {
                 // Replace this stub with oODataModel.create("/TicketCreate", oPayload, ...)
                 // once the backend endpoint is configured.
                 // =====================================================================
-                jQuery.sap.log.info("[CreateTicket TODO Stub] Ticket payload:", JSON.stringify(oPayload, null, 2));
+                Log.info("[CreateTicket TODO Stub] Ticket payload", JSON.stringify(oPayload, null, 2));
 
                 setTimeout(function () {
                     if (that._oCreateTicketDialog) {
@@ -6019,9 +5447,9 @@ if (dFrom && dTo) {
                 });
 
                 // Create VBox
-                var oVBox = new sap.m.VBox({
+                var oVBox = new VBox({
                     items: [
-                        new sap.m.Label({
+                        new Label({
                             text: "Select Ticket File"
                         }),
                         oFileUploader
@@ -6040,13 +5468,13 @@ if (dFrom && dTo) {
                         oVBox
                     ],
 
-                    beginButton: new sap.m.Button({
+                    beginButton: new Button({
                         text: "Upload",
                         type: "Emphasized",
                         press: this.onTicketUploadConfirm.bind(this)
                     }),
 
-                    endButton: new sap.m.Button({
+                    endButton: new Button({
                         text: "Cancel",
                         press: function () {
                             this._oTicketUploadDialog.close();
@@ -6070,10 +5498,7 @@ if (dFrom && dTo) {
 
                 this._oSelectedTicketFile = aFiles[0];
 
-                console.log(
-                    "Selected Ticket File:",
-                    this._oSelectedTicketFile.name
-                );
+                Log.debug("Selected Ticket File:", this._oSelectedTicketFile.name);
 
                 MessageToast.show(
                     "File selected: " +
@@ -6095,10 +5520,7 @@ if (dFrom && dTo) {
 
             var oFile = this._oSelectedTicketFile;
 
-            console.log(
-                "Uploading Ticket File:",
-                oFile.name
-            );
+            Log.debug("Uploading Ticket File:", oFile.name);
 
             /*
             * FILE PROCESSING WILL COME HERE
@@ -6120,41 +5542,50 @@ if (dFrom && dTo) {
 
 
         _navigateToIntent: function (sSemanticObject, sAction) {
-            var oCrossNav = this._oCrossNav;
-            if (!oCrossNav) {
+            // sap/ushell/Container is only loaded when running inside the FLP
+            var Container = sap.ui.require("sap/ushell/Container");
+            if (!Container) {
                 MessageToast.show(
                     "Navigation service is unavailable. " +
                     "Please run the app inside the SAP Fiori Launchpad."
                 );
                 return;
             }
-        
-            var sIntent = sSemanticObject + "-" + sAction;
-        
-            oCrossNav.isIntentSupported([sIntent])
-                .done(function (oSupportedIntents) {
-                    if (oSupportedIntents[sIntent] && oSupportedIntents[sIntent].supported) {
-                        // Generate the target intent URL hash
-                        var sHash = oCrossNav.hrefForExternal({
-                            target: {
-                                semanticObject: sSemanticObject,
-                                action: sAction
-                            }
-                        });
-        
-                        if (sHash) {
-                            // Combine launchpad base URL with the hash and open in new tab
-                            var sFullUrl = window.location.href.split('#')[0] + sHash;
-                            window.open(sFullUrl, '_blank');
-                        }
-                    } else {
+
+            var oTarget = {
+                target: {
+                    semanticObject: sSemanticObject,
+                    action: sAction
+                }
+            };
+            var oComponent = this.getOwnerComponent();
+            var oNavigation;
+
+            Container.getServiceAsync("Navigation")
+                .then(function (oService) {
+                    oNavigation = oService;
+                    return oNavigation.isNavigationSupported([oTarget], oComponent);
+                })
+                .then(function (aSupported) {
+                    if (!aSupported[0] || !aSupported[0].supported) {
                         MessageToast.show(
                             "Navigation to '" + sSemanticObject + "#" + sAction +
                             "' is not supported for your user role."
                         );
+                        return null;
+                    }
+                    // Generate the target intent URL hash
+                    return oNavigation.getHref(oTarget, oComponent);
+                })
+                .then(function (sHash) {
+                    if (sHash) {
+                        // Combine launchpad base URL with the hash and open in new tab
+                        var sFullUrl = window.location.href.split('#')[0] + sHash;
+                        window.open(sFullUrl, '_blank');
                     }
                 })
-                .fail(function () {
+                .catch(function (oError) {
+                    Log.error("Cross-app navigation failed", oError);
                     MessageToast.show("Could not verify navigation intent. Please try again.");
                 });
         },
@@ -6167,7 +5598,7 @@ if (dFrom && dTo) {
         _toggleGenericTableFullScreen: function (oEvent, mConfig) {
             var oViewModel = this.getView().getModel("view");
             if (!oViewModel) {
-                oViewModel = new sap.ui.model.json.JSONModel({});
+                oViewModel = new JSONModel({});
                 this.getView().setModel(oViewModel, "view");
             }
             var bFullScreen = !oViewModel.getProperty(mConfig.flag);

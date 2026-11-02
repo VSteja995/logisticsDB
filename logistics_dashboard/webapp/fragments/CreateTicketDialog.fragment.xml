@@ -26,7 +26,7 @@
                 class="sapUiSmallMarginBeginEnd sapUiSmallMarginTop"
             >
 
-                <!-- ══════════════════════ Header fields: Ticket No + Vehicle No ══ -->
+                <!-- ══════════════════════ Header fields: Ticket No + Carrier ══ -->
                 <FlexBox id="_IDGenFlexBox30"
                     alignItems="Center"
                     wrap="Wrap"
@@ -42,10 +42,10 @@
                     </FlexBox>
 
                     <FlexBox id="_IDGenFlexBox32" direction="Column">
-                        <Label id="_IDGenLabel51" text="Vehicle No" class="sapUiTinyMarginBottom"/>
+                        <Label id="_IDGenLabel51" text="Carrier" class="sapUiTinyMarginBottom"/>
                         <Input id="_IDGenInput6"
-                            value="{ticketModel>/vehicleNo}"
-                            placeholder="Vehicle No (optional)"
+                            value="{ticketModel>/carrier}"
+                            placeholder="Carrier (optional)"
                             width="16rem"
                         />
                     </FlexBox>
@@ -96,9 +96,9 @@
                                         design="Bold"
                                     />
                                     <Text id="_IDGenText68"
-                                        text="{ticketModel>nomno}"
+                                        text="{ticketModel>nomtk}"
                                         wrapping="false"
-                                        tooltip="{ticketModel>nomno}"
+                                        tooltip="{ticketModel>nomtk}"
                                        
                                     />
                                 </FlexBox>

@@ -35,7 +35,7 @@ server:
       configuration:
         mountPath: /
         services:
-          - urlPath: /sap/opu/odata4/sap/zsrvimp_logistick_wrkbnch/srvd/sap/zsd_logistick_workbench/0001
+          - urlPath: /sap/opu/odata/GLQ/CM_API_LOGISTIC
             metadataPath: ./webapp/localService/mainService/metadata.xml
             mockdataPath: ./webapp/localService/mainService/data
             generateMockData: true

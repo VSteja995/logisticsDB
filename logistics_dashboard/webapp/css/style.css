@@ -9,13 +9,13 @@
 .c_logo {
     background-color: var(--sapBaseColor, #fff) !important;
     border-radius: 50% !important;
-    padding: 6px !important;
-    border: 4px solid var(--sapBaseColor, #fff) !important;
-    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.60),
-                0 6px 24px rgba(0, 0, 0, 0.25) !important;
+    padding: 3px !important;
+    border: 2px solid var(--sapBaseColor, #fff) !important;
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.60),
+                0 3px 12px rgba(0, 0, 0, 0.25) !important;
     display: block !important;
-    width: 96px !important;
-    height: 96px !important;
+    width: 56px !important;
+    height: 56px !important;
     object-fit: contain !important;
     transition: box-shadow 0.25s ease, transform 0.25s ease;
 }
@@ -76,13 +76,18 @@ html, body, .sapUiBody {
     color: var(--sapShell_TextColor, #fff) !important;
 }
 
+/* Page title in Horizon brand blue */
+.sapMPage>.sapMPageHeader .sapMTitle {
+    color: var(--sapBrandColor, #0070f2) !important;
+}
+
 /* ============================================================
    HEADER BANNER
    Uses the Horizon shell gradient — dark blue-grey tones
    ============================================================ */
 .headerBanner {
     background: var(--sapShellColor, #1d2d3e) !important;
-    padding: 1.25rem 1.5rem !important;
+    padding: 0.5rem 1.5rem !important;
     border-radius: 0 !important;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
     position: relative;

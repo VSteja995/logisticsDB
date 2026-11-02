@@ -33,13 +33,3 @@ server:
           - path: /sap
             url: http://gens.sapvista.com:50000
             client: '100'
-    - name: sap-fe-mockserver
-      beforeMiddleware: csp
-      configuration:
-        mountPath: /
-        services:
-          - urlPath: /sap/opu/odata4/sap/zsrvimp_logistick_wrkbnch/srvd/sap/zsd_logistick_workbench/0001
-            metadataPath: ./webapp/localService/mainService/metadata.xml
-            mockdataPath: ./webapp/localService/mainService/data
-            generateMockData: true
-        annotations: []

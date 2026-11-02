@@ -2,7 +2,6 @@
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
     xmlns:layout="sap.ui.layout"
-    xmlns:smartTable="sap.ui.comp.smarttable"
     xmlns:table="sap.ui.table">
 
     <!-- ═══════════════════════════════════════════════════════
@@ -105,22 +104,6 @@
                  <Button id="entFullBtnI12" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent"/>
                 </Toolbar>
                <ScrollContainer id="entScroll" horizontal="true" vertical="true" width="100%" height="100%">
-                    <!-- <smartTable:SmartTable
-                        id="entSmartTable"
-                        entitySet="EntDetailSet"
-                        tableType="Table"
-                        enableExport="false"
-                        useVariantManagement="false"
-                        useTablePersonalisation="false"
-                        beforeRebindTable="onBeforeRebindEntitlementsTable"
-                        showRowCount="false"
-                        enableAutoBinding="false"
-                        enableCopy="false"   
-                        editable="false"
-                        showFullScreenButton="false"
-                        sticky="ColumnHeaders,HeaderToolbar"
-                        
-                       > -->
                     
                     <Table id="entTbl" fixedLayout="false" items="{EntDetailData>/EntDetailSet}" mode="MultiSelect" selectionChange="onSelectionChangeENT" >
                         <columns>
@@ -155,9 +138,9 @@
                                     <Text id="_IDGenText114" text="{EntDetailData>DocumentItem}"></Text>
                                     <Text id="_IDGenText115" text="{EntDetailData>PurchaseQuantity}"></Text>
                                     <Text id="_IDGenText116" text="{EntDetailData>MatchQuantity}"></Text>
-                                    <Text id="_IDGenText117" text="{
+                                    <Text core:require="{DateType: 'sap/ui/model/type/Date'}" id="_IDGenText117" text="{
                                     path: 'EntDetailData>DeliveryDate',
-                                    type: 'sap.ui.model.type.Date',
+                                    type: 'DateType',
                                     formatOptions: {
                                           pattern: 'yyyy/MMM/dd'     
                                     }
@@ -180,7 +163,6 @@
 
                     </Table>
                    
-                    <!-- </smartTable:SmartTable> -->
                      </ScrollContainer>
                 
             </VBox>
@@ -195,20 +177,6 @@
                     <ToolbarSpacer id="oblSpc" ></ToolbarSpacer>
                      <Button id="entFullBtnI34" press="onFullScreenToggle" icon="sap-icon://full-screen" type="Transparent"/>
                 </Toolbar>
-                <!-- <smartTable:SmartTable
-                        id="entSmartTable"
-                        entitySet="EntDetailSet"
-                        tableType="Table"
-                        enableExport="false"
-                        useVariantManagement="false"
-                        useTablePersonalisation="false"
-                        beforeRebindTable="onBeforeRebindObligationsTable"
-                        showRowCount="false"
-                        enableAutoBinding="false"
-                        enableCopy="false"   
-                        editable="false"
-                        showFullScreenButton="false"
-                       > -->
                 <ScrollContainer id="oblScroll" horizontal="true" vertical="true" width="100%" height="100%" >    
                         <Table id="oblTbl" fixedLayout="false" items="{OblDetailData>/OblDetailSet}" mode="MultiSelect" selectionChange="onSelectionChangeOBL" >
                         <columns>
@@ -238,16 +206,16 @@
                                 <cells>
                                      <Text id="_IDGenText133" text="{OblDetailData>DealNumber}"></Text>
                                      <Text id="_IDGenText134" text="{OblDetailData>Commodity}"></Text>
-                                     <Text id="_IDGenText112EO" text="{EntDetailData>CommodityDESC}"></Text>
+                                     <Text id="_IDGenText112EO" text="{OblDetailData>CommodityDESC}"></Text>
                                      <Text id="_IDGenText135" text="{OblDetailData>DocumentNumber}"></Text>
                                      <Text id="_IDGenText136" text="{OblDetailData>DocumentItem}"></Text>
                                      <Text id="_IDGenText137" text="{OblDetailData>SalesQuantity}"></Text>
                                      <Text id="_IDGenText138" text="{OblDetailData>MatchQuantity}"></Text>
-                                     <Text id="_IDGenText139" text="{
+                                     <Text core:require="{DateType: 'sap/ui/model/type/Date'}" id="_IDGenText139" text="{
                                      path :'OblDetailData>DueDate',
-                                     type :'sap.ui.model.type.Date',
+                                     type :'DateType',
                                      formatOptions :{
-                                          pattern :'YYYY/MMM/dd'
+                                          pattern :'yyyy/MMM/dd'
                                      }
                                      }"></Text>
                                      <Text id="_IDGenText140" text="{OblDetailData>ScheduleMonth}"></Text>
@@ -268,7 +236,6 @@
                         </items>
                     </Table> 
                 </ScrollContainer>
-            <!-- </smartTable:SmartTable> -->
             </VBox>
         </layout:Splitter>
         <!-- ROW 2 : Inventory | Selected Items -->
@@ -486,7 +453,7 @@
                     <table:template>
                         <FlexBox id="_IDGenFlexBox3" justifyContent="End" width="100%">
                             <Text id="_IDGenText65" text="{matchedPositionsModel>MatchedQtyFormatted}" wrapping="false" class="pos-table-blue" visible="{= ${matchedPositionsModel>RowType} === 'parent'}"/>
-                            <Input id="_IDGenInput" value="{ path: 'matchedPositionsModel>MatchedQty', type: 'sap.ui.model.type.Float', formatOptions: { minFractionDigits: 0, maxFractionDigits: 3 } }" width="9rem" textAlign="Right" visible="{= ${matchedPositionsModel>RowType} === 'child'}" change="onMatchedQtyChange" tooltip="Edit matched quantity"/>
+                            <Input core:require="{FloatType: 'sap/ui/model/type/Float'}" id="_IDGenInput" value="{ path: 'matchedPositionsModel>MatchedQty', type: 'FloatType', formatOptions: { minFractionDigits: 0, maxFractionDigits: 3 } }" width="9rem" textAlign="Right" visible="{= ${matchedPositionsModel>RowType} === 'child'}" change="onMatchedQtyChange" tooltip="Edit matched quantity"/>
                         </FlexBox>
                     </table:template>
                 </table:Column>
@@ -676,25 +643,25 @@
                                      path :'OblDetailData>DueDate',
                                      type :'sap.ui.model.type.Date',
                                      formatOptions :{
-                                          pattern :'YYYY/MMM/dd'
+                                          pattern :'yyyy/MMM/dd'
                                      }
                                      }" -->
-            <Text id="_IDGenText188" text="{path :'MatchPosData>Purchscheddate',
-                                            type :'sap.ui.model.type.Date',
+            <Text core:require="{DateType: 'sap/ui/model/type/Date'}" id="_IDGenText188" text="{path :'MatchPosData>Purchscheddate',
+                                            type :'DateType',
                                             formatOptions :{
                                                 pattern :'yyyy/MMM/dd'
                                             }  }"/>
             <Text id="_IDGenText189" text="{MatchPosData>PIncoTerms}"/>
             <Text id="_IDGenText190" text="{MatchPosData>PTransactionType}"/>
-            <Text id="_IDGenText191" text="{path :'MatchPosData>Salescheddate',
-                                            type :'sap.ui.model.type.Date',
+            <Text core:require="{DateType: 'sap/ui/model/type/Date'}" id="_IDGenText191" text="{path :'MatchPosData>Salescheddate',
+                                            type :'DateType',
                                             formatOptions :{
                                                 pattern :'yyyy/MMM/dd'
                                             }  }"/>
             <Text id="_IDGenText192" text="{MatchPosData>SIncoTerms}"/>
             <Text id="_IDGenText193" text="{MatchPosData>STransactionType}"/>
-            <Text id="_IDGenText194" text="{path :'MatchPosData>CreatedAt',
-                                            type :'sap.ui.model.type.Date',
+            <Text core:require="{DateType: 'sap/ui/model/type/Date'}" id="_IDGenText194" text="{path :'MatchPosData>CreatedAt',
+                                            type :'DateType',
                                             formatOptions :{
                                                 pattern :'yyyy/MMM/dd'
                                             }  }"/>

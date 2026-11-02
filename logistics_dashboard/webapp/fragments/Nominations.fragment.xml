@@ -184,9 +184,9 @@
     <Text id="_IDGenText157" text="{NomDetailsData>ContractItem}" />
     <Text id="_IDGenText158" text="{NomDetailsData>Status}" />
     <Text id="_IDGenText159" text="{NomDetailsData>StatusDescription}" />
-      <Text id="_IDGenText160" text="{
+      <Text core:require="{DateType: 'sap/ui/model/type/Date'}" id="_IDGenText160" text="{
                 path: 'NomDetailsData>ScheduleDate',
-                type: 'sap.ui.model.type.Date', 
+                type: 'DateType', 
                 formatOptions: {
                       pattern: 'yyyy/MMM/dd' 
                       }
@@ -435,10 +435,10 @@
                     text="{TicketDetailsData>TicketMaterial}"/>
 
                 <!-- 11 -->
-                <Text
+                <Text core:require="{DateType: 'sap/ui/model/type/Date'}"
                     id="NomPnl3Txt178" text="{
                 path: 'TicketDetailsData>TicketPostingDate',
-                type: 'sap.ui.model.type.Date', 
+                type: 'DateType', 
                 formatOptions: {
                       pattern: 'yyyy/MMM/dd' 
                       }
@@ -460,11 +460,11 @@
                     text="{TicketDetailsData>TicketCreatedBy}"/>
 
                 <!-- 15 -->
-                <Text
+                <Text core:require="{DateType: 'sap/ui/model/type/Date'}"
                     id="NomPnl3Txt182"
                           text="{
                 path: 'TicketDetailsData>TicketChangedDate',
-                type: 'sap.ui.model.type.Date', 
+                type: 'DateType', 
                 formatOptions: {
                       pattern: 'yyyy/MMM/dd' 
                       }

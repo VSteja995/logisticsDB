@@ -6,8 +6,8 @@
     >
  <Page id="MainPnlPg001"  title="{i18n>title}"  titleAlignment="Center" titleLevel="H1">
     <VBox id="MainPnlVbx002" class="headerBanner">  
-        <HBox id="MainPnlHbx003">
-            <VBox id="MainPnlVbx004" class="sapUiMediumMarginEnd"> <Image id="MainPnlImg005"  class="c_logo" src="../Images/Gens-logo.png"></Image></VBox>
+        <HBox id="MainPnlHbx003" alignItems="Center">
+            <VBox id="MainPnlVbx004" class="sapUiSmallMarginEnd"> <Image id="MainPnlImg005"  class="c_logo" src="../Images/Gens-logo.png"></Image></VBox>
             <VBox id="MainPnlVbx006" >
                 <Title id="MainPnlTtl007" text="Deal Obligation &amp; Entitlement Management" titleStyle="H2" class="headerTitle" />
                 <Text id="MainPnlTxt008" text="Manage and monitor your physical deals, obligations, and entitlements" class="headerSubtitle" />

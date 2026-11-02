@@ -233,17 +233,17 @@
             <cells>
                 <Text id="DlPnl2Txt097" text="{DealDetailData>DealId}" />
 
-                 <Text id="DlPnl2Txt104" text="{
+                 <Text core:require="{DateType: 'sap/ui/model/type/Date'}" id="DlPnl2Txt104" text="{
                 path: 'DealDetailData>TradeDate',
-                type: 'sap.ui.model.type.Date', 
+                type: 'DateType', 
                 formatOptions: {
                       pattern: 'yyyy/MMM/dd' 
                       }
                       }" />
 
-                <Text id="DlPnl2Txt108"  text="{
+                <Text core:require="{DateType: 'sap/ui/model/type/Date'}" id="DlPnl2Txt108"  text="{
                 path: 'DealDetailData>ScheduleDate',
-                type: 'sap.ui.model.type.Date', 
+                type: 'DateType', 
                 formatOptions: {
                       pattern: 'yyyy/MMM/dd' 
                       }
@@ -260,16 +260,16 @@
                 <Text id="DlPnl2Txt103" text="{DealDetailData>ContractNumber}"/>
                
                 
-                      <Text id="DlPnl2Txt108E"  text="{
+                      <Text core:require="{DateType: 'sap/ui/model/type/Date'}" id="DlPnl2Txt108E"  text="{
                 path: 'DealDetailData>DeliveryStart',
-                type: 'sap.ui.model.type.Date', 
+                type: 'DateType', 
                 formatOptions: {
                       pattern: 'yyyy/MMM/dd' 
                       }
                       }"/>
-                      <Text id="DlPnl2Txt108A"  text="{
+                      <Text core:require="{DateType: 'sap/ui/model/type/Date'}" id="DlPnl2Txt108A"  text="{
                 path: 'DealDetailData>DeliveryEnd',
-                type: 'sap.ui.model.type.Date', 
+                type: 'DateType', 
                 formatOptions: {
                       pattern: 'yyyy/MMM/dd' 
                       }
