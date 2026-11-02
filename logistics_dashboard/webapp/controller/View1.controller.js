@@ -7,17 +7,12 @@ sap.ui.define([
     "sap/ui/model/Filter",
     "sap/ui/model/FilterOperator",
     "sap/ui/core/Fragment",
-    "sap/m/Dialog",
-    "sap/ui/unified/FileUploader",
     "sap/m/SelectDialog",
     "sap/m/StandardListItem",
-    "sap/m/VBox",
-    "sap/m/Label",
-    "sap/m/Button",
     "sap/ui/core/Element",
     "sap/base/Log"
-], function (Controller, JSONModel, LayoutHelper, MessageToast, MessageBox, Filter, FilterOperator, Fragment, Dialog, FileUploader,
-    SelectDialog, StandardListItem, VBox, Label, Button, Element, Log) {
+], function (Controller, JSONModel, LayoutHelper, MessageToast, MessageBox, Filter, FilterOperator, Fragment,
+    SelectDialog, StandardListItem, Element, Log) {
     "use strict";
 
     // ── Pure Date & Type Utility Helpers ─────────────────────────────────────
@@ -1265,6 +1260,61 @@ _sortNominationsNewestFirst: function (a, b) {
                 return nItemDiff;
             }
         }
+        return sItemA.localeCompare(sItemB, undefined, { numeric: true, sensitivity: "base" });
+    }
+
+    return 0;
+},
+
+_sortTicketsNewestFirst: function (a, b) {
+    if (!a && !b) { return 0; }
+    if (!a) { return 1; }
+    if (!b) { return -1; }
+
+    // 1. Prioritize newly created tickets from active session (TicketKey or Ext. Ticket No)
+    var aLastKeys = this._aLastCreatedTicketKeys || [];
+    if (aLastKeys.length > 0) {
+        var fnIdx = function (oRow) {
+            var iKey = aLastKeys.indexOf(String(oRow.TicketKey || "").trim());
+            return iKey !== -1 ? iKey : aLastKeys.indexOf(String(oRow.TicketExtNumber || "").trim());
+        };
+        var iIdxA = fnIdx(a);
+        var iIdxB = fnIdx(b);
+
+        if (iIdxA !== -1 && iIdxB === -1) {
+            return -1;
+        }
+        if (iIdxA === -1 && iIdxB !== -1) {
+            return 1;
+        }
+        if (iIdxA !== -1 && iIdxB !== -1 && iIdxA !== iIdxB) {
+            return iIdxA - iIdxB;
+        }
+    }
+
+    // 2. TicketKey DESCENDING (numeric / natural sort)
+    var sKeyA = String(a.TicketKey || "").trim();
+    var sKeyB = String(b.TicketKey || "").trim();
+
+    if (sKeyA !== sKeyB) {
+        var nNumA = Number(sKeyA);
+        var nNumB = Number(sKeyB);
+        if (!isNaN(nNumA) && !isNaN(nNumB) && sKeyA !== "" && sKeyB !== "") {
+            var nDiff = nNumB - nNumA;
+            if (nDiff !== 0) {
+                return nDiff;
+            }
+        }
+        var nComp = sKeyB.localeCompare(sKeyA, undefined, { numeric: true, sensitivity: "base" });
+        if (nComp !== 0) {
+            return nComp;
+        }
+    }
+
+    // 3. Same TicketKey -> sort by TicketItem ASCENDING
+    var sItemA = String(a.TicketItem || "").trim();
+    var sItemB = String(b.TicketItem || "").trim();
+    if (sItemA !== sItemB) {
         return sItemA.localeCompare(sItemB, undefined, { numeric: true, sensitivity: "base" });
     }
 
@@ -2526,6 +2576,10 @@ _applyTicketFilters: function (dFrom, dTo) {
         return;
     }
 
+    // Fall back to the current Nominations date range when called without dates
+    dFrom = dFrom || this._oNomFilterState.fromDate;
+    dTo = dTo || this._oNomFilterState.toDate;
+
     // =====================================================
     // 1. Format dates
     // =====================================================
@@ -2575,6 +2629,9 @@ _applyTicketFilters: function (dFrom, dTo) {
 
 
             Log.debug("Ticket records received:", aResults.length);
+
+            // Newly created tickets first, then newest TicketKey first
+            aResults.sort(this._sortTicketsNewestFirst.bind(this));
 
 
             // =================================================
@@ -5262,7 +5319,7 @@ if (dFrom && dTo) {
                             that._oCreateTicketDialog.close();
                         }
                         MessageToast.show("Ticket " + sTicketNo + " created successfully.");
-                        that._afterTicketCreationSuccess();
+                        that._afterTicketCreationSuccess(oData, sTicketNo);
                     },
                     error: function (oError) {
                         if (that._oCreateTicketDialog) {
@@ -5290,7 +5347,7 @@ if (dFrom && dTo) {
                         that._oCreateTicketDialog.close();
                     }
                     MessageToast.show("Ticket " + sTicketNo + " created successfully.");
-                    that._afterTicketCreationSuccess();
+                    that._afterTicketCreationSuccess(null, sTicketNo);
                 }, 600);
             }
         },
@@ -5413,7 +5470,17 @@ if (dFrom && dTo) {
             return "An unknown error occurred while communicating with the server.";
         },
 
-        _afterTicketCreationSuccess: function () {
+        _afterTicketCreationSuccess: function (oData, sTicketNo) {
+            // Remember the new ticket so it is sorted to the top of Ticket Details
+            this._aLastCreatedTicketKeys = this._aLastCreatedTicketKeys || [];
+            var sNewTicketKey = (oData && (oData.ticket_key || oData.TicketKey)) || "";
+            if (sTicketNo) {
+                this._aLastCreatedTicketKeys.unshift(String(sTicketNo).trim());
+            }
+            if (sNewTicketKey) {
+                this._aLastCreatedTicketKeys.unshift(String(sNewTicketKey).trim());
+            }
+
             // Deselect rows on the nomination table
             var oTable = this.byId("MainPnlFra015--NomPnl2Tbl062") || this.byId("NomPnl2Tbl062");
             if (oTable && typeof oTable.removeSelections === "function") {
@@ -5427,117 +5494,17 @@ if (dFrom && dTo) {
                 this.onNominationRefresh();
             }
 
-            // Refresh ticket list if available
+            // Refresh ticket list with the current date range
             if (typeof this._applyTicketFilters === "function") {
-                this._applyTicketFilters();
+                this._applyTicketFilters(this._oNomFilterState.fromDate, this._oNomFilterState.toDate);
             }
         },
 
-        navToUploadTicket: function () {
-
-            if (!this._oTicketUploadDialog) {
-
-                // Create FileUploader
-                var oFileUploader = new FileUploader({
-                    width: "100%",
-                    placeholder: "Choose an Excel or CSV file...",
-                    buttonText: "Browse",
-                    fileType: ["xlsx", "xls", "csv"],
-                    change: this.onTicketFileChange.bind(this)
-                });
-
-                // Create VBox
-                var oVBox = new VBox({
-                    items: [
-                        new Label({
-                            text: "Select Ticket File"
-                        }),
-                        oFileUploader
-                    ]
-                });
-
-                // Correct way to add CSS class
-                oVBox.addStyleClass("sapUiMediumMargin");
-
-                // Create Dialog
-                this._oTicketUploadDialog = new Dialog({
-                    title: "Upload Ticket File",
-                    contentWidth: "500px",
-
-                    content: [
-                        oVBox
-                    ],
-
-                    beginButton: new Button({
-                        text: "Upload",
-                        type: "Emphasized",
-                        press: this.onTicketUploadConfirm.bind(this)
-                    }),
-
-                    endButton: new Button({
-                        text: "Cancel",
-                        press: function () {
-                            this._oTicketUploadDialog.close();
-                        }.bind(this)
-                    })
-                });
-
-                this.getView().addDependent(
-                    this._oTicketUploadDialog
-                );
-            }
-
-            this._oTicketUploadDialog.open();
-        },
-
-        onTicketFileChange: function (oEvent) {
-
-            var aFiles = oEvent.getParameter("files");
-
-            if (aFiles && aFiles.length > 0) {
-
-                this._oSelectedTicketFile = aFiles[0];
-
-                Log.debug("Selected Ticket File:", this._oSelectedTicketFile.name);
-
-                MessageToast.show(
-                    "File selected: " +
-                    this._oSelectedTicketFile.name
-                );
-            }
-        },
-
-        onTicketUploadConfirm: function () {
-
-            if (!this._oSelectedTicketFile) {
-
-                MessageToast.show(
-                    "Please select a file first."
-                );
-
-                return;
-            }
-
-            var oFile = this._oSelectedTicketFile;
-
-            Log.debug("Uploading Ticket File:", oFile.name);
-
-            /*
-            * FILE PROCESSING WILL COME HERE
-            *
-            * For example:
-            * Excel -> read rows
-            * -> validate data
-            * -> send data to OData
-            */
-
-            MessageToast.show(
-                "File selected: " + oFile.name
-            );
-
-            this._oTicketUploadDialog.close();
-
-            this._oSelectedTicketFile = null;
+        // Cancel / Reverse / Upload ticket are not implemented yet
+        onFeatureInProgress: function () {
+            MessageBox.information("Development in progress.", {
+                title: "Coming Soon"
+            });
         },
 
 

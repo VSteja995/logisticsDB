@@ -223,15 +223,15 @@
                         text="Cancel Ticket"
                         icon="sap-icon://decline"
                         type="Reject"
-                        press="navToCreateTicket"/>
+                        press="onFeatureInProgress"/>
                 <Button id="NomPnl3Btn124"
                         text="Reverse Ticket"
                         icon="sap-icon://undo"
-                        press="navToReverseTicket"/>
+                        press="onFeatureInProgress"/>
                 <Button id="NomPnl3Btn125"
                         text="Upload File"
                         icon="sap-icon://upload"
-                        press="navToUploadTicket"/>
+                        press="onFeatureInProgress"/>
                 <Button id="NomPnl3Btn126"
                         text="Refresh"
                         icon="sap-icon://refresh"
@@ -445,14 +445,28 @@
                       }"/>
 
                 <!-- 12 -->
-                <Text
+                <Text core:require="{DateType: 'sap/ui/model/type/Date'}"
                     id="NomPnl3Txt179"
-                     text="{TicketDetailsData>TicketStartDateTime}"/>
+                     text="{
+                path: 'TicketDetailsData>TicketStartDateTime',
+                type: 'DateType',
+                formatOptions: {
+                      source: { pattern: 'yyyyMMddHHmmss' },
+                      pattern: 'yyyy/MMM/dd'
+                      }
+                      }"/>
 
                 <!-- 13 -->
-                <Text
+                <Text core:require="{DateType: 'sap/ui/model/type/Date'}"
                     id="NomPnl3Txt180"
-                     text="{TicketDetailsData>TicketEndDateTime}"/>
+                     text="{
+                path: 'TicketDetailsData>TicketEndDateTime',
+                type: 'DateType',
+                formatOptions: {
+                      source: { pattern: 'yyyyMMddHHmmss' },
+                      pattern: 'yyyy/MMM/dd'
+                      }
+                      }"/>
 
                 <!-- 14 -->
                 <Text
